@@ -1,13 +1,12 @@
 /* ============================================================
-   MODULE: navigation.js
-   Chức năng: Di chuyển — GPS + La bàn + Khoảng cách + Hướng
-   ★★★ ĐÂY LÀ FILE QUAN TRỌNG NHẤT ★★★
+   navigation.js — GPS + La bàn + Hướng
+   ★ v1.04 FIX: ** → Math.pow (webview cũ không hỗ trợ **)
    ============================================================ */
 
 var playerLat = 10.762622;
 var playerLng = 106.660172;
-var rawHeading = 0;     // Hướng thô từ cảm biến
-var smoothHeading = 0;   // Hướng đã mượt (dùng cho render)
+var rawHeading = 0;
+var smoothHeading = 0;
 var compassActive = false;
 
 /* ===== GPS ===== */
@@ -15,109 +14,100 @@ function initGPS(){
   if(!navigator.geolocation) return;
   navigator.geolocation.watchPosition(
     function(p){playerLat=p.coords.latitude;playerLng=p.coords.longitude;},
-    function(e){console.log('GPS error:',e);},
-    {enableHighAccuracy:true,maximumAge:2000}
+    function(){},
+    {enableHighAccuracy:true, maximumAge:2000}
   );
 }
 
-/* ===== LA BÀN — ★★★ PHẢI CLICK BUTTON ĐỂ KÍCH HOẠT ★★★ ===== */
+/* ===== LA BÀN ===== */
 function activateCompass(){
   if(compassActive) return;
-
-  // Kiểm tra hỗ trợ
   if(typeof DeviceOrientationEvent==='undefined'){
-    showToast('⚠️ Thiết bị không hỗ trợ la bàn. Dùng nút ◀▶ để xoay.');
+    showToast('⚠️ Thiết bị không hỗ trợ la bàn');
     return;
   }
 
-  // ★ iOS 13+ PHẢI request permission từ user gesture ★
   if(typeof DeviceOrientationEvent.requestPermission==='function'){
     DeviceOrientationEvent.requestPermission()
-      .then(function(res){
-        if(res==='granted'){
-          setupCompassListeners();
+      .then(function(r){
+        if(r==='granted'){
+          setupCompass();
           compassActive=true;
           updateCompassUI();
-          showToast('🧭 La bàn đã kích hoạt!');
+          showToast('🧭 La bàn OK!');
         }else{
-          showToast('⛔ Cần cho phép quyền la bàn trong Cài đặt!');
+          showToast('⛔ Cho phép la bàn trong Cài đặt!');
         }
       })
-      .catch(function(err){
-        showToast('⛔ Lỗi la bàn: '+err.message);
-        showToast('💡 Dùng nút ◀▶ để xoay thủ công',5000);
+      .catch(function(){
+        showToast('⛔ Lỗi la bàn!');
       });
   }else{
-    // Android / iOS cũ — không cần permission
-    setupCompassListeners();
+    setupCompass();
     compassActive=true;
     updateCompassUI();
-    showToast('🧭 La bàn đã kích hoạt!');
+    showToast('🧭 La bàn OK!');
   }
 }
 
-function setupCompassListeners(){
-  // ★ Method 1: deviceorientationabsolute (Chrome Android) ★
-  window.addEventListener('deviceorientationabsolute',function(e){
-    if(e.alpha!==null&&e.alpha!==undefined){
-      rawHeading=e.alpha;
-    }
-  },true);
+function setupCompass(){
+  window.addEventListener('deviceorientationabsolute', function(e){
+    if(e.alpha!==null && e.alpha!==undefined) rawHeading=e.alpha;
+  }, true);
 
-  // ★ Method 2: deviceorientation (iOS + universal) ★
-  window.addEventListener('deviceorientation',function(e){
-    if(e.webkitCompassHeading!==undefined&&e.webkitCompassHeading!==null){
-      rawHeading=e.webkitCompassHeading; // iOS: 0-360, Bắc=0
-    }else if(e.alpha!==null&&e.alpha!==undefined){
-      rawHeading=360-e.alpha; // Android: alpha=0 là Bắc
+  window.addEventListener('deviceorientation', function(e){
+    if(e.webkitCompassHeading!==undefined && e.webkitCompassHeading!==null){
+      rawHeading=e.webkitCompassHeading;
+    }else if(e.alpha!==null && e.alpha!==undefined){
+      rawHeading=360-e.alpha;
     }
-  },true);
+  }, true);
 
-  // ★ Hiệu chỉnh la bàn ★
-  window.addEventListener('webkitCompassNeedsCalibration',function(){
-    showToast('📱 Xoay điện thoại hình số 8 để hiệu chỉnh!',5000);
+  window.addEventListener('webkitCompassNeedsCalibration', function(){
+    showToast('📱 Xoay hình số 8 để hiệu chỉnh!', 5000);
   });
 }
 
 function updateCompassUI(){
-  var btn=document.getElementById('btn-compass');
-  var status=document.getElementById('compass-status');
-  if(compassActive){
-    btn.textContent='🧭 La bàn OK';
-    btn.classList.add('active');
-    status.textContent='🧭 La bàn: ' + Math.round(smoothHeading) + '°';
+  var b=document.getElementById('btn-compass');
+  var s=document.getElementById('compass-status');
+  if(compassActive && b){
+    b.textContent='🧭 OK';
+    b.classList.add('active');
   }
+  if(s) s.textContent='🧭 '+Math.round(smoothHeading)+'°';
 }
 
-/* ===== SMOOTHING — mượt 60fps ===== */
 function updateSmoothHeading(){
-  var diff=rawHeading-smoothHeading;
-  if(diff>180) diff-=360;
-  if(diff<-180) diff+=360;
-  smoothHeading+=diff*0.12;
+  var d=rawHeading-smoothHeading;
+  if(d>180) d-=360;
+  if(d<-180) d+=360;
+  smoothHeading+=d*0.12;
   smoothHeading=((smoothHeading%360)+360)%360;
-
-  // Cập nhật UI
   if(compassActive){
-    var status=document.getElementById('compass-status');
-    if(status) status.textContent='🧭 '+Math.round(smoothHeading)+'°';
+    var s=document.getElementById('compass-status');
+    if(s) s.textContent='🧭 '+Math.round(smoothHeading)+'°';
   }
 }
 
-/* ===== MANUAL FALLBACK — khi la bàn không hoạt động ===== */
-function manualTurnLeft(){ rawHeading=((rawHeading-8)+360)%360; }
-function manualTurnRight(){ rawHeading=((rawHeading+8)+360)%360; }
+/* ================================================================
+   ★★★ FIX v1.04: ** → Math.pow() — webview cũ chết với ** ★★★
+   ================================================================ */
 
-/* ===== KHOẢNG CÁCH + HƯỚNG ===== */
-function getDist(a,b,c,d){
-  var R=6371000,dLa=(c-a)*Math.PI/180,dLn=(d-b)*Math.PI/180;
-  var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLn/2)*Math.sin(dLn/2);
-  return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
+function getDist(lat1, lng1, lat2, lng2){
+  var R=6371000;
+  var dLat=(lat2-lat1)*Math.PI/180;
+  var dLng=(lng2-lng1)*Math.PI/180;
+  var a=Math.pow(Math.sin(dLat/2), 2)
+      + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180)
+      * Math.pow(Math.sin(dLng/2), 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function getBearing(a,b,c,d){
-  var dLn=(d-b)*Math.PI/180;
-  var y=Math.sin(dLn)*Math.cos(c*Math.PI/180);
-  var x=Math.cos(a*Math.PI/180)*Math.sin(c*Math.PI/180)-Math.sin(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.cos(dLn);
-  return((Math.atan2(y,x)*180/Math.PI)+360)%360;
+function getBearing(lat1, lng1, lat2, lng2){
+  var dLng=(lng2-lng1)*Math.PI/180;
+  var y=Math.sin(dLng)*Math.cos(lat2*Math.PI/180);
+  var x=Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180)
+       - Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.cos(dLng);
+  return ((Math.atan2(y, x)*180/Math.PI)+360) % 360;
 }
