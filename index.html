@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🔮 Yêu Thú Săn Bắt</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hidden;height:100vh;width:100vw}
+.screen{display:none;position:absolute;top:0;left:0;width:100%;height:100%;overflow-y:auto}
+.screen.active{display:flex;flex-direction:column}
+.btn{padding:14px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:10px;transition:all .3s}
+.btn-primary{background:linear-gradient(135deg,#7c4dff,#448aff);color:#fff}
+.btn-primary:active{transform:scale(.97)}
+.btn-google{background:#fff;color:#333;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-back{position:absolute;top:15px;left:15px;background:rgba(255,255,255,.1);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;z-index:50}
+#screen-login{justify-content:center;align-items:center;background:linear-gradient(135deg,#0a0a2e,#1a0a3e,#0a2a4e);padding:20px}
+.login-\boxed{width:100%;max-width:350px;background:rgba(255,255,255,.08);border-radius:20px;padding:30px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1)}
+.login-box h1{text-align:center;font-size:28px;margin-bottom:5px}
+.login-box .subtitle{text-align:center;color:#aaa;margin-bottom:25px;font-size:14px}
+.input-group{margin-bottom:15px}
+.input-group label{display:block;margin-bottom:5px;font-size:13px;color:#ccc}
+.input-group input{width:100%;padding:12px 15px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.05);color:#fff;font-size:16px;outline:none}
+.input-group input:focus{border-color:#7c4dff}
+.divider{text-align:center;margin:20px 0;color:#888;font-size:13px;position:relative}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:rgba(255,255,255,.15)}
+.divider::before{left:0}.divider::after{right:0}
+.toggle-text{text-align:center;margin-top:15px;font-size:13px;color:#aaa}
+.toggle-text a{color:#7c4dff;cursor:pointer;text-decoration:none}
+#screen-ar{background:#000}
+#camera-feed{width:100%;height:100%;object-fit:cover;position:absolute}
+#ar-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.hud-top{position:absolute;top:0;left:0;right:0;padding:15px;display:flex;justify-content:space-between;align-items:flex-start;z-index:10}
+.hud-info{background:rgba(0,0,0,.6);border-radius:12px;padding:10px 15px;backdrop-filter:blur(10px)}
+.hud-level{font-size:12px;color:#aaa}
+.hud-realm{font-size:18px;font-weight:700;color:#ffd700}
+.hud-xp-bar{width:120px;height:6px;background:rgba(255,255,255,.2);border-radius:3px;margin-top:5px;overflow:hidden}
+.hud-xp-fill{height:100%;background:linear-gradient(90deg,#7c4dff,#448aff);border-radius:3px;transition:width .5s}
+.qr-zone{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;text-align:center}
+.qr-btn{width:120px;height:120px;border-radius:50%;border:3px dashed rgba(255,255,255,.4);background:rgba(0,0,0,.3);backdrop-filter:blur(5px);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.qr-btn:active{transform:scale(.9)}
+.qr-btn-icon{font-size:40px}
+.qr-btn-text{font-size:11px;margin-top:5px;opacity:.8}
+.qr-scan-line{position:absolute;width:90px;height:2px;background:#4fc3f7;top:15px;left:50%;transform:translateX(-50%);animation:scanline 2s infinite}
+@keyframes scanline{0%,100%{top:15px}50%{top:100px}}
+.notification{position:absolute;top:90px;left:15px;right:15px;background:linear-gradient(135deg,rgba(124,77,255,.9),rgba(68,138,255,.9));border-radius:15px;padding:15px 20px;z-index:20;transform:translateY(-120%);transition:transform .5s cubic-bezier(.175,.885,.32,1.275)}
+.notification.show{transform:translateY(0)}
+.notification-title{font-size:14px;font-weight:600;margin-bottom:5px}
+.notification-desc{font-size:12px;opacity:.9}
+.notification-btns{display:flex;gap:10px;margin-top:10px}
+.notification-btn{padding:8px 20px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-size:13px;cursor:pointer}
+.nav-guide{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);border-radius:15px;padding:15px 25px;text-align:center;z-index:15;backdrop-filter:blur(10px)}
+.nav-direction{font-size:36px;margin-bottom:5px}
+.nav-distance{font-size:20px;font-weight:700;color:#4fc3f7}
+.nav-target{font-size:12px;color:#aaa;margin-top:5px}
+.hud-bottom{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:12px;z-index:10}
+.hud-btn{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(0,0,0,.5);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px)}
+.hud-btn:active{transform:scale(.9)}
+#screen-generation{background:linear-gradient(135deg,#0a0a2e,#1a0a3e,#2a1a4e);justify-content:center;align-items:center;padding:20px}
+.gen-container{text-align:center;width:100%;max-width:400px}
+.gen-title{font-size:22px;margin-bottom:10px}
+.gen-desc{font-size:13px;color:#aaa;margin-bottom:20px}
+.gen-canvas-wrap{position:relative;width:280px;height:280px;margin:0 auto 20px;border-radius:20px;overflow:hidden;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1)}
+#gen-canvas{width:100%;height:100%}
+.gen-sparkle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:60px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:.3;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}}
+.gen-result{display:none}
+.gen-creature-name{font-size:26px;font-weight:700;margin:10px 0 5px}
+.gen-creature-info{display:flex;justify-content:center;gap:10px;margin:10px 0;flex-wrap:wrap}
+.gen-badge{padding:5px 15px;border-radius:20px;font-size:13px;font-weight:600}
+.gen-stats{background:rgba(255,255,255,.08);border-radius:15px;padding:15px;margin:15px 0;text-align:left}
+.gen-stat-row{display:flex;justify-content:space-between;padding:5px 0;font-size:14px}
+.gen-stat-label{color:#aaa}.gen-stat-value{font-weight:600}
+#screen-capture{background:rgba(0,0,0,.88);justify-content:center;align-items:center;padding:20px}
+.capture-display{text-align:center;margin-bottom:15px}
+#capture-canvas-wrap{width:240px;height:240px;border-radius:20px;overflow:hidden;margin:0 auto 15px;background:rgba(255,255,255,.05);position:relative}
+#capture-canvas{width:100%;height:100%}
+.glow-pulse{animation:glowPulse 2s ease-in-out infinite}
+@keyframes glowPulse{0%,100%{filter:drop-shadow(0 0 8px rgba(124,77,255,.3))}50%{filter:drop-shadow(0 0 20px rgba(124,77,255,.6))}}
+.creature-name-display{font-size:22px;font-weight:700}
+.creature-info-row{display:flex;justify-content:center;gap:10px;margin-top:10px}
+.creature-badge{padding:5px 15px;border-radius:20px;font-size:13px;font-weight:600}
+.capture-rate-display{margin:15px 0;padding:10px 20px;background:rgba(255,255,255,.1);border-radius:10px;font-size:14px}
+.escape-display{margin:10px 0;font-size:13px;color:#ffab40}
+.escape-dots{display:flex;gap:5px;justify-content:center;margin-top:5px}
+.escape-dot{width:10px;height:10px;border-radius:50%;background:#ffab40;transition:all .3s}
+.escape-dot.used{background:#555;transform:scale(.7)}
+.ball-selection{display:flex;gap:10px;margin:15px 0;flex-wrap:wrap;justify-content:center}
+.ball{width:65px;height:65px;border-radius:50%;border:3px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;font-size:11px;font-weight:600}
+.ball.selected{border-color:#fff;transform:scale(1.15);box-shadow:0 0 20px rgba(255,255,255,.4)}
+.ball-icon{font-size:24px}.ball-count{font-size:10px;margin-top:2px;opacity:.8}
+.btn-capture{padding:16px 50px;border:none;border-radius:30px;font-size:18px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#ff6b6b,#ff8e53);color:#fff;margin-top:15px;transition:all .3s}
+.btn-capture:active{transform:scale(.95)}
+.btn-capture:disabled{opacity:.4}
+.btn-flee{margin-top:10px;background:none;border:1px solid rgba(255,255,255,.3);color:#aaa;padding:12px 30px;border-radius:25px;font-size:14px;cursor:pointer}
+.creature-escape{animation:escapeJump .8s ease-in-out}
+@keyframes escapeJump{0%{transform:translate(0,0) scale(1)}25%{transform:translate(-30px,-40px) scale(1.1)}50%{transform:translate(40px,-20px) scale(.9)}75%{transform:translate(-20px,10px) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
+.creature-flee{animation:fleeAway 1s ease-in forwards}
+@keyframes fleeAway{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(200px,-300px) scale(0);opacity:0}}
+.creature-caught{animation:caughtShake .5s ease}
+@keyframes caughtShake{0%,100%{transform:translate(0,0)}20%{transform:translate(-10px,0)}40%{transform:translate(10px,0)}60%{transform:translate(-5px,0)}80%{transform:translate(5px,0)}}
+#screen-evolution{background:linear-gradient(135deg,#0a0a2e,#1a0a3e,#2a1a4e);padding:20px}
+.evo-title{text-align:center;font-size:22px;padding:20px 0 10px}
+.evo-desc{text-align:center;font-size:13px;color:#aaa;margin-bottom:20px}
+.evo-element-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap}
+.evo-tab{padding:10px 18px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);cursor:pointer;font-size:13px;transition:all .3s}
+.evo-tab.active{background:rgba(124,77,255,.6);border-color:#7c4dff}
+.evo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.evo-item{background:rgba(255,255,255,.08);border-radius:15px;padding:10px;text-align:center;cursor:pointer;border:2px solid transparent;transition:all .3s;position:relative}
+.evo-item.selected{border-color:#7c4dff;background:rgba(124,77,255,.15)}
+.evo-item canvas{width:100%;border-radius:8px;background:rgba(255,255,255,.05)}
+.evo-item-name{font-size:10px;margin-top:6px;font-weight:600}
+.evo-item-level{font-size:9px;color:#aaa}
+.evo-check{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:#7c4dff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+.evo-merge-bar{background:rgba(255,255,255,.08);border-radius:15px;padding:20px;text-align:center;margin:15px 0}
+.evo-selected-count{font-size:18px;font-weight:700;margin-bottom:10px}
+.evo-rate-display{font-size:14px;color:#aaa;margin-bottom:5px}
+.evo-level-display{font-size:13px;color:#ffd700}
+.evo-progress{width:100%;height:8px;background:rgba(255,255,255,.15);border-radius:4px;margin-top:10px;overflow:hidden}
+.evo-progress-fill{height:100%;background:linear-gradient(90deg,#7c4dff,#448aff);border-radius:4px;transition:width .5s}
+.evo-btn{padding:16px 40px;border:none;border-radius:30px;font-size:16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#9c27b0,#7c4dff);color:#fff;margin-top:15px;transition:all .3s;width:100%}
+.evo-btn:active{transform:scale(.95)}.evo-btn:disabled{opacity:.4}
+.evo-animation-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:100;display:none;justify-content:center;align-items:center;flex-direction:column}
+.evo-animation-overlay.active{display:flex}
+#evo-anim-canvas{width:300px;height:300px;border-radius:20px}
+.evo-anim-text{font-size:22px;font-weight:700;margin-top:20px;text-align:center}
+.evo-anim-sub{font-size:14px;color:#aaa;margin-top:10px;text-align:center}
+.realm-hud{position:absolute;top:85px;left:15px;right:15px;z-index:12}
+.realm-banner{background:linear-gradient(135deg,rgba(139,0,139,.85),rgba(75,0,130,.85));border-radius:15px;padding:12px 18px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15)}
+.realm-banner-name{font-size:15px;font-weight:700;color:#e1bee7}
+.realm-banner-tier{font-size:11px;color:#ce93d8;margin-top:2px}
+.realm-banner-items{display:flex;gap:8px;margin-top:8px}
+.realm-item-slot{width:36px;height:36px;border-radius:10px;border:2px dashed rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .3s}
+.realm-item-slot.filled{border-style:solid;border-color:#ce93d8;background:rgba(255,255,255,.1)}
+.realm-item-slot.locked{opacity:.35}
+.realm-daily{font-size:10px;color:#b39ddb;margin-top:6px}
+.realm-exhausted{position:absolute;top:90px;left:15px;right:15px;background:linear-gradient(135deg,rgba(255,69,0,.9),rgba(178,34,34,.9));border-radius:15px;padding:15px 20px;z-index:25;transform:translateY(-120%);transition:transform .5s cubic-bezier(.175,.885,.32,1.275)}
+.realm-exhausted.show{transform:translateY(0)}
+.realm-exhausted-title{font-size:15px;font-weight:700;margin-bottom:5px}
+.realm-exhausted-desc{font-size:12px;opacity:.9}
+.realm-exhausted-btns{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.realm-exhausted-btn{padding:8px 16px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-size:12px;cursor:pointer}
+.realm-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:200;display:none;justify-content:center;align-items:center;padding:20px}
+.realm-modal.active{display:flex}
+.realm-modal-\boxed{width:100%;max-width:380px;background:linear-gradient(135deg,#1a0a3e,#2a1a4e);border-radius:20px;padding:25px;border:1px solid rgba(255,255,255,.15)}
+.realm-modal-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:15px}
+.realm-modal-body{font-size:14px;color:#ccc;line-height:1.7}
+.realm-modal-actions{display:flex;gap:10px;margin-top:20px}
+.realm-modal-btn{flex:1;padding:12px;border-radius:12px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all .3s}
+.realm-modal-btn:active{transform:scale(.95)}
+.btn-enter-realm{background:linear-gradient(135deg,#9c27b0,#7c4dff);color:#fff}
+.tier-transition{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);z-index:300;display:none;justify-content:center;align-items:center;flex-direction:column}
+.tier-transition.active{display:flex}
+.tier-transition-text{font-size:28px;font-weight:700;background:linear-gradient(135deg,#e1bee7,#ce93d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+.tier-transition-sub{font-size:15px;color:#aaa;margin-top:15px;text-align:center;padding:0 30px}
+.tier-transition-icon{font-size:80px;margin-bottom:20px;animation:tierSpin 2s ease-in-out infinite}
+@keyframes tierSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}
+#screen-photo{background:#000}
+#photo-camera{width:100%;height:100%;object-fit:cover;position:absolute}
+.creature-overlay{position:absolute;cursor:move;touch-action:none;pointer-events:auto;z-index:5}
+.photo-top-bar{position:absolute;top:0;left:0;right:0;padding:15px;display:flex;justify-content:space-between;z-index:20}
+.photo-back-btn{width:45px;height:45px;border-radius:50%;border:none;background:rgba(0,0,0,.5);color:#fff;font-size:20px;cursor:pointer}
+.photo-filter-btn{padding:10px 20px;border-radius:25px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.5);color:#fff;font-size:13px;cursor:pointer}
+.photo-bottom-bar{position:absolute;bottom:0;left:0;right:0;padding:20px;z-index:20}
+.pose-selector{display:flex;gap:10px;justify-content:center;margin-bottom:15px;overflow-x:auto;padding:0 10px}
+.pose-btn{padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:12px;cursor:pointer;white-space:nowrap}
+.pose-btn.active{background:rgba(124,77,255,.7);border-color:#7c4dff}
+.photo-actions{display:flex;justify-content:center;align-items:center;gap:25px}
+.shutter-btn{width:70px;height:70px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.2);cursor:pointer}
+.shutter-btn:active{transform:scale(.85)}
+.photo-side-btn{width:45px;height:45px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.size-slider-wrap{position:absolute;right:15px;top:50%;transform:translateY(-50%);z-index:15}
+.size-slider{writing-mode:vertical-lr;direction:rtl;height:150px;accent-color:#7c4dff}
+#screen-photo-result{background:rgba(0,0,0,.95);justify-content:center;align-items:center;padding:20px}
+#result-photo-canvas{max-width:100%;max-height:65vh;border-radius:15px}
+.photo-result-actions{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;justify-content:center}
+.btn-share{padding:12px 25px;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;color:#fff}
+#screen-collection{background:linear-gradient(135deg,#0a0a2e,#1a0a3e);padding:20px}
+.collection-title{text-align:center;font-size:22px;padding:20px 0}
+.collection-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.collection-item{background:rgba(255,255,255,.08);border-radius:15px;padding:12px;text-align:center;cursor:pointer;transition:all .3s}
+.collection-item:active{transform:scale(.95)}
+.collection-item canvas{width:100%;border-radius:10px;background:rgba(255,255,255,.05)}
+.collection-item-name{font-size:11px;font-weight:600;margin-top:8px}
+.collection-item-level{font-size:10px;color:#aaa}
+#screen-profile{background:linear-gradient(135deg,#0a0a2e,#1a0a3e);padding:20px}
+.profile-header{text-align:center;padding:20px 0}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#7c4dff,#448aff);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 15px}
+.profile-realm{font-size:22px;font-weight:700;color:#ffd700}
+.profile-level{font-size:14px;color:#aaa;margin-top:5px}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.stat-card{background:rgba(255,255,255,.08);border-radius:15px;padding:15px;text-align:center}
+.stat-value{font-size:28px;font-weight:700}.stat-label{font-size:12px;color:#aaa;margin-top:5px}
+#screen-inventory{background:linear-gradient(135deg,#0a0a2e,#1a0a3e);padding:20px}
+.inv-title{text-align:center;font-size:22px;padding:20px 0}
+.ball-inventory{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+.inv-item{background:rgba(255,255,255,.08);border-radius:15px;padding:15px;text-align:center}
+.inv-ball-icon{width:50px;height:50px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.inv-ball-name{font-size:13px;font-weight:600}.inv-ball-count{font-size:18px;font-weight:700;margin-top:5px}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:1000;transition:transform .4s;backdrop-filter:blur(10px)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.admin-badge{position:absolute;top:15px;right:15px;background:linear-gradient(135deg,#ff6b6b,#ff8e53);border-radius:8px;padding:4px 10px;font-size:10px;font-weight:700;color:#fff;z-index:25;cursor:pointer;animation:adminPulse 2s infinite;display:none}
+@keyframes adminPulse{0%,100%{box-shadow:0 0 5px rgba(255,107,107,.5)}50%{box-shadow:0 0 15px rgba(255,107,107,.8)}}
+#screen-admin{background:linear-gradient(135deg,#1a0020,#2a0a3e,#1a0a4e);padding:15px;overflow-y:auto}
+.admin-title{text-align:center;font-size:20px;padding:15px 0;background:linear-gradient(135deg,#ff6b6b,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.admin-section{background:rgba(255,255,255,.06);border-radius:15px;padding:15px;margin-bottom:12px;border:1px solid rgba(255,107,107,.2)}
+.admin-section-title{font-size:14px;font-weight:700;color:#ff8a80;margin-bottom:12px}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.admin-btn{padding:10px 12px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:12px;cursor:pointer;transition:all .2s;text-align:center}
+.admin-btn:active{transform:scale(.95);background:rgba(255,107,107,.3)}
+.admin-btn.hot{background:rgba(255,69,0,.3);border-color:rgba(255,69,0,.5)}
+.admin-btn.gold{background:rgba(255,215,0,.2);border-color:rgba(255,215,0,.4)}
+.admin-btn.danger{background:rgba(255,0,0,.2);border-color:rgba(255,0,0,.4)}
+.admin-input-row{display:flex;gap:8px;margin-top:8px}
+.admin-input{flex:1;padding:10px 12px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.05);color:#fff;font-size:13px;outline:none}
+.admin-input:focus{border-color:#ff6b6b}
+.admin-select{padding:10px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.05);color:#fff;font-size:13px;outline:none}
+.admin-toggle-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.admin-toggle-label{font-size:13px;color:#ccc}
+.admin-toggle{width:45px;height:24px;border-radius:12px;background:rgba(255,255,255,.15);cursor:pointer;position:relative;transition:all .3s}
+.admin-toggle.on{background:#4caf50}
+.admin-toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:all .3s}
+.admin-toggle.on::after{left:24px}
+.admin-log{max-height:150px;overflow-y:auto;background:rgba(0,0,0,.3);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;line-height:1.6;color:#81c784}
+.admin-log-entry{border-bottom:1px solid rgba(255,255,255,.05);padding:2px 0}
+.test-credentials{background:rgba(255,107,107,.15);border:1px dashed rgba(255,107,107,.4);border-radius:10px;padding:12px;margin-top:10px;font-size:12px;color:#ff8a80;text-align:center}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-box">
+    <h1>🔮 Yêu Thú Săn Bắt</h1>
+    <div class="subtitle">Thu phục yêu thú ngũ hành — Tu tiên thành tiên</div>
+    <div id="login-form">
+      <div class="input-group"><label>Email</label><input type="email" id="input-email" placeholder="email@example.com"></div>
+      <div class="input-group"><label>Mật khẩu</label><input type="password" id="input-password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="handleLogin()">Đăng nhập</button>
+      <div class="divider">hoặc</div>
+      <button class="btn btn-google" onclick="handleGoogleLogin()">🔵 Đăng nhập với Google</button>
+      <div class="toggle-text">Chưa có tài khoản? <a onclick="toggleRegister()">Đăng ký</a></div>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="input-group"><label>Tên thợ săn</label><input type="text" id="reg-name" placeholder="Thợ săn yêu thú"></div>
+      <div class="input-group"><label>Email</label><input type="email" id="reg-email" placeholder="email@example.com"></div>
+      <div class="input-group"><label>Mật khẩu</label><input type="password" id="reg-password" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="handleRegister()">Tạo tài khoản</button>
+      <div class="toggle-text">Đã có tài khoản? <a onclick="toggleRegister()">Đăng nhập</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- AR -->
+<div id="screen-ar" class="screen">
+  <video id="camera-feed" autoplay playsinline muted></video>
+  <canvas id="ar-canvas"></canvas>
+  <div class="hud-top">
+    <div class="hud-info">
+      <div class="hud-level" id="hud-level">Level 1</div>
+      <div class="hud-realm" id="hud-realm">🌀 Luyện Khí</div>
+      <div class="hud-xp-bar"><div class="hud-xp-fill" id="hud-xp-fill" style="width:0%"></div></div>
+    </div>
+    <div class="admin-badge" id="admin-badge" onclick="showScreen('screen-admin')">🔧 ADMIN</div>
+  </div>
+  <div class="realm-hud" id="realm-hud">
+    <div class="realm-banner" id="realm-banner">
+      <div class="realm-banner-name" id="realm-name">🔮 Đi tìm bí cảnh...</div>
+      <div class="realm-banner-tier" id="realm-tier"></div>
+      <div class="realm-banner-items" id="realm-items"></div>
+      <div class="realm-daily" id="realm-daily">Hôm nay: 0/10 bí cảnh</div>
+    </div>
+  </div>
+  <div class="qr-zone">
+    <div class="qr-btn" onclick="scanQR()">
+      <div class="qr-scan-line"></div>
+      <div class="qr-btn-icon">📱</div>
+      <div class="qr-btn-text">Quét QR / chạm để<br>phát hiện yêu thú</div>
+    </div>
+  </div>
+  <div id="notification" class="notification">
+    <div class="notification-title" id="notif-title"></div>
+    <div class="notification-desc" id="notif-desc"></div>
+    <div class="notification-btns">
+      <button class="notification-btn" onclick="acceptHunt()">⚔️ Truy tìm</button>
+      <button class="notification-btn" onclick="dismissNotification()">Bỏ qua</button>
+    </div>
+  </div>
+  <div id="nav-guide" class="nav-guide" style="display:none">
+    <div class="nav-direction" id="nav-arrow">🧭</div>
+    <div class="nav-distance" id="nav-dist">-- m</div>
+    <div class="nav-target" id="nav-target">Đang tìm kiếm...</div>
+  </div>
+  <div class="realm-exhausted" id="realm-exhausted">
+    <div class="realm-exhausted-title" id="realm-exhausted-title">⚠️ Bí cảnh đã cạn kiệt!</div>
+    <div class="realm-exhausted-desc" id="realm-exhausted-desc"></div>
+    <div class="realm-exhausted-btns">
+      <button class="realm-exhausted-btn" onclick="enterNextTier()">🏰 Tầng tiếp</button>
+      <button class="realm-exhausted-btn" onclick="dismissRealmExhausted()">✕</button>
+    </div>
+  </div>
+  <div class="hud-bottom">
+    <div class="hud-btn" onclick="showScreen('screen-profile')">👤</div>
+    <div class="hud-btn" onclick="showScreen('screen-collection')">📖</div>
+    <div class="hud-btn" onclick="showScreen('screen-evolution')">🧬</div>
+    <div class="hud-btn" onclick="showScreen('screen-inventory')">🎒</div>
+    <div class="hud-btn" onclick="startPhotoMode()">📸</div>
+  </div>
+</div>
+
+<!-- GENERATION -->
+<div id="screen-generation" class="screen">
+  <div class="gen-container">
+    <div class="gen-title" id="gen-title">🔮 Đang triệu hồi yêu thú...</div>
+    <div class="gen-desc" id="gen-desc">AI đang tạo sinh yêu thú dựa trên thuộc tính ngũ hành</div>
+    <div class="gen-canvas-wrap"><canvas id="gen-canvas" width="280" height="280"></canvas><div class="gen-sparkle" id="gen-sparkle">✨</div></div>
+    <div class="gen-result" id="gen-result">
+      <div class="gen-creature-name" id="gen-name"></div>
+      <div class="gen-creature-info" id="gen-badges"></div>
+      <div class="gen-stats" id="gen-stats"></div>
+      <button class="btn btn-primary" onclick="proceedToCapture()">⚔️ Bắt ngay!</button>
+      <button class="btn btn-flee" style="width:100%;margin-top:10px" onclick="showScreen('screen-ar')">← Bỏ qua</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAPTURE -->
+<div id="screen-capture" class="screen">
+  <button class="btn-back" onclick="showScreen('screen-ar')">✕</button>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:20px">
+    <div id="capture-content">
+      <div class="capture-display">
+        <div id="capture-canvas-wrap" class="glow-pulse"><canvas id="capture-canvas" width="240" height="240"></canvas></div>
+        <div class="creature-name-display" id="cap-creature-name"></div>
+        <div class="creature-info-row" id="cap-info-row"></div>
+      </div>
+      <div class="capture-rate-display" id="cap-rate-display"></div>
+      <div class="escape-display" id="escape-display"><div>⚡ Lượt thoát còn lại: <span id="escape-count"></span></div><div class="escape-dots" id="escape-dots"></div></div>
+      <div class="ball-selection" id="ball-selection"></div>
+      <button class="btn-capture" id="btn-capture" onclick="doCapture()">🎯 Ném Bảo Bối</button>
+      <br><button class="btn-flee" onclick="showScreen('screen-ar')">← Bỏ qua</button>
+    </div>
+    <div id="capture-result-area" style="display:none;text-align:center">
+      <div id="capture-result"><div style="font-size:60px;margin-bottom:10px" id="result-icon"></div><div style="font-size:22px;font-weight:700" id="result-text"></div></div>
+      <button class="btn btn-primary" style="max-width:250px;margin:30px auto" onclick="afterCapture()">Tiếp tục</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVOLUTION -->
+<div id="screen-evolution" class="screen">
+  <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
+  <div class="evo-title">🧬 Tiến Hóa Yêu Thú</div>
+  <div class="evo-desc">Gộp 2+ yêu thú cùng hệ để tiến hóa. Tỷ lệ thành công: 30%</div>
+  <div class="evo-element-tabs" id="evo-tabs"></div>
+  <div class="evo-grid" id="evo-grid"></div>
+  <div class="evo-merge-bar">
+    <div class="evo-selected-count" id="evo-selected-count">Chọn 2+ yêu thú cùng hệ</div>
+    <div class="evo-rate-display" id="evo-rate-display">Tỷ lệ tiến hóa: 30%</div>
+    <div class="evo-level-display" id="evo-level-display"></div>
+    <div class="evo-progress"><div class="evo-progress-fill" id="evo-progress-fill" style="width:0%"></div></div>
+  </div>
+  <button class="evo-btn" id="evo-btn" onclick="attemptEvolution()" disabled>🧬 Tiến Hóa</button>
+</div>
+<div class="evo-animation-overlay" id="evo-overlay">
+  <canvas id="evo-anim-canvas" width="300" height="300"></canvas>
+  <div class="evo-anim-text" id="evo-anim-text">🔮 Đang tiến hóa...</div>
+  <div class="evo-anim-sub" id="evo-anim-sub"></div>
+</div>
+
+<!-- REALM INFO -->
+<div class="realm-modal" id="realm-info-modal">
+  <div class="realm-modal-box">
+    <div class="realm-modal-title" id="realm-info-title">📜 Bí Cảnh</div>
+    <div class="realm-modal-body" id="realm-info-body"></div>
+    <div class="realm-modal-actions"><button class="realm-modal-btn btn-enter-realm" onclick="closeRealmInfo()">Đóng</button></div>
+  </div>
+</div>
+
+<!-- TIER TRANSITION -->
+<div class="tier-transition" id="tier-transition">
+  <div class="tier-transition-icon">🌀</div>
+  <div class="tier-transition-text" id="tier-trans-text"></div>
+  <div class="tier-transition-sub" id="tier-trans-sub"></div>
+</div>
+
+<!-- PHOTO -->
+<div id="screen-photo" class="screen">
+  <video id="photo-camera" autoplay playsinline muted></video>
+  <div class="creature-overlay" id="creature-overlay" style="width:150px;height:150px"><canvas id="creature-overlay-img" width="150" height="150"></canvas></div>
+  <div class="photo-top-bar">
+    <button class="photo-back-btn" onclick="exitPhotoMode()">✕</button>
+    <button class="photo-filter-btn" onclick="toggleFilter()">🎨 Bộ lọc</button>
+  </div>
+  <div class="size-slider-wrap"><input type="range" class="size-slider" id="creature-size" min="50" max="300" value="150" oninput="resizeCreature()"></div>
+  <div class="photo-bottom-bar">
+    <div class="pose-selector" id="pose-selector"></div>
+    <div class="photo-actions">
+      <button class="photo-side-btn" onclick="switchCamera()">🔄</button>
+      <button class="shutter-btn" onclick="takePhoto()"></button>
+      <button class="photo-side-btn" onclick="toggleCreatureSelect()">🐾</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTO RESULT -->
+<div id="screen-photo-result" class="screen">
+  <canvas id="result-photo-canvas"></canvas>
+  <div class="photo-result-actions">
+    <button class="btn-share" style="background:linear-gradient(135deg,#4caf50,#45a049)" onclick="savePhoto()">💾 Lưu</button>
+    <button class="btn-share" style="background:linear-gradient(135deg,#2196f3,#1976d2)" onclick="sharePhoto()">📤 Chia sẻ</button>
+    <button class="btn-share" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3)" onclick="showScreen('screen-photo')">📷 Chụp lại</button>
+    <button class="btn-share" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3)" onclick="showScreen('screen-ar')">🏠</button>
+  </div>
+</div>
+
+<!-- COLLECTION -->
+<div id="screen-collection" class="screen">
+  <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
+  <div class="collection-title">📖 Sưu Tập Yêu Thú</div>
+  <div class="collection-grid" id="collection-grid"></div>
+</div>
+
+<!-- PROFILE -->
+<div id="screen-profile" class="screen">
+  <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
+  <div class="profile-header"><div class="profile-avatar">🧙</div><div class="profile-realm" id="profile-realm"></div><div class="profile-level" id="profile-level"></div></div>
+  <div class="profile-stats">
+    <div class="stat-card"><div class="stat-value" id="stat-caught" style="color:#4caf50">0</div><div class="stat-label">Yêu thú bắt được</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-failed" style="color:#f44336">0</div><div class="stat-label">Bắt trượt</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-rate" style="color:#4fc3f7">0%</div><div class="stat-label">Tỷ lệ thành công</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-evo" style="color:#e040fb">0</div><div class="stat-label">Đã tiến hóa</div></div>
+  </div>
+</div>
+
+<!-- INVENTORY -->
+<div id="screen-inventory" class="screen">
+  <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
+  <div class="inv-title">🎒 Túi Bảo Bối</div>
+  <div class="ball-inventory" id="ball-inventory"></div>
+</div>
+
+<!-- ADMIN -->
+<div id="screen-admin" class="screen">
+  <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
+  <div class="admin-title">🔧 ADMIN TESTER PANEL 🔧</div>
+  <div class="admin-section"><div class="admin-section-title">👤 Tài khoản</div><div style="font-size:13px;color:#ccc"><strong>Tên:</strong> <span id="admin-name">Admin</span> | <strong>Level:</strong> <span id="admin-level">99</span> | <strong>Quyền:</strong> <span style="color:#ff6b6b">SUPER_ADMIN</span></div></div>
+  <div class="admin-section"><div class="admin-section-title">⚡ Level</div><div class="admin-grid"><div class="admin-btn gold" onclick="adminSetLevel(99)">Level 99</div><div class="admin-btn gold" onclick="adminSetLevel(50)">Level 50</div><div class="admin-btn gold" onclick="adminSetLevel(1)">Reset</div><div class="admin-btn" onclick="adminAddXP(99999)">+99999 XP</div></div></div>
+  <div class="admin-section"><div class="admin-section-title">⚡ Test Mode</div>
+    <div class="admin-toggle-row"><div class="admin-toggle-label">🎯 Bắt 100%</div><div class="admin-toggle" id="toggle-godCapture" onclick="adminToggle('godCapture')"></div></div>
+    <div class="admin-toggle-row"><div class="admin-toggle-label">💨 Không thoát</div><div class="admin-toggle" id="toggle-noEscape" onclick="adminToggle('noEscape')"></div></div>
+    <div class="admin-toggle-row"><div class="admin-toggle-label">🧬 Tiến hóa 100%</div><div class="admin-toggle" id="toggle-godEvolution" onclick="adminToggle('godEvolution')"></div></div>
+    <div class="admin-toggle-row"><div class="admin-toggle-label">🔮 Bỏ GPS</div><div class="admin-toggle" id="toggle-noGPS" onclick="adminToggle('noGPS')"></div></div>
+    <div class="admin-toggle-row"><div class="admin-toggle-label">🏰 Bỏ giới hạn bí cảnh</div><div class="admin-toggle" id="toggle-unlimitedRealms" onclick="adminToggle('unlimitedRealms')"></div></div>
+    <div class="admin-toggle-row"><div class="admin-toggle-label">🎁 Unlimited items</div><div class="admin-toggle" id="toggle-unlimitedItems" onclick="adminToggle('unlimitedItems')"></div></div>
+  </div>
+  <div class="admin-section"><div class="admin-section-title">🐾 Sinh Yêu Thú</div>
+    <div class="admin-input-row"><select class="admin-select" id="admin-spawn-element"><option value="KIM">⚔️ Kim</option><option value="MOC">🌿 Mộc</option><option value="THUY">💧 Thủy</option><option value="HOA">🔥 Hỏa</option><option value="THO">🏔️ Thổ</option></select><select class="admin-select" id="admin-spawn-rarity"><option value="common">Common</option><option value="rare">Rare</option><option value="legendary">Legendary</option></select></div>
+    <div class="admin-input-row"><input type="number" class="admin-input" id="admin-spawn-level" value="10" placeholder="Level"></div>
+    <div class="admin-grid" style="margin-top:8px"><button class="admin-btn hot" onclick="adminSpawnCreature()">🐾 Sinh</button><button class="admin-btn hot" onclick="adminSpawnLegendary()">👑 Legendary</button><button class="admin-btn" onclick="adminSpawnRandom()">🎲 Random</button><button class="admin-btn" onclick="adminSpawnMass()">💥 ×10</button></div>
+  </div>
+  <div class="admin-section"><div class="admin-section-title">🎒 Túi & Sưu Tập</div><div class="admin-grid"><button class="admin-btn gold" onclick="adminGiveBalls(100)">💎 +100</button><button class="admin-btn gold" onclick="adminFillInventory()">💎 Đầy túi</button><button class="admin-btn" onclick="adminAddRandomCreatures(5)">🐾 +5</button><button class="admin-btn" onclick="adminAddRandomCreatures(20)">🐾 +20</button><button class="admin-btn gold" onclick="adminAddEvolvedCreatures(3)">⭐ +3 evo</button><button class="admin-btn danger" onclick="adminResetAll()">🗑️ Reset all</button></div></div>
+  <div class="admin-section"><div class="admin-section-title">🏰 Bí Cảnh</div><div class="admin-grid"><button class="admin-btn" onclick="adminResetRealmDaily()">🔄 Reset ngày</button><button class="admin-btn" onclick="adminGenerateRealm()">✨ Bí cảnh mới</button><button class="admin-btn gold" onclick="adminFillRealmItems()">🎁 Đầy items</button><button class="admin-btn" onclick="adminResetRealmCooldown()">⏰ Reset CD</button></div></div>
+  <div class="admin-section"><div class="admin-section-title">📍 Dịch chuyển</div>
+    <div class="admin-input-row"><input type="number" class="admin-input" id="admin-lat" step="0.000001" placeholder="Lat"><input type="number" class="admin-input" id="admin-lng" step="0.000001" placeholder="Lng"></div>
+    <div class="admin-grid" style="margin-top:8px"><button class="admin-btn hot" onclick="adminTeleport()">🚀 Teleport</button><button class="admin-btn" onclick="adminMoveRandom(50)">🚶 50m</button><button class="admin-btn" onclick="adminMoveRandom(100)">🚶 100m</button><button class="admin-btn" onclick="adminGetCurrentLocation()">📍 GPS</button></div>
+  </div>
+  <div class="admin-section"><div class="admin-section-title">💾 Dữ liệu</div><div class="admin-grid"><button class="admin-btn" onclick="adminExportData()">📤 Export</button><button class="admin-btn" onclick="adminImportData()">📥 Import</button><button class="admin-btn danger" onclick="adminClearCollection()">🗑️ Sưu tập</button><button class="admin-btn danger" onclick="adminClearLogs()">🗑️ Logs</button></div></div>
+  <div class="admin-section"><div class="admin-section-title">📝 Nhật ký</div><div class="admin-log" id="admin-log"><div class="admin-log-entry">[SYSTEM] Admin panel khởi động</div></div></div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const C={SPAWN_RADIUS:50,DETECTION_RANGE:100,CAPTURE_RANGE:5,RESPAWN_TIME:3600000,XP_CAPTURE:100,XP_FAIL:-30,INIT_BALLS:20,EVO_SUCCESS_RATE:.3,EVO_MAX_LEVEL:10,EVO_CREATURES_PER_LEVEL:100,ESCAPE_MIN:1,ESCAPE_MAX:3};
+const REALM_CONFIG={RADIUS:50,MAX_ITEMS_PER_TIER:2,MAX_TIERS:5,MAX_REALMS_PER_DAY:10,REALM_COOLDOWN:3600000,REALMS_PER_AREA:10,EXIT_RADIUS:60};
+
+// ===== ELEMENTS =====
+const EL={KIM:{name:'Kim',icon:'⚔️',color:'#FFD700',bg:'linear-gradient(135deg,#B8860B,#FFD700)',primary:'#FFD700',glow:'#FFF8DC',particle:'#FFD700'},MOC:{name:'Mộc',icon:'🌿',color:'#228B22',bg:'linear-gradient(135deg,#006400,#228B22)',primary:'#228B22',glow:'#90EE90',particle:'#90EE90'},THUY:{name:'Thủy',icon:'💧',color:'#1E90FF',bg:'linear-gradient(135deg,#0052CC,#1E90FF)',primary:'#1E90FF',glow:'#87CEEB',particle:'#87CEEB'},HOA:{name:'Hỏa',icon:'🔥',color:'#FF4500',bg:'linear-gradient(135deg,#CC2200,#FF4500)',primary:'#FF4500',glow:'#FFA07A',particle:'#FF6347'},THO:{name:'Thổ',icon:'🏔️',color:'#8B4513',bg:'linear-gradient(135deg,#5C2E00,#8B4513)',primary:'#8B4513',glow:'#DEB887',particle:'#DEB887'}};
+const SINH={KIM:'THUY',THUY:'MOC',MOC:'HOA',HOA:'THO',THO:'KIM'};
+const KHAC={KIM:'MOC',MOC:'THO',THO:'THUY',THUY:'HOA',HOA:'KIM'};
+
+// ===== REALMS =====
+const REALMS=[{name:'Luyện Khí',min:1,icon:'🌀'},{name:'Trúc Cơ',min:11,icon:'🏗️'},{name:'Kết Đan',min:21,icon:'💎'},{name:'Nguyên Anh',min:31,icon:'👶'},{name:'Hóa Thần',min:41,icon:'⚡'},{name:'Luyện Hư',min:51,icon:'🌌'},{name:'Hợp Thể',min:61,icon:'☯️'},{name:'Đại Thừa',min:71,icon:'🏔️'},{name:'Độ Kiếp',min:81,icon:'🌩️'},{name:'Tiên Nhân',min:91,icon:'✨'}];
+function getRealm(l){for(let i=REALMS.length-1;i>=0;i--)if(l>=REALMS[i].min)return REALMS[i];return REALMS[0];}
+function xpForLevel(l){return Math.floor(100*Math.pow(1.15,l-1));}
+
+// ===== CREATURE DNA =====
+const BODY=['round','oval','tall','chibi','floating'],EAR=['cat','rabbit','fox','dragon','deer','none'],EYE=['big','sleepy','happy','sparkly','determined'],MOUTH=['smile','small','o','cat','grin'],TAIL=['flame','leaf','water','spike','cloud','star','none'],ACC=['horns','wings','halo','crown','scarf','pendant','none'],PAT=['spots','stripes','stars','hearts','swirls','none'],TONES=['#FFE0BD','#FFD5C2','#F8C8A0','#FFDAB9','#FFE4C4'];
+function genDNA(element,rarity,evoLevel){const rng=()=>Math.random(),pick=a=>a[Math.floor(rng()*a.length)];const fc=rarity==='legendary'?3:rarity==='rare'?2:1;const accs=[];for(let i=0;i<fc;i++){const a=pick(ACC);if(a!=='none'&&!accs.includes(a))accs.push(a);}const eb=Math.min(evoLevel||0,5);for(let i=0;i<eb;i++){const a=pick(ACC);if(a!=='none'&&!accs.includes(a))accs.push(a);}return{bodyShape:pick(BODY),earType:pick(EAR),eyeStyle:pick(EYE),mouthStyle:pick(MOUTH),tailType:pick(TAIL),accessories:accs,pattern:pick(PAT),skinTone:pick(TONES),elementColor:EL[element].primary,elementGlow:EL[element].glow,eyeColor:EL[element].primary,bodySize:(.8+rng()*.4)*(1+(evoLevel||0)*.08),headRatio:.4+rng()*.2,uniqueSeed:Math.floor(rng()*999999),evoLevel:evoLevel||0};}
+
+// ===== ANIMATED CREATURE RENDERER =====
+function drawCreatureAnimated(canvas,dna,time,opts={}){const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);const t=time/1e3,cx=w/2,cy=h/2,floatY=Math.sin(t*1.5)*6,breathe=Math.sin(t*2)*.02+1,blink=Math.sin(t*.7)>.95?.1:1,tailSway=Math.sin(t*1.8)*8;const gg=ctx.createRadialGradient(cx,cy+floatY,5,cx,cy,w*.45);gg.addColorStop(0,dna.elementGlow+'25');gg.addColorStop(1,'transparent');ctx.fillStyle=gg;ctx.fillRect(0,0,w,h);drawParticles(ctx,dna,t,cx,cy,w,h);ctx.save();ctx.translate(cx,cy+floatY);const s=opts.scale||1;ctx.scale(s*dna.bodySize*breathe,s*dna.bodySize*breathe);drawTailAnim(ctx,dna,tailSway);drawBodyAnim(ctx,dna);drawHeadAnim(ctx,dna);drawEarsAnim(ctx,dna,t);drawFaceAnim(ctx,dna,blink,t);drawAccAnim(ctx,dna,t);drawPatAnim(ctx,dna,t);ctx.restore();if(dna.evoLevel>0){ctx.save();ctx.globalAlpha=.3+Math.sin(t*3)*.15;ctx.strokeStyle=dna.elementColor;ctx.lineWidth=2+dna.evoLevel;ctx.beginPath();ctx.arc(cx,cy+floatY,w*.35+dna.evoLevel*5,0,Math.PI*2);ctx.stroke();ctx.restore();}}
+function drawParticles(ctx,dna,t,cx,cy,w,h){const count=8+((dna.uniqueSeed||0)%8);for(let i=0;i<count;i++){const angle=(Math.PI*2/count)*i+t*.5,radius=w*.3+Math.sin(t*1.2+i*2)*20,px=cx+Math.cos(angle)*radius,py=cy+Math.sin(angle)*radius*.6,size=2+Math.sin(t*2+i)*1.5,alpha=.3+Math.sin(t*1.5+i)*.3;ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle=dna.elementColor;ctx.beginPath();ctx.arc(px,py,size,0,Math.PI*2);ctx.fill();ctx.restore();}for(let i=0;i<5;i++){const px=cx+Math.sin(t*.8+i*1.5)*w*.35,py=cy+Math.cos(t*.6+i*2)*h*.3;ctx.save();ctx.globalAlpha=.5+Math.sin(t*2+i)*.3;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(px,py,1+Math.sin(t*3+i),0,Math.PI*2);ctx.fill();ctx.restore();}}
+function drawTailAnim(ctx,dna,sway){const ty=45;ctx.save();ctx.translate(0,sway*.3);ctx.strokeStyle=dna.elementColor;ctx.fillStyle=dna.elementColor+'80';ctx.lineWidth=3;switch(dna.tailType){case'flame':for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-25,ty+i*5);ctx.quadraticCurveTo(-55+sway,ty-20-i*15,-45+sway,ty+10+i*8);ctx.quadraticCurveTo(-35,ty+5,-25,ty+i*5);ctx.fill();}break;case'leaf':ctx.beginPath();ctx.moveTo(0,ty);ctx.quadraticCurveTo(-35+sway,ty-35,-45+sway,ty-15);ctx.quadraticCurveTo(-35,ty+5,0,ty);ctx.fill();ctx.stroke();break;case'water':ctx.beginPath();ctx.moveTo(-10,ty);ctx.quadraticCurveTo(-40+sway,ty-45,-55+sway,ty-25);ctx.quadraticCurveTo(-45,ty+5,-10,ty);ctx.fill();break;case'spike':for(let i=0;i<3;i++){ctx.fillStyle=dna.elementColor;ctx.beginPath();ctx.moveTo(-20,ty+i*3);ctx.lineTo(-50-i*8+sway,ty-15-i*8);ctx.lineTo(-25,ty+8+i*3);ctx.closePath();ctx.fill();}break;case'cloud':for(let i=0;i<3;i++){ctx.fillStyle=dna.elementGlow;ctx.beginPath();ctx.arc(-30-i*8+sway*.5,ty-5+i*5,12+i*3,0,Math.PI*2);ctx.fill();}break;case'star':ctx.fillStyle=dna.elementColor;drawStar(ctx,-35+sway,ty-15,5,15,7);drawStar(ctx,-55+sway*.5,ty+5,5,10,5);break;default:break;}ctx.restore();}
+function drawBodyAnim(ctx,dna){ctx.fillStyle=dna.skinTone;ctx.strokeStyle=dna.elementColor+'60';ctx.lineWidth=2;const shapes={round:()=>{ctx.beginPath();ctx.ellipse(0,30,35,32,0,0,Math.PI*2)},oval:()=>{ctx.beginPath();ctx.ellipse(0,35,28,38,0,0,Math.PI*2)},tall:()=>{ctx.beginPath();ctx.ellipse(0,40,22,42,0,0,Math.PI*2)},chibi:()=>{ctx.beginPath();ctx.ellipse(0,35,38,30,0,0,Math.PI*2)},floating:()=>{ctx.beginPath();ctx.ellipse(0,30,32,28,0,0,Math.PI*2)}};(shapes[dna.bodyShape]||shapes.round)();ctx.fill();ctx.stroke();ctx.fillStyle=dna.skinTone;ctx.beginPath();ctx.ellipse(-15,62,12,8,-.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(15,62,12,8,.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(-32,30,10,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(32,30,10,0,Math.PI*2);ctx.fill();}
+function drawHeadAnim(ctx,dna){const hr=42*dna.headRatio*1.5;ctx.fillStyle=dna.skinTone;ctx.strokeStyle=dna.elementColor+'60';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,-15,hr,hr*1.05,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#FFB6C140';ctx.beginPath();ctx.ellipse(-hr*.55,-8,10,7,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(hr*.55,-8,10,7,0,0,Math.PI*2);ctx.fill();}
+function drawEarsAnim(ctx,dna,t){const hr=42*dna.headRatio*1.5,earY=-15-hr*.7,earSway=Math.sin(t*1.3)*2;ctx.fillStyle=dna.skinTone;ctx.strokeStyle=dna.elementColor+'60';ctx.lineWidth=2;switch(dna.earType){case'cat':[[-1],[1]].forEach(([sx])=>{ctx.beginPath();ctx.moveTo(sx*hr*.6,earY+10);ctx.lineTo(sx*hr*.95+sx*earSway,earY-25);ctx.lineTo(sx*hr*.15,earY-5);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#FFB6C1';ctx.beginPath();ctx.moveTo(sx*hr*.55,earY+7);ctx.lineTo(sx*hr*.82+sx*earSway,earY-18);ctx.lineTo(sx*hr*.25,earY-2);ctx.closePath();ctx.fill();ctx.fillStyle=dna.skinTone});break;case'rabbit':[[-1],[1]].forEach(([sx])=>{ctx.beginPath();ctx.ellipse(sx*hr*.55,earY-25,12,30,sx*.15+earSway*.01,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#FFB6C1';ctx.beginPath();ctx.ellipse(sx*hr*.55,earY-22,7,20,sx*.15+earSway*.01,0,Math.PI*2);ctx.fill();ctx.fillStyle=dna.skinTone});break;case'fox':[[-1],[1]].forEach(([sx])=>{ctx.beginPath();ctx.moveTo(sx*hr*.45,earY+12);ctx.quadraticCurveTo(sx*hr*1.1+sx*earSway,earY-35,sx*hr*.3,earY-15);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle=dna.elementColor+'60';ctx.beginPath();ctx.moveTo(sx*hr*.5,earY+8);ctx.quadraticCurveTo(sx*hr*.95+sx*earSway,earY-25,sx*hr*.35,earY-12);ctx.closePath();ctx.fill();ctx.fillStyle=dna.skinTone});break;case'dragon':[[-1],[1]].forEach(([sx])=>{ctx.fillStyle=dna.elementColor;ctx.beginPath();ctx.moveTo(sx*hr*.5,earY+5);ctx.quadraticCurveTo(sx*hr*.85+sx*earSway,earY-30,sx*hr*.65,earY+2);ctx.closePath();ctx.fill()});break;case'deer':[[-1],[1]].forEach(([sx])=>{ctx.strokeStyle=dna.elementColor;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx*hr*.55,earY+5);ctx.lineTo(sx*hr*.8+sx*earSway,earY-25);ctx.lineTo(sx*hr*1,earY-20);ctx.moveTo(sx*hr*.8+sx*earSway,earY-25);ctx.lineTo(sx*hr*.65,earY-35);ctx.stroke();ctx.lineWidth=2});break;default:break;}}
+function drawFaceAnim(ctx,dna,blink,t){const hr=42*dna.headRatio*1.5,eyeY=-18,eyeSpacing=hr*.45;switch(dna.eyeStyle){case'big':[[-1],[1]].forEach(([sx])=>{ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(sx*eyeSpacing,eyeY,14,16*blink,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=dna.eyeColor;ctx.beginPath();ctx.arc(sx*eyeSpacing,eyeY+2,10*blink,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.arc(sx*eyeSpacing,eyeY+2,5*blink,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(sx*eyeSpacing-4,eyeY-3,4*blink,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(sx*eyeSpacing+5,eyeY+4,2*blink,0,Math.PI*2);ctx.fill()});break;case'sleepy':[[-1],[1]].forEach(([sx])=>{ctx.strokeStyle='#333';ctx.lineWidth=3;ctx.beginPath();ctx.arc(sx*eyeSpacing,eyeY+4,10,Math.PI*.15,Math.PI*.85);ctx.stroke();ctx.fillStyle=dna.eyeColor;ctx.beginPath();ctx.arc(sx*eyeSpacing,eyeY+4,6*blink,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.arc(sx*eyeSpacing,eyeY+4,3*blink,0,Math.PI*2);ctx.fill()});break;case'happy':[[-1],[1]].forEach(([sx])=>{ctx.strokeStyle='#333';ctx.lineWidth=3;ctx.beginPath();ctx.arc(sx*eyeSpacing,eyeY+2,10,Math.PI*1.15,Math.PI*1.85);ctx.stroke()});break;case'sparkly':[[-1],[1]].forEach(([sx])=>{ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(sx*eyeSpacing,eyeY,14,16*blink,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=dna.eyeColor;drawStar(ctx,sx*eyeSpacing,eyeY+2,5,12*blink,6*blink);ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.arc(sx*eyeSpacing,eyeY+2,5*blink,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(sx*eyeSpacing-5,eyeY-3,5*blink,0,Math.PI*2);ctx.fill()});break;case'determined':[[-1],[1]].forEach(([sx])=>{ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(sx*eyeSpacing,eyeY,12,14*blink,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=dna.eyeColor;ctx.beginPath();ctx.arc(sx*eyeSpacing,eyeY,8*blink,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.arc(sx*eyeSpacing,eyeY,4*blink,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#333';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(sx*eyeSpacing-12*sx,eyeY-18);ctx.lineTo(sx*eyeSpacing+12*sx,eyeY-22);ctx.stroke()});break;}const my=eyeY+22;ctx.strokeStyle='#333';ctx.fillStyle='#333';ctx.lineWidth=2;const bm=Math.sin(t*1.5)*1;switch(dna.mouthStyle){case'smile':ctx.beginPath();ctx.arc(0,my-5+bm,10,Math.PI*.15,Math.PI*.85);ctx.stroke();break;case'small':ctx.beginPath();ctx.arc(0,my-2+bm,5,Math.PI*.15,Math.PI*.85);ctx.stroke();break;case'o':ctx.beginPath();ctx.ellipse(0,my+bm,7,9+bm,0,0,Math.PI*2);ctx.fill();break;case'cat':ctx.beginPath();ctx.arc(-5,my-4+bm,6,Math.PI*.15,Math.PI*.85);ctx.stroke();ctx.beginPath();ctx.arc(5,my-4+bm,6,Math.PI*.15,Math.PI*.85);ctx.stroke();break;case'grin':ctx.beginPath();ctx.arc(0,my-6+bm,12,Math.PI*.1,Math.PI*.9);ctx.stroke();ctx.fillStyle='#FF6B6B';ctx.beginPath();ctx.ellipse(0,my+1+bm,8,4,0,0,Math.PI);ctx.fill();break;}}
+function drawAccAnim(ctx,dna,t){const hr=42*dna.headRatio*1.5,sway=Math.sin(t*1.1)*2;dna.accessories.forEach(acc=>{switch(acc){case'horns':ctx.fillStyle=dna.elementColor;[[-1],[1]].forEach(([sx])=>{ctx.beginPath();ctx.moveTo(sx*hr*.55,-15-hr*.7);ctx.quadraticCurveTo(sx*hr*.95+sway,-15-hr*1.4,sx*hr*.75,-15-hr*.85);ctx.closePath();ctx.fill()});break;case'wings':ctx.fillStyle=dna.elementGlow+'80';ctx.strokeStyle=dna.elementColor+'60';[[-1],[1]].forEach(([sx])=>{const ws=Math.sin(t*2+sx)*3;ctx.beginPath();ctx.moveTo(sx*30,15);ctx.quadraticCurveTo(sx*75+ws,-15-ws,sx*55,5);ctx.quadraticCurveTo(sx*70+ws,25,sx*35,25);ctx.closePath();ctx.fill();ctx.stroke()});break;case'halo':ctx.strokeStyle='#FFD700';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(Math.sin(t*1.8)*3,-15-hr*1.15,22,7,Math.sin(t*1.8)*.02,0,Math.PI*2);ctx.stroke();break;case'crown':ctx.fillStyle='#FFD700';ctx.beginPath();ctx.moveTo(-18,-15-hr*.85);ctx.lineTo(-18,-15-hr*1.1);ctx.lineTo(-10,-15-hr*.95);ctx.lineTo(-3,-15-hr*1.2);ctx.lineTo(5,-15-hr*.95);ctx.lineTo(13,-15-hr*1.15);ctx.lineTo(18,-15-hr*.85);ctx.closePath();ctx.fill();break;case'scarf':ctx.fillStyle=dna.elementColor;ctx.beginPath();ctx.ellipse(0,5,28,10,0,0,Math.PI*2);ctx.fill();const ss=Math.sin(t*1.5)*5;ctx.fillRect(-8+ss,5,12,25);break;case'pendant':ctx.strokeStyle='#FFD700';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,12,18,Math.PI*.3,Math.PI*.7);ctx.stroke();ctx.fillStyle=dna.elementColor;ctx.beginPath();ctx.arc(Math.sin(t*1.3)*3,22,6,0,Math.PI*2);ctx.fill();break;default:break;}});}
+function drawPatAnim(ctx,dna,t){const pc=dna.elementColor+'30',pulse=.95+Math.sin(t*1.5)*.05;switch(dna.pattern){case'spots':[[-25,20],[20,35],[5,55],[-15,50],[30,15]].forEach(([x,y],i)=>{ctx.fillStyle=pc;ctx.beginPath();ctx.arc(x,y,(5+Math.sin(t*1.2+i)*2)*pulse,0,Math.PI*2);ctx.fill()});break;case'stripes':ctx.strokeStyle=pc;ctx.lineWidth=3;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-28+i*2,20+i*12);ctx.quadraticCurveTo(0,18+i*12+Math.sin(t+i)*2,28-i*2,20+i*12);ctx.stroke()}break;case'stars':ctx.fillStyle=pc;[[-15,25],[15,40],[0,55]].forEach(([x,y],i)=>{ctx.save();ctx.translate(x,y);ctx.rotate(t*.5+i);drawStar(ctx,0,0,5,6*pulse,3*pulse);ctx.restore()});break;case'hearts':ctx.fillStyle='#FF6B6B30';[[-10,30],[15,45]].forEach(([x,y],i)=>{const beat=1+Math.sin(t*2+i*1.5)*.15;ctx.beginPath();ctx.arc(x-3,y,4*beat,0,Math.PI*2);ctx.arc(x+3,y,4*beat,0,Math.PI*2);ctx.moveTo(x-7*beat,y+2);ctx.lineTo(x,y+10*beat);ctx.lineTo(x+7*beat,y+2);ctx.fill()});break;case'swirls':ctx.strokeStyle=pc;ctx.lineWidth=2;[[-15,35],[15,45]].forEach(([x,y])=>{ctx.beginPath();for(let a=0;a<Math.PI*2;a+=.1){const r=a*3*pulse;ctx.lineTo(x+Math.cos(a+t*.3)*r,y+Math.sin(a+t*.3)*r)}ctx.stroke()});break;default:break;}}
+function drawStar(ctx,cx,cy,pts,or,ir){ctx.beginPath();for(let i=0;i<pts*2;i++){const r=i%2===0?or:ir,a=(Math.PI/pts)*i-Math.PI/2;if(i===0)ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);else ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r)}ctx.closePath();ctx.fill();}
+
+// ===== NAME GENERATOR =====
+const PRE={KIM:['Bạch','Kim','Thiết','Nhật','Nguyệt'],MOC:['Thanh','Mộc','Lục','Thảo','Lam'],THUY:['Huyền','Hải','Long','Vân','Băng'],HOA:['Xích','Hỏa','Diễm','Phượng','Viêm'],THO:['Hoàng','Thổ','Cổ','Thạch','Cửu']};
+const SUF={KIM:['Hổ','Ưng','Phong','Kiếm','Giáp'],MOC:['Lân','Xà','Phượng','Đằng','Lộc'],THUY:['Quy','Long','Ngư','Giao','Vân'],HOA:['Ly','Tước','Hạc','Quỷ','Sư'],THO:['Giáp','Lân','Thú','Sơn','Ngưu']};
+const TITLE=['','Minh','Tuyệt','Thần','Vô','Ngự','Tịch','Huyết'];
+function genName(el){const r=()=>Math.floor(Math.random()*5),p=PRE[el][r()],s=SUF[el][r()],t=TITLE[Math.floor(Math.random()*TITLE.length)];return t?`${t} ${p} ${s}`:`${p} ${s}`;}
+
+// ===== REALM NAME =====
+const RP=['Cửu Thiên','Hỗn Nguyên','Thái Cổ','Bát Hoang','Vạn Cổ','Thiên Địa','Âm Dương','Huyền Minh','Thần Long','Phong Vân','Băng Hỏa','Lôi Đình','Thanh Long','Tử Vi','Nguyệt Ảnh'];
+const RS=['Bí Cảnh','Cấm Địa','Thánh Địa','Phúc Địa','Di Tích','Huyễn Cảnh','Linh Vực','Thần Vực','Cổ Thành','Động Thiên'];
+const RTYPES=[{name:'Hỏa Vực',element:'HOA',icon:'🌋',desc:'Nhiệt độ cực cao'},{name:'Băng Nguyên',element:'THUY',icon:'❄️',desc:'Băng tuyết vĩnh cửu'},{name:'Rừng Cổ',element:'MOC',icon:'🌳',desc:'Rừng nguyên sinh'},{name:'Kim Thạch',element:'KIM',icon:'⛏️',desc:'Hang tinh thể'},{name:'Thổ Mạch',element:'THO',icon:'🏔️',desc:'Núi non hiểm trở'},{name:'Hỗn Độn',element:'KIM',icon:'🌀',desc:'Ngũ hành hỗn loạn'},{name:'Thiên Không',element:'HOA',icon:'☁️',desc:'Trên mây'},{name:'Thủy Tinh',element:'THUY',icon:'🔮',desc:'Hang nước'},{name:'Lôi Vực',element:'HOA',icon:'⚡',desc:'Sấm sét'},{name:'Vô Tận',element:'MOC',icon:'🌌',desc:'Không gian vô tận'}];
+function genRealmName(){return RP[Math.floor(Math.random()*RP.length)]+' '+RS[Math.floor(Math.random()*RS.length)];}
+function genRealmType(){return RTYPES[Math.floor(Math.random()*RTYPES.length)];}
+
+// ===== GAME STATE =====
+let GS={user:null,level:1,xp:0,totalXp:0,caught:0,failed:0,evolved:0,inventory:{KIM:20,MOC:20,THUY:20,HOA:20,THO:20},collection:[],currentTarget:null,spawnedLocations:[],selectedBall:'HOA',currentPhotoCreature:null,photoFilterIndex:0,evoSelectedElement:'KIM',evoSelectedIds:[],realms:{},realmDailyCount:0,realmDailyDate:new Date().toDateString(),currentRealmKey:null};
+function loadState(){const s=localStorage.getItem('yeuthu_v3');if(s)try{GS={...GS,...JSON.parse(s)}}catch(e){}}
+function saveState(){localStorage.setItem('yeuthu_v3',JSON.stringify(GS))}
+
+// ===== CAPTURE LOGIC =====
+function getLevelRate(cL,pL){const d=cL-pL;if(d<=-2)return 1;if(d===-1)return .8;if(d===0)return .5;if(d===1)return .3;if(d===2)return .1;if(d===3)return .01;if(d===4)return .004;if(d===5)return .001;return 0;}
+function getElemMod(b,c){if(KHAC[b]===c)return 1.5;if(SINH[b]===c)return .5;return 1;}
+function getRate(b,c,cL,pL){return Math.min(1,getLevelRate(cL,pL)*getElemMod(b,c));}
+
+// ===== UI =====
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='screen-ar'){startCamera();updateHUD();updateRealmHUD();}if(id==='screen-profile')updateProfile();if(id==='screen-inventory')updateInventory();if(id==='screen-collection')updateCollection();if(id==='screen-evolution')updateEvolutionScreen();}
+function showToast(m,d=3000){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function updateHUD(){const r=getRealm(GS.level);document.getElementById('hud-level').textContent=`Level ${GS.level}`;document.getElementById('hud-realm').textContent=`${r.icon} ${r.name}`;document.getElementById('hud-xp-fill').style.width=Math.min(100,(GS.xp/xpForLevel(GS.level))*100)+'%';}
+function updateProfile(){const r=getRealm(GS.level);document.getElementById('profile-realm').textContent=`${r.icon} ${r.name}`;document.getElementById('profile-level').textContent=`Level ${GS.level} — ${GS.xp}/${xpForLevel(GS.level)} XP`;document.getElementById('stat-caught').textContent=GS.caught;document.getElementById('stat-failed').textContent=GS.failed;const total=GS.caught+GS.failed;document.getElementById('stat-rate').textContent=total?Math.round((GS.caught/total)*100)+'%':'0%';document.getElementById('stat-evo').textContent=GS.evolved;}
+function updateInventory(){const c=document.getElementById('ball-inventory');c.innerHTML='';for(const[k,v]of Object.entries(GS.inventory)){const el=EL[k];c.innerHTML+=`<div class="inv-item"><div class="inv-ball-icon" style="background:${el.bg}">${el.icon}</div><div class="inv-ball-name" style="color:${el.color}">${el.name}</div><div class="inv-ball-count">×${v}</div></div>`;}}
+function rarityColor(r){return r==='legendary'?'#ff9800':r==='rare'?'#2196f3':'#4caf50';}
+
+// ===== AUTH =====
+function toggleRegister(){const l=document.getElementById('login-form'),r=document.getElementById('register-form');if(l.style.display==='none'){l.style.display='';r.style.display='none';}else{l.style.display='none';r.style.display='';}}
+function handleLogin(){const e=document.getElementById('input-email').value,p=document.getElementById('input-password').value;if(!e||!p){showToast('Nhập email và mật khẩu');return;}if(adminLogin(e,p)){showToast(`🔧 Admin: ${GS.user.name}`,4000);showScreen('screen-ar');return;}GS.user={email:e,name:e.split('@')[0]};saveState();showToast('Đăng nhập thành công!');showScreen('screen-ar');}
+function handleRegister(){const n=document.getElementById('reg-name').value,e=document.getElementById('reg-email').value,p=document.getElementById('reg-password').value;if(!n||!e||!p){showToast('Điền đầy đủ');return;}GS.user={email:e,name:n};GS.level=1;GS.xp=0;saveState();showToast(`Chào ${n}!`);showScreen('screen-ar');}
+function handleGoogleLogin(){GS.user={email:'hunter@gmail.com',name:'Thợ Săn'};saveState();showToast('Đăng nhập Google!');showScreen('screen-ar');}
+
+// ===== ADMIN =====
+const ADMIN_ACCOUNTS={'admin@test.com':{password:'admin123',name:'Admin Tester',role:'SUPER_ADMIN',level:99},'tester@test.com':{password:'tester123',name:'Tester Pro',role:'TESTER',level:50},'dev@test.com':{password:'dev123',name:'Dev Master',role:'DEVELOPER',level:99}};
+let adminFlags={godCapture:false,noEscape:false,godEvolution:false,noGPS:false,unlimitedRealms:false,unlimitedItems:false};
+let adminLog=[];
+function adminLogAdd(msg){const time=new Date().toLocaleTimeString();adminLog.unshift(`[${time}] ${msg}`);if(adminLog.length>100)adminLog.pop();const el=document.getElementById('admin-log');if(el)el.innerHTML=adminLog.map(e=>`<div class="admin-log-entry">${e}</div>`).join('');}
+function adminLogin(email,password){const acc=ADMIN_ACCOUNTS[email];if(!acc||acc.password!==password)return false;GS.user={email,name:acc.name,role:acc.role,isAdmin:true};GS.level=acc.level;GS.xp=xpForLevel(acc.level)-1;for(const k of Object.keys(GS.inventory))GS.inventory[k]=99999;document.getElementById('admin-badge').style.display='';document.getElementById('admin-name').textContent=acc.name;document.getElementById('admin-level').textContent=acc.level;saveState();adminLogAdd(`Đăng nhập: ${acc.name}`);return true;}
+function adminToggle(flag){adminFlags[flag]=!adminFlags[flag];const el=document.getElementById('toggle-'+flag);if(el)el.classList.toggle('on',adminFlags[flag]);adminLogAdd(`${adminFlags[flag]?'🟢':'🔴'} ${flag}`);showToast(`${adminFlags[flag]?'🟢':'🔴'} ${flag}: ${adminFlags[flag]?'ON':'OFF'}`,2000);}
+function adminSetLevel(l){GS.level=Math.max(1,Math.min(99,l));GS.xp=0;adminLogAdd(`⚡ Level=${GS.level}`);showToast(`Level=${GS.level}`);updateHUD();saveState();}
+function adminAddXP(x){GS.xp+=x;GS.totalXp+=x;adminLogAdd(`✨+${x}XP`);showToast(`+${x}XP`);checkLevelUp();updateHUD();saveState();}
+function adminSpawnCreature(){const el=document.getElementById('admin-spawn-element').value,r=document.getElementById('admin-spawn-rarity').value,l=parseInt(document.getElementById('admin-spawn-level').value)||10;const creature={name:genName(el),element:el,rarity:r,level:Math.max(1,Math.min(99,l)),dna:genDNA(el,r,0),emoji:EL[el].icon,escapeChances:adminFlags.noEscape?0:(1+Math.floor(Math.random()*3)),escapeAttemptsUsed:0,lat:playerLat,lng:playerLng,spawnTime:Date.now(),adminSpawned:true};GS.currentTarget=creature;adminLogAdd(`🐾 ${creature.name}`);openGenerationScreen(creature);}
+function adminSpawnLegendary(){document.getElementById('admin-spawn-rarity').value='legendary';document.getElementById('admin-spawn-level').value='50';adminSpawnCreature();}
+function adminSpawnRandom(){const els=Object.keys(EL),rars=['common','rare','legendary'];document.getElementById('admin-spawn-element').value=els[Math.floor(Math.random()*els.length)];document.getElementById('admin-spawn-rarity').value=rars[Math.floor(Math.random()*rars.length)];document.getElementById('admin-spawn-level').value=Math.floor(Math.random()*50)+1;adminSpawnCreature();}
+function adminSpawnMass(){for(let i=0;i<10;i++){const els=Object.keys(EL),el=els[Math.floor(Math.random()*els.length)],rars=['common','rare','legendary'],r=rars[Math.floor(Math.random()*rars.length)];GS.collection.push({name:genName(el),element:el,rarity:r,level:Math.floor(Math.random()*30)+1,dna:genDNA(el,r,0),emoji:EL[el].icon,escapeChances:2,escapeAttemptsUsed:0,lat:playerLat,lng:playerLng,spawnTime:Date.now(),id:Date.now()+Math.random(),caughtAt:Date.now(),caughtWith:'ADMIN'});}adminLogAdd('💥 +10 creatures');showToast('+10 vào sưu tập!');saveState();}
+function adminGiveBalls(n){for(const k of Object.keys(GS.inventory))GS.inventory[k]+=n;adminLogAdd(`💎+${n}`);showToast(`+${n} bảo bối!`);saveState();}
+function adminFillInventory(){for(const k of Object.keys(GS.inventory))GS.inventory[k]=99999;adminLogAdd('💎 Đầy túi');showToast('Túi đầy!');saveState();}
+function adminAddRandomCreatures(n){for(let i=0;i<n;i++){const els=Object.keys(EL),el=els[Math.floor(Math.random()*els.length)],rars=['common','common','rare','rare','legendary'],r=rars[Math.floor(Math.random()*rars.length)];GS.collection.push({name:genName(el),element:el,rarity:r,level:Math.floor(Math.random()*30)+1,dna:genDNA(el,r,0),emoji:EL[el].icon,escapeChances:2,escapeAttemptsUsed:0,lat:playerLat,lng:playerLng,spawnTime:Date.now(),id:Date.now()+Math.random(),caughtAt:Date.now(),caughtWith:'ADMIN'});}adminLogAdd(`🐾+${n}`);showToast(`+${n} yêu thú!`);saveState();}
+function adminAddEvolvedCreatures(n){for(let i=0;i<n;i++){const els=Object.keys(EL),el=els[Math.floor(Math.random()*els.length)],evoL=Math.floor(Math.random()*5)+1;GS.collection.push({name:`⭐ ${genName(el)}`,element:el,rarity:'legendary',level:20+evoL*10,dna:genDNA(el,'legendary',evoL),emoji:EL[el].icon,escapeChances:0,escapeAttemptsUsed:0,lat:playerLat,lng:playerLng,spawnTime:Date.now(),id:Date.now()+Math.random(),caughtAt:Date.now(),caughtWith:'ADMIN',isEvolved:true});}adminLogAdd(`⭐+${n}`);showToast(`+${n} evo!`);saveState();}
+function adminResetRealmDaily(){GS.realmDailyCount=0;adminLogAdd('🔄 Reset realm daily');showToast('Đã reset!');saveState();}
+function adminGenerateRealm(){ensureRealmState();const key=getGridKey(playerLat,playerLng);const realm=getRealmForGrid(key);realm.name=genRealmName();realm.type=genRealmType();realm.items=[];realm.itemsCollected=0;realm.exhausted=false;realm.cooldownUntil=0;realm.enteredByPlayer=false;genRealmItems(realm);adminLogAdd(`✨ ${realm.name}`);showToast(`Bí cảnh: ${realm.name}!`);saveState();updateRealmHUD();}
+function adminFillRealmItems(){ensureRealmState();const key=GS.currentRealmKey;if(!key||!GS.realms[key]){showToast('Chưa ở bí cảnh!');return;}const realm=GS.realms[key];realm.items.forEach(i=>{if(!i.collected){i.collected=true;realm.itemsCollected++;}});adminLogAdd('🎁 Fill items');showToast('Đã nhặt tất cả!');saveState();updateRealmHUD();}
+function adminResetRealmCooldown(){ensureRealmState();const key=GS.currentRealmKey;if(key&&GS.realms[key]){GS.realms[key].cooldownUntil=0;GS.realms[key].exhausted=false;adminLogAdd('⏰ Reset CD');showToast('Reset cooldown!');saveState();}}
+function adminTeleport(){const lat=parseFloat(document.getElementById('admin-lat').value),lng=parseFloat(document.getElementById('admin-lng').value);if(isNaN(lat)||isNaN(lng)){showToast('Nhập tọa độ!');return;}playerLat=lat;playerLng=lng;adminLogAdd(`🚀 ${lat},${lng}`);showToast('Teleport!');checkRealmProximity();}
+function adminMoveRandom(m){const a=Math.random()*360,dLat=(m*Math.cos(a*Math.PI/180))/111320,dLng=(m*Math.sin(a*Math.PI/180))/(111320*Math.cos(playerLat*Math.PI/180));playerLat+=dLat;playerLng+=dLng;adminLogAdd(`🚶 ${m}m`);showToast(`${m}m!`);checkRealmProximity();}
+function adminGetCurrentLocation(){document.getElementById('admin-lat').value=playerLat.toFixed(6);document.getElementById('admin-lng').value=playerLng.toFixed(6);showToast(`${playerLat.toFixed(4)},${playerLng.toFixed(4)}`);}
+function adminExportData(){const blob=new Blob([JSON.stringify(GS,null,2)],{type:'application/json'});const link=document.createElement('a');link.download=`yeuthu-${Date.now()}.json`;link.href=URL.createObjectURL(blob);link.click();adminLogAdd('📤 Export');showToast('Export!');}
+function adminImportData(){const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{GS={...GS,...JSON.parse(ev.target.result)};saveState();showToast('Import!');updateHUD();}catch(err){showToast('File lỗi!');}};r.readAsText(f);};input.click();}
+function adminResetAll(){if(!confirm('XÓA TOÀN BỘ?'))return;localStorage.removeItem('yeuthu_v3');showToast('Đã reset!');setTimeout(()=>location.reload(),1000);}
+function adminClearCollection(){GS.collection=[];adminLogAdd('🗑️ Clear collection');showToast('Đã xóa!');saveState();}
+function adminClearLogs(){adminLog=[];const el=document.getElementById('admin-log');if(el)el.innerHTML='<div class="admin-log-entry">[SYSTEM] Cleared</div>';}
+
+// ===== CAMERA =====
+let camStream=null;
+async function startCamera(){if(camStream)return;try{camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});document.getElementById('camera-feed').srcObject=camStream;}catch(e){showToast('Không mở camera');}}
+
+// ===== GPS / COMPASS =====
+let heading=0,playerLat=10.762622,playerLng=106.660172;
+window.addEventListener('deviceorientationabsolute',e=>{if(e.alpha!==null)heading=e.alpha;});
+window.addEventListener('deviceorientation',e=>{if(e.webkitCompassHeading!==undefined)heading=e.webkitCompassHeading;else if(e.alpha!==null)heading=360-e.alpha;});
+if(navigator.geolocation){navigator.geolocation.watchPosition(p=>{playerLat=p.coords.latitude;playerLng=p.coords.longitude;},()=>{},{enableHighAccuracy:true,maximumAge:5000});}
+function dist(la1,ln1,la2,ln2){const R=6371000,dLa=(la2-la1)*Math.PI/180,dLn=(ln2-ln1)*Math.PI/180;const a=Math.sin(dLa/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLn/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function bearing(la1,ln1,la2,ln2){const dLn=(ln2-ln1)*Math.PI/180;const y=Math.sin(dLn)*Math.cos(la2*Math.PI/180);const x=Math.cos(la1*Math.PI/180)*Math.sin(la2*Math.PI/180)-Math.sin(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.cos(dLn);return((Math.atan2(y,x)*180/Math.PI)+360)%360;}
+
+// ===== SPAWN =====
+function scanQR(){triggerDetection();}
+function generateCreature(){const pL=GS.level,els=Object.keys(EL),rars=['common','common','common','rare','rare','legendary'],element=els[Math.floor(Math.random()*els.length)],rarity=rars[Math.floor(Math.random()*rars.length)],level=Math.max(1,pL+Math.floor(Math.random()*8)-3),name=genName(element),dna=genDNA(element,rarity,0),escapeChances=C.ESCAPE_MIN+Math.floor(Math.random()*(C.ESCAPE_MAX-C.ESCAPE_MIN+1));const angle=Math.random()*360,d=C.SPAWN_RADIUS+Math.random()*C.DETECTION_RANGE;const dLa=(d*Math.cos(angle*Math.PI/180))/111320,dLn=(d*Math.sin(angle*Math.PI/180))/(111320*Math.cos(playerLat*Math.PI/180));return{name,element,rarity,level,dna,emoji:EL[element].icon,lat:playerLat+dLa,lng:playerLng+dLn,spawnTime:Date.now(),escapeChances,escapeAttemptsUsed:0,alive:true};}
+function triggerDetection(){const creature=generateCreature();const d=Math.round(dist(playerLat,playerLng,creature.lat,creature.lng)),b=Math.round(bearing(playerLat,playerLng,creature.lat,creature.lng)),dirs=['Bắc','Đông Bắc','Đông','Đông Nam','Nam','Tây Nam','Tây','Tây Bắc'],dirName=dirs[Math.round(b/45)%8];GS.currentTarget=creature;saveState();const r=getRealm(creature.level);document.getElementById('notif-title').innerHTML=`⚠️ Phát hiện <strong>${creature.name}</strong>`;document.getElementById('notif-desc').innerHTML=`${EL[creature.element].icon} ${EL[creature.element].name} | Lv.${creature.level} (${r.icon} ${r.name}) | ~${d}m ${dirName} | ${creature.rarity}`;document.getElementById('notification').classList.add('show');showToast(`🔮 ${creature.name}!`);}
+function acceptHunt(){document.getElementById('notification').classList.remove('show');document.getElementById('nav-guide').style.display='';startNavigation();}
+function dismissNotification(){document.getElementById('notification').classList.remove('show');GS.currentTarget=null;}
+
+// ===== NAVIGATION =====
+let navInterval=null;
+function startNavigation(){if(navInterval)clearInterval(navInterval);navInterval=setInterval(()=>{const t=GS.currentTarget;if(!t)return;const d=dist(playerLat,playerLng,t.lat,t.lng),b=bearing(playerLat,playerLng,t.lat,t.lng),rel=((b-heading)+360)%360;document.getElementById('nav-arrow').textContent=dirIcon(rel);document.getElementById('nav-dist').textContent=`${Math.round(d)} m`;document.getElementById('nav-target').textContent=`${t.name} — ${EL[t.element].icon} Lv.${t.level}`;if(d<=C.CAPTURE_RANGE){clearInterval(navInterval);navInterval=null;document.getElementById('nav-guide').style.display='none';showToast(`🎯 Đến gần ${t.name}!`);setTimeout(()=>openGenerationScreen(t),800);}},1000);}
+function dirIcon(a){if(a<30||a>330)return'⬆️';if(a<60)return'↗️';if(a<120)return'➡️';if(a<150)return'↘️';if(a<210)return'⬇️';if(a<240)return'↙️';if(a<300)return'⬅️';return'↖️';}
+
+// ===== GENERATION =====
+function openGenerationScreen(creature){showScreen('screen-generation');document.getElementById('gen-title').textContent='🔮 Đang triệu hồi...';document.getElementById('gen-desc').textContent=`${EL[creature.element].name} — ${creature.rarity}`;document.getElementById('gen-result').style.display='none';document.getElementById('gen-sparkle').style.display='';const canvas=document.getElementById('gen-canvas');let frame=0;const iv=setInterval(()=>{frame++;const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);for(let i=0;i<25;i++){ctx.fillStyle=`hsla(${Math.random()*360},80%,70%,${Math.random()})`;ctx.beginPath();ctx.arc(canvas.width/2+(Math.random()-.5)*frame*3,canvas.height/2+(Math.random()-.5)*frame*3,Math.random()*5+1,0,Math.PI*2);ctx.fill();}if(frame>30){clearInterval(iv);startCreatureAnimation(canvas,creature.dna,1);document.getElementById('gen-sparkle').style.display='none';document.getElementById('gen-title').textContent=`✨ ${creature.name}`;document.getElementById('gen-result').style.display='';const el=EL[creature.element],r=getRealm(creature.level);document.getElementById('gen-badges').innerHTML=`<div class="gen-badge" style="background:${el.bg};color:#fff">${el.icon} ${el.name}</div><div class="gen-badge" style="background:${rarityColor(creature.rarity)};color:#fff">Lv.${creature.level}</div><div class="gen-badge" style="background:rgba(255,255,255,.15);color:#fff">${creature.rarity}</div>`;document.getElementById('gen-stats').innerHTML=`<div class="gen-stat-row"><span class="gen-stat-label">Cảnh giới</span><span class="gen-stat-value">${r.icon} ${r.name}</span></div><div class="gen-stat-row"><span class="gen-stat-label">Lượt thoát</span><span class="gen-stat-value">${creature.escapeChances}</span></div><div class="gen-stat-row"><span class="gen-stat-label">Tỷ lệ bắt</span><span class="gen-stat-value">${Math.round(getRate(GS.selectedBall,creature.element,creature.level,GS.level)*1000)/10}%</span></div>`;}},50);}
+
+// ===== ANIMATION LOOP MANAGER =====
+const animLoops={};
+function startCreatureAnimation(canvas,dna,scale){const key=canvas.id||'default';if(animLoops[key])cancelAnimationFrame(animLoops[key]);function loop(time){drawCreatureAnimated(canvas,dna,time,{scale:scale||1});animLoops[key]=requestAnimationFrame(loop);}animLoops[key]=requestAnimationFrame(loop);}
+function stopCreatureAnimation(canvasId){if(animLoops[canvasId]){cancelAnimationFrame(animLoops[canvasId]);delete animLoops[canvasId];}}
+
+function proceedToCapture(){openCaptureScreen(GS.currentTarget);}
+
+// ===== CAPTURE =====
+function openCaptureScreen(creature){if(!creature)return;const canvas=document.getElementById('capture-canvas');startCreatureAnimation(canvas,creature.dna,0.8);const el=EL[creature.element];document.getElementById('cap-creature-name').textContent=creature.name;document.getElementById('cap-info-row').innerHTML=`<div class="creature-badge" style="background:${el.bg};color:#fff">${el.icon} ${el.name}</div><div class="creature-badge" style="background:${rarityColor(creature.rarity)};color:#fff">Lv.${creature.level}</div>`;renderEscapeDots(creature);renderBallSelection(creature);document.getElementById('capture-content').style.display='';document.getElementById('capture-result-area').style.display='none';showScreen('screen-capture');}
+function renderEscapeDots(creature){const remaining=creature.escapeChances-creature.escapeAttemptsUsed;document.getElementById('escape-count').textContent=remaining;const dots=document.getElementById('escape-dots');dots.innerHTML='';for(let i=0;i<creature.escapeChances;i++)dots.innerHTML+=`<div class="escape-dot${i<creature.escapeAttemptsUsed?' used':''}"></div>`;}
+function renderBallSelection(creature){const c=document.getElementById('ball-selection');c.innerHTML='';for(const[k,v]of Object.entries(GS.inventory)){const el=EL[k],rate=getRate(k,creature.element,creature.level,GS.level),pct=Math.round(rate*1000)/10;c.innerHTML+=`<div class="ball ${GS.selectedBall===k?'selected':''}" onclick="selectBall('${k}','${creature.element}',${creature.level})" style="background:${el.bg};opacity:${v>0?1:.3}"><div class="ball-icon">${el.icon}</div><div>${el.name}</div><div class="ball-count">×${v} | ${pct}%</div></div>`;}updateRateDisplay(creature);}
+function selectBall(el,cEl,cLvl){GS.selectedBall=el;document.querySelectorAll('.ball').forEach(b=>b.classList.remove('selected'));event.currentTarget.classList.add('selected');updateRateDisplay({element:cEl,level:cLvl});}
+function updateRateDisplay(creature){const rate=getRate(GS.selectedBall,creature.element,creature.level,GS.level),pct=Math.round(rate*1000)/10,mod=getElemMod(GS.selectedBall,creature.element);let rel='';if(mod>1)rel=' <span style="color:#4caf50">(Khắc!)</span>';else if(mod<1)rel=' <span style="color:#f44336">(Sinh)</span>';document.getElementById('cap-rate-display').innerHTML=`Tỷ lệ: <strong>${pct}%</strong>${rel}`;}
+
+function doCapture(){const creature=GS.currentTarget;if(!creature)return;const ball=GS.selectedBall;
+  if(adminFlags.godCapture){if(!adminFlags.unlimitedItems&&GS.inventory[ball]<=0){showToast('Hết bảo bối!');return;}if(!adminFlags.unlimitedItems)GS.inventory[ball]--;showCaptureSuccess(creature,ball,'[ADMIN]');return;}
+  if(GS.inventory[ball]<=0){showToast('Hết bảo bối!');return;}GS.inventory[ball]--;
+  const success=getRate(ball,creature.element,creature.level,GS.level)>Math.random();
+  if(success){showCaptureSuccess(creature,ball,'');return;}
+  // FAIL — escape
+  creature.escapeAttemptsUsed++;const canvas=document.getElementById('capture-canvas');canvas.parentElement.classList.remove('creature-caught');canvas.parentElement.classList.add('creature-escape');
+  const remaining=creature.escapeChances-creature.escapeAttemptsUsed;
+  if(remaining<=0){const flees=Math.random()<0.3;if(flees){setTimeout(()=>{canvas.parentElement.classList.remove('creature-escape');canvas.parentElement.classList.add('creature-flee');setTimeout(()=>{document.getElementById('capture-content').style.display='none';document.getElementById('capture-result-area').style.display='';document.getElementById('result-icon').textContent='💨';document.getElementById('result-text').textContent=`${creature.name} biến mất!`;document.getElementById('result-text').style.color='#f44336';GS.failed++;GS.xp=Math.max(0,GS.xp+C.XP_FAIL);saveState();updateHUD();},1000);},800);}else{creature.escapeChances++;setTimeout(()=>{canvas.parentElement.classList.remove('creature-escape');renderEscapeDots(creature);showToast(`⚡ ${creature.name} còn ở đây!`);},800);}}else{setTimeout(()=>{canvas.parentElement.classList.remove('creature-escape');renderEscapeDots(creature);showToast(`💨 Còn ${remaining} lượt!`);},800);}}
+
+function showCaptureSuccess(creature,ball,tag){const canvas=document.getElementById('capture-canvas');canvas.parentElement.classList.remove('creature-escape');canvas.parentElement.classList.add('creature-caught');setTimeout(()=>{document.getElementById('capture-content').style.display='none';document.getElementById('capture-result-area').style.display='';document.getElementById('result-icon').textContent='🎉';document.getElementById('result-text').textContent=`${tag} Bắt được ${creature.name}!`;document.getElementById('result-text').style.color='#4caf50';GS.caught++;GS.xp+=C.XP_CAPTURE;GS.totalXp+=C.XP_CAPTURE;GS.collection.push({...creature,caughtAt:Date.now(),caughtWith:ball,id:Date.now()+Math.random()});GS.spawnedLocations.push({lat:creature.lat,lng:creature.lng,time:Date.now()});checkLevelUp();showToast(`+${C.XP_CAPTURE} XP!`);saveState();updateHUD();},600);}
+function afterCapture(){GS.currentTarget=null;stopCreatureAnimation('capture-canvas');showScreen('screen-ar');}
+function checkLevelUp(){const need=xpForLevel(GS.level);if(GS.xp>=need){GS.xp-=need;GS.level++;const r=getRealm(GS.level);showToast(`🎊 Level up! ${r.icon} ${r.name}!`,5000);checkLevelUp();}}
+
+// ===== EVOLUTION =====
+function updateEvolutionScreen(){const tabs=document.getElementById('evo-tabs');tabs.innerHTML=Object.entries(EL).map(([k,v])=>`<div class="evo-tab ${GS.evoSelectedElement===k?'active':''}" onclick="selectEvoElement('${k}')" style="border-color:${GS.evoSelectedElement===k?v.color:'rgba(255,255,255,.2)'}">${v.icon} ${v.name}</div>`).join('');const creatures=GS.collection.filter(c=>c.element===GS.evoSelectedElement);const grid=document.getElementById('evo-grid');if(!creatures.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:#aaa">Chưa có yêu thú hệ này</div>';updateEvoMergeBar();return;}grid.innerHTML=creatures.map(c=>{const sel=GS.evoSelectedIds.includes(c.id);return`<div class="evo-item${sel?' selected':''}" onclick="toggleEvoSelect('${c.id}')">${sel?'<div class="evo-check">✓</div>':''}<canvas id="evo-canvas-${c.id}" width="100" height="100"></canvas><div class="evo-item-name">${c.name}</div><div class="evo-item-level">Lv.${c.level} ${c.dna.evoLevel?'⭐'.repeat(Math.min(c.dna.evoLevel,3)):''}</div></div>`;}).join('');requestAnimationFrame(()=>{creatures.forEach(c=>{const cv=document.getElementById(`evo-canvas-${c.id}`);if(cv)drawCreatureAnimated(cv,c.dna,Date.now(),{scale:.5})})});updateEvoMergeBar();}
+function selectEvoElement(el){GS.evoSelectedElement=el;GS.evoSelectedIds=[];updateEvolutionScreen();}
+function toggleEvoSelect(id){const idx=GS.evoSelectedIds.indexOf(id);if(idx>=0)GS.evoSelectedIds.splice(idx,1);else GS.evoSelectedIds.push(id);updateEvolutionScreen();}
+function updateEvoMergeBar(){const count=GS.evoSelectedIds.length,creatures=GS.collection.filter(c=>GS.evoSelectedIds.includes(c.id)),avgEvo=creatures.length?Math.max(...creatures.map(c=>c.dna.evoLevel||0)):0,nextEvo=Math.min(avgEvo+1,C.EVO_MAX_LEVEL);document.getElementById('evo-selected-count').textContent=count<2?`Chọn 2+ (đã chọn: ${count})`:`Gộp ${count} → ⭐${nextEvo}`;document.getElementById('evo-rate-display').textContent=`Tỷ lệ: 30% | +${count}% progress`;document.getElementById('evo-level-display').textContent=`Evo: ${avgEvo} → ${nextEvo} (cần 100 con/level)`;document.getElementById('evo-progress-fill').style.width=Math.min(100,(count/C.EVO_CREATURES_PER_LEVEL)*100)+'%';document.getElementById('evo-btn').disabled=count<2;}
+
+function attemptEvolution(){const ids=GS.evoSelectedIds;if(ids.length<2){showToast('Cần ít nhất 2!');return;}const creatures=GS.collection.filter(c=>ids.includes(c.id));
+  const overlay=document.getElementById('evo-overlay');overlay.classList.add('active');
+  const canvas=document.getElementById('evo-anim-canvas');const avgEvo=Math.max(...creatures.map(c=>c.dna.evoLevel||0));const newEvo=Math.min(avgEvo+1,C.EVO_MAX_LEVEL);const element=GS.evoSelectedElement;
+  document.getElementById('evo-anim-text').textContent='🔮 Đang tiến hóa...';document.getElementById('evo-anim-sub').textContent=`${creatures.length} yêu thú hệ ${EL[element].name}`;
+  let frame=0;const iv=setInterval(()=>{frame++;const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);for(let i=0;i<30;i++){const angle=frame*.1+i*(Math.PI*2/30),r=50+frame*3;ctx.fillStyle=`hsla(${Math.random()*360},80%,70%,${Math.max(0,1-frame*.02)})`;ctx.beginPath();ctx.arc(canvas.width/2+Math.cos(angle)*r,canvas.height/2+Math.sin(angle)*r,Math.max(1,8-frame*.15),0,Math.PI*2);ctx.fill();}const glowR=30+frame*2,glow=ctx.createRadialGradient(canvas.width/2,canvas.height/2,0,canvas.width/2,canvas.height/2,glowR);glow.addColorStop(0,EL[element].primary+'80');glow.addColorStop(1,'transparent');ctx.fillStyle=glow;ctx.fillRect(0,0,canvas.width,canvas.height);if(frame>60){clearInterval(iv);
+    const success=adminFlags.godEvolution||Math.random()<C.EVO_SUCCESS_RATE;
+    if(success){const newDna=genDNA(element,creatures[0].rarity,newEvo),newName=genName(element),maxLvl=Math.max(...creatures.map(c=>c.level)),evolved={name:`⭐ ${newName}`,element,rarity:creatures[0].rarity,level:maxLvl+1,dna:newDna,emoji:EL[element].icon,caughtAt:Date.now(),id:Date.now()+Math.random(),isEvolved:true,evoFrom:creatures.length};GS.collection=GS.collection.filter(c=>!ids.includes(c.id));GS.collection.push(evolved);GS.evolved++;document.getElementById('evo-anim-text').textContent='✨ Thành công!';document.getElementById('evo-anim-sub').textContent=`${evolved.name} — ⭐${newEvo}`;drawCreatureAnimated(canvas,newDna,Date.now(),{scale:1});showToast(`🎊 ${evolved.name}!`,5000);}
+    else{document.getElementById('evo-anim-text').textContent='💥 Thất bại!';document.getElementById('evo-anim-sub').textContent='Yêu thú đã mất...';GS.collection=GS.collection.filter(c=>!ids.includes(c.id));showToast('💥 Tiến hóa thất bại!',4000);}
+    saveState();GS.evoSelectedIds=[];setTimeout(()=>{overlay.classList.remove('active');updateEvolutionScreen();},3000);}},50);}
+
+// ===== PHOTO MODE =====
+let photoStream=null,photoFacing='environment',isDragging=false,dragOffset={x:0,y:0};
+const POSES=['👋 Vẫy tay','🤗 Ôm','📸 Selfie','✌️ Peace','💪 Đáng yêu','🙏 Chào','🎭 Đổi kiểu','⭐ Random'];
+async function startPhotoMode(){showScreen('screen-photo');const creature=GS.collection.length>0?GS.collection[GS.collection.length-1]:generateCreature();GS.currentPhotoCreature=creature;try{if(photoStream)photoStream.getTracks().forEach(t=>t.stop());photoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:photoFacing,width:{ideal:1280},height:{ideal:720}},audio:false});document.getElementById('photo-camera').srcObject=photoStream;}catch(e){showToast('Không mở camera');}const overlay=document.getElementById('creature-overlay'),cv=document.getElementById('creature-overlay-img');startCreatureAnimation(cv,creature.dna,.7);overlay.style.left='50%';overlay.style.top='40%';overlay.style.transform='translate(-50%,-50%)';setupDrag(overlay);document.getElementById('pose-selector').innerHTML=POSES.map((p,i)=>`<button class="pose-btn${i===0?' active':''}" onclick="selectPose(${i})">${p}</button>`).join('');}
+function setupDrag(el){el.addEventListener('touchstart',e=>{isDragging=true;const t=e.touches[0],r=el.getBoundingClientRect();dragOffset.x=t.clientX-r.left;dragOffset.y=t.clientY-r.top;e.preventDefault();},{passive:false});document.addEventListener('touchmove',e=>{if(!isDragging)return;const t=e.touches[0];el.style.left=(t.clientX-dragOffset.x)+'px';el.style.top=(t.clientY-dragOffset.y)+'px';el.style.transform='none';e.preventDefault();},{passive:false});document.addEventListener('touchend',()=>{isDragging=false;});el.addEventListener('mousedown',e=>{isDragging=true;dragOffset.x=e.clientX-el.getBoundingClientRect().left;dragOffset.y=e.clientY-el.getBoundingClientRect().top;e.preventDefault();});document.addEventListener('mousemove',e=>{if(!isDragging)return;el.style.left=(e.clientX-dragOffset.x)+'px';el.style.top=(e.clientY-dragOffset.y)+'px';el.style.transform='none';});document.addEventListener('mouseup',()=>{isDragging=false;});}
+function selectPose(i){document.querySelectorAll('.pose-btn').forEach(b=>b.classList.remove('active'));event.currentTarget.classList.add('active');showToast(POSES[i]);}
+function resizeCreature(){const sz=document.getElementById('creature-size').value;document.getElementById('creature-overlay').style.width=sz+'px';document.getElementById('creature-overlay').style.height=sz+'px';const cv=document.getElementById('creature-overlay-img');cv.width=sz;cv.height=sz;if(GS.currentPhotoCreature)startCreatureAnimation(cv,GS.currentPhotoCreature.dna,sz/200);}
+function toggleFilter(){const filters=['none','sepia(0.3)','brightness(1.1) saturate(1.3)','contrast(1.2)','hue-rotate(20deg)','grayscale(0.5)'];GS.photoFilterIndex=(GS.photoFilterIndex+1)%filters.length;document.getElementById('photo-camera').style.filter=filters[GS.photoFilterIndex];showToast(`Bộ lọc: ${GS.photoFilterIndex===0?'Gốc':GS.photoFilterIndex}`);}
+async function switchCamera(){photoFacing=photoFacing==='environment'?'user':'environment';try{if(photoStream)photoStream.getTracks().forEach(t=>t.stop());photoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:photoFacing},audio:false});document.getElementById('photo-camera').srcObject=photoStream;showToast(photoFacing==='environment'?'Camera sau':'Camera trước');}catch(e){showToast('Lỗi');}}
+function toggleCreatureSelect(){if(!GS.collection.length){showToast('Chưa có yêu thú!');return;}const cur=GS.currentPhotoCreature,idx=GS.collection.findIndex(c=>c.name===cur.name),next=(idx+1)%GS.collection.length;GS.currentPhotoCreature=GS.collection[next];resizeCreature();showToast(GS.collection[next].name);}
+function exitPhotoMode(){if(photoStream){photoStream.getTracks().forEach(t=>t.stop());photoStream=null;}showScreen('screen-ar');}
+function takePhoto(){const video=document.getElementById('photo-camera'),creatureEl=document.getElementById('creature-overlay'),resultCanvas=document.getElementById('result-photo-canvas');const W=video.videoWidth||720,H=video.videoHeight||1280;resultCanvas.width=W;resultCanvas.height=H;const ctx=resultCanvas.getContext('2d');ctx.drawImage(video,0,0,W,H);const filters=['none','sepia(0.3)','brightness(1.1) saturate(1.3)','contrast(1.2)','hue-rotate(20deg)','grayscale(0.5)'];if(GS.photoFilterIndex>0){ctx.filter=filters[GS.photoFilterIndex];ctx.drawImage(video,0,0,W,H);ctx.filter='none';}const vr=video.getBoundingClientRect(),or_=creatureEl.getBoundingClientRect();const sx=W/vr.width,sy=H/vr.height;const cx=(or_.left-vr.left)*sx,cy=(or_.top-vr.top)*sy,cw=or_.width*sx,ch=or_.height*sy;const cc=document.getElementById('creature-overlay-img');ctx.drawImage(cc,cx,cy,cw,ch);ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,H-50,W,50);ctx.fillStyle='#fff';ctx.font='18px sans-serif';ctx.textAlign='right';const cr=GS.currentPhotoCreature;ctx.fillText(`🔮 ${cr.name} — Yêu Thú Săn Bắt`,W-15,H-18);showScreen('screen-photo-result');showToast('📸 Đã chụp!');}
+function savePhoto(){const cv=document.getElementById('result-photo-canvas'),link=document.createElement('a');link.download=`yeuthu-${Date.now()}.png`;link.href=cv.toDataURL('image/png');link.click();showToast('💾 Lưu!');}
+async function sharePhoto(){const cv=document.getElementById('result-photo-canvas'),cr=GS.currentPhotoCreature;try{const blob=await new Promise(r=>cv.toBlob(r,'image/png')),file=new File([blob],`yeuthu-${cr.name}.png`,{type:'image/png'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:`🔮 ${cr.name}`,text:`Bắt được ${cr.name}!`});showToast('📤 Chia sẻ!');}else{navigator.clipboard.writeText(`🔮 ${cr.name}`);showToast('📋 Copy!');}}catch(e){showToast('Lỗi: '+e.message);}}
+
+// ===== COLLECTION =====
+function updateCollection(){const c=document.getElementById('collection-grid');c.innerHTML='';if(!GS.collection.length){c.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#aaa">Chưa có yêu thú!</div>';return;}GS.collection.forEach((cre,i)=>{c.innerHTML+=`<div class="collection-item" onclick="viewCollectionItem(${i})"><canvas id="col-canvas-${i}" width="100" height="100"></canvas><div class="collection-item-name">${cre.emoji} ${cre.name}</div><div class="collection-item-level">Lv.${cre.level} ${cre.dna.evoLevel?'⭐'+cre.dna.evoLevel:''}</div></div>`;});requestAnimationFrame(()=>{GS.collection.forEach((cre,i)=>{const cv=document.getElementById(`col-canvas-${i}`);if(cv)drawCreatureAnimated(cv,cre.dna,Date.now(),{scale:.5})})});}
+function viewCollectionItem(i){GS.currentPhotoCreature=GS.collection[i];startPhotoMode();}
+
+// ===== REALM SYSTEM =====
+function ensureRealmState(){if(!GS.realms)GS.realms={};if(!GS.realmDailyCount)GS.realmDailyCount=0;if(!GS.realmDailyDate)GS.realmDailyDate=new Date().toDateString();if(!GS.currentRealmKey)GS.currentRealmKey=null;const today=new Date().toDateString();if(GS.realmDailyDate!==today){GS.realmDailyCount=0;GS.realmDailyDate=today;}}
+function getGridKey(lat,lng){const gs=0.00045;return `${Math.floor(lat/gs)}_${Math.floor(lng/gs)}`;}
+function getGridCenter(key){const[gx,gy]=key.split('_').map(Number),gs=0.00045;return{lat:gx*gs+gs/2,lng:gy*gs+gs/2};}
+function getRealmForGrid(key){ensureRealmState();if(!GS.realms[key]){const type=genRealmType();GS.realms[key]={id:key,name:genRealmName(),type,items:[],itemsCollected:0,maxItems:REALM_CONFIG.MAX_ITEMS_PER_TIER,tier:1,maxTier:REALM_CONFIG.MAX_TIERS,createdAt:Date.now(),exhausted:false,cooldownUntil:0,enteredByPlayer:false};}return GS.realms[key];}
+function genRealmItems(realm){if(realm.items.length>0||realm.enteredByPlayer)return;const patterns=[['creature','creature'],['treasure','treasure'],['creature','treasure'],['creature','rare_treasure']];const pattern=patterns[Math.floor(Math.random()*patterns.length)];realm.items=pattern.map(typeId=>{if(typeId==='creature'){const element=realm.type.element,level=Math.max(1,GS.level+Math.floor(Math.random()*6)-2),dna=genDNA(element,'common',0),name=genName(element);return{type:'creature',data:{name,element,level,dna,emoji:EL[element].icon,rarity:'common',escapeChances:1+Math.floor(Math.random()*2),escapeAttemptsUsed:0},collected:false,icon:'🐾'};}else{const icon=typeId==='rare_treasure'?'👑':'💎';return{type:typeId,data:{name:typeId==='rare_treasure'?'Bảo bối hiếm':'Bảo bối',desc:'+XP + Balls',effect:'add_xp',value:50},collected:false,icon};}});realm.enteredByPlayer=true;}
+function checkRealmProximity(){ensureRealmState();const key=getGridKey(playerLat,playerLng),center=getGridCenter(key);if(GS.currentRealmKey!==key){const d=dist(playerLat,playerLng,center.lat,center.lng);if(d<=REALM_CONFIG.RADIUS){GS.currentRealmKey=key;if(GS.realmDailyCount>=REALM_CONFIG.MAX_REALMS_PER_DAY&&!adminFlags.unlimitedRealms){showToast(`⛔ Hết ${REALM_CONFIG.MAX_REALMS_PER_DAY} bí cảnh hôm nay!`);return;}const realm=getRealmForGrid(key);if(realm.cooldownUntil>Date.now()){showToast(`⏳ Cooldown ${Math.ceil((realm.cooldownUntil-Date.now())/60000)} phút`);return;}if(realm.exhausted){showRealmExhausted(realm);return;}genRealmItems(realm);GS.realmDailyCount++;showRealmNotification(realm);}}updateRealmHUD();}
+function showRealmNotification(realm){const type=realm.type;document.getElementById('notif-title').innerHTML=`🏰 <strong>${realm.name}</strong>`;document.getElementById('notif-desc').innerHTML=`${type.icon} ${type.desc} | Tầng ${realm.tier}/${realm.maxTier} | Items: ${realm.itemsCollected}/${realm.maxItems} | Hôm nay: ${GS.realmDailyCount}/${REALM_CONFIG.MAX_REALMS_PER_DAY}`;document.getElementById('notification').classList.add('show');showToast(`🏰 ${realm.name}!`);saveState();}
+function updateRealmHUD(){ensureRealmState();const key=GS.currentRealmKey;if(!key||!GS.realms[key]){document.getElementById('realm-name').textContent='🔮 Đi tìm bí cảnh...';document.getElementById('realm-tier').textContent='';document.getElementById('realm-items').innerHTML='';document.getElementById('realm-daily').textContent=`Hôm nay: ${GS.realmDailyCount}/${REALM_CONFIG.MAX_REALMS_PER_DAY}`;return;}const realm=GS.realms[key];document.getElementById('realm-name').textContent=`${realm.type.icon} ${realm.name}`;document.getElementById('realm-tier').textContent=`Tầng ${realm.tier}/${realm.maxTier} — ${realm.type.name}`;document.getElementById('realm-daily').textContent=`Hôm nay: ${GS.realmDailyCount}/${REALM_CONFIG.MAX_REALMS_PER_DAY}`;const container=document.getElementById('realm-items');container.innerHTML='';for(let i=0;i<realm.maxItems;i++){const item=realm.items[i];if(item&&item.collected)container.innerHTML+=`<div class="realm-item-slot filled">${item.icon}</div>`;else if(item)container.innerHTML+=`<div class="realm-item-slot">❓</div>`;else container.innerHTML+=`<div class="realm-item-slot locked">🔒</div>`;}}
+function showRealmExhausted(realm){document.getElementById('realm-exhausted-title').innerHTML=`⚠️ <strong>${realm.name}</strong> cạn kiệt!`;document.getElementById('realm-exhausted-desc').innerHTML=`Tầng ${realm.tier} hết items. Đi ${REALM_CONFIG.EXIT_RADIUS}m ra ngoài hoặc chờ 1h.`;document.getElementById('realm-exhausted').classList.add('show');}
+function dismissRealmExhausted(){document.getElementById('realm-exhausted').classList.remove('show');}
+function enterNextTier(){ensureRealmState();const key=GS.currentRealmKey;if(!key||!GS.realms[key])return;const realm=GS.realms[key];if(realm.tier>=realm.maxTier){showToast('⛔ Đã tầng cao nhất!');dismissRealmExhausted();return;}const center=getGridCenter(key),d=dist(playerLat,playerLng,center.lat,center.lng);if(d<REALM_CONFIG.EXIT_RADIUS){dismissRealmExhausted();showTierTransition(realm.tier+1,`Đi ${Math.round(REALM_CONFIG.EXIT_RADIUS-d)}m ra ngoài hoặc chờ 1h để vào tầng ${realm.tier+1}.`);return;}realm.tier++;realm.items=[];realm.itemsCollected=0;realm.exhausted=false;realm.enteredByPlayer=false;genRealmItems(realm);dismissRealmExhausted();showTierTransition(realm.tier,`Tầng ${realm.tier} — ${realm.name}!`);saveState();updateRealmHUD();}
+function showTierTransition(tier,msg){const overlay=document.getElementById('tier-transition');document.getElementById('tier-trans-text').textContent=`🌀 Tầng ${tier}`;document.getElementById('tier-trans-sub').textContent=msg;overlay.classList.add('active');setTimeout(()=>overlay.classList.remove('active'),4000);}
+function closeRealmInfo(){document.getElementById('realm-info-modal').classList.remove('active');}
+
+// ===== AR OVERLAY =====
+function renderAROverlay(){const canvas=document.getElementById('ar-canvas'),video=document.getElementById('camera-feed');if(!canvas.width&&video.videoWidth){canvas.width=video.videoWidth;canvas.height=video.videoHeight;}if(canvas.width){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);const target=GS.currentTarget;if(target&&navInterval){const d=dist(playerLat,playerLng,target.lat,target.lng);if(d>C.CAPTURE_RANGE){const pulse=Math.sin(Date.now()*.003)*.3+.7;ctx.save();ctx.globalAlpha=pulse;ctx.font='48px sans-serif';ctx.textAlign='center';ctx.fillText('🔮',canvas.width/2,canvas.height/2);ctx.font='bold 22px sans-serif';ctx.fillStyle='#fff';ctx.fillText(`${Math.round(d)}m`,canvas.width/2,canvas.height/2+45);ctx.restore();}}}requestAnimationFrame(renderAROverlay);}
+
+// ===== TEST CREDENTIALS HINT =====
+const loginBox=document.querySelector('.login-box');if(loginBox){const hint=document.createElement('div');hint.className='test-credentials';hint.innerHTML='<strong>🔧 Test:</strong> admin@test.com/admin123 | tester@test.com/tester123';loginBox.appendChild(hint);}
+
+// ===== INIT =====
+loadState();renderAROverlay();
+setInterval(()=>{checkRealmProximity();},5000);
+if(GS.user&&GS.user.isAdmin){document.getElementById('admin-badge').style.display='';}
+console.log('🔮 Yêu Thú Săn Bắt v3 — Full Build');
+</script>
+</body>
+</html>
