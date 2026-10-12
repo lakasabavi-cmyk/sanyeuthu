@@ -1,7 +1,8 @@
 /* ============================================================
    MODULE: ui.js
    Chức năng: UI + Auth + Search + Fullscreen + Init
-   ★ ĐÃ BỎ "Truy tìm" — THAY BẰNG KÍNH LÚP 🔍 ★
+   ★ ĐÃ BỎ manual turn + notification "Truy tìm" ★
+   ★ THAY BẰNG KÍNH LÚP 🔍 TRÊN SIDE NAV ★
    ============================================================ */
 
 /* ===== FULLSCREEN ===== */
@@ -15,7 +16,7 @@ function enterFullscreen(){
   else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
   else if(el.mozRequestFullScreen)el.mozRequestFullScreen();
   else if(el.msRequestFullscreen)el.msRequestFullscreen();
-  if(navigator.userAgent.match(/iPhone|iPad/i)){window.scrollTo(0,1);setTimeout(function(){window.scrollTo(0,0);},100);}
+  if(/iPhone|iPad/i.test(navigator.userAgent)){window.scrollTo(0,1);setTimeout(function(){window.scrollTo(0,0);},100);}
   updateFullscreenBtn();
 }
 function exitFullscreen(){
@@ -28,16 +29,14 @@ function exitFullscreen(){
 function updateFullscreenBtn(){
   var btn=document.getElementById('fullscreen-btn');
   if(!btn)return;
-  if(isFullscreen()){btn.classList.add('fullscreen');}else{btn.classList.remove('fullscreen');}
+  btn.classList.toggle('fullscreen',isFullscreen());
 }
 ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange'].forEach(function(e){document.addEventListener(e,updateFullscreenBtn);});
-
 function hideAddressBar(){
   if(!window.pageYOffset){setTimeout(function(){window.scrollTo(0,1);},300);setTimeout(function(){window.scrollTo(0,0);},400);}
 }
 window.addEventListener('orientationchange',function(){setTimeout(hideAddressBar,300);});
 window.addEventListener('load',hideAddressBar);
-
 function autoFullscreenOnMobile(){
   if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
     try{enterFullscreen();}catch(e){}
@@ -75,7 +74,7 @@ function updateProfile(){
 /* ===== AUTH ===== */
 function toggleRegister(){
   var l=document.getElementById('login-form'),r=document.getElementById('register-form');
-  if(l.style.display==='none'){l.style.display='';r.style.display='none';}
+  if(l.style.display==='none'){l.style.display='';r.style.display='';}
   else{l.style.display='none';r.style.display='';}
 }
 function handleLogin(){
@@ -97,49 +96,31 @@ function handleGoogleLogin(){
 }
 
 /* ================================================================
-   ★★★ SEARCH — KÍNH LÚP 🔍 — THAY CHO "Truy tìm" ★★★
+   ★★★ SEARCH — KÍNH LÚP 🔍 ★★★
    ================================================================ */
 var searchActive=false;
 
 function startSearch(){
-  if(searchActive){
-    showToast('🔍 Đang tìm...');
-    return;
-  }
+  if(searchActive){showToast('🔍 Đang tìm...');return;}
   searchActive=true;
-  var btn=document.getElementById('btn-search');
-  btn.classList.add('active');
-
+  document.getElementById('btn-search').classList.add('active');
   showToast('🔍 Đang quét yêu thú xung quanh...',2000);
-
-  // Đợi 2s → tìm thấy yêu thú
-  setTimeout(function(){
-    triggerDetection();
-  },2000);
+  setTimeout(function(){triggerDetection();},2000);
 }
 
 function triggerDetection(){
   var creature=generateCreature();
   GS.currentTarget=creature;saveState();
-
-  // ★ Hiển thị thông báo TÌM THẤY (không phải "Truy tìm") ★
   var el=ELEMENTS[creature.element];
   var realm=getRealm(creature.level);
   document.getElementById('notif-found-icon').textContent=creature.emoji;
   document.getElementById('notif-found-name').innerHTML='Tìm thấy <strong>'+creature.name+'</strong>';
   document.getElementById('notif-found-detail').innerHTML=el.icon+' '+el.name+' | Lv.'+creature.level+' | '+realm.icon+' '+realm.name;
   document.getElementById('notif-found').classList.add('show');
-
   document.getElementById('ar-distance').style.display='';
   renderBalls();
-
-  // ★ Tự động ẩn thông báo sau 5s ★
   setTimeout(function(){closeNotifFound();},5000);
-
-  // ★ Nếu chưa bật la bàn → nhắc ★
-  if(!compassActive){
-    showToast('👉 Bấm 🧭 La bàn để tìm đường!',5000);
-  }
+  if(!compassActive){showToast('👉 Bấm 🧭 La bàn để tìm đường!',5000);}
 }
 
 function closeNotifFound(){
@@ -151,5 +132,4 @@ loadState();
 renderAR();
 setTimeout(hideAddressBar,200);
 setTimeout(hideAddressBar,1000);
-
-console.log('🔮 Yêu Thú Săn Bắt — Search Icon Edition');
+console.log('🔮 Yêu Thú Săn Bắt — Fixed Layout');
