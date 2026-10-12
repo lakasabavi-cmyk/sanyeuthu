@@ -13,7 +13,7 @@
 <body>
 <div id="toast" class="toast"></div>
 
-<!-- ★ FULLSCREEN TOGGLE ★ -->
+<!-- FULLSCREEN -->
 <button class="fullscreen-btn" id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
 
 <!-- ===== LOGIN ===== -->
@@ -44,6 +44,7 @@
   <video id="camera-feed" autoplay playsinline muted></video>
   <canvas id="ar-canvas"></canvas>
 
+  <!-- Crosshair -->
   <div class="crosshair" id="crosshair">
     <div class="crosshair-ring" id="crosshair-ring">
       <div class="crosshair-h"></div><div class="crosshair-v"></div><div class="crosshair-dot"></div>
@@ -51,37 +52,65 @@
     <div class="crosshair-pulse" id="crosshair-pulse"></div>
   </div>
 
-  <div class="hud-top safe-top">
+  <!-- ★ TOP HUD — chỉ info + compass + exit ★ -->
+  <div class="hud-top">
     <div class="hud-info">
       <div class="hud-level" id="hud-level">Level 1</div>
       <div class="hud-realm" id="hud-realm">🌀 Luyện Khí</div>
       <div class="hud-xp-bar"><div class="hud-xp-fill" id="hud-xp-fill" style="width:0%"></div></div>
-      <div class="hud-compass-status" id="compass-status">🧭 Chưa bật</div>
+      <div class="hud-compass-status" id="compass-status">🧭 La bàn chưa bật</div>
     </div>
     <div class="hud-top-right">
-      <button class="btn-compass" id="btn-compass" onclick="activateCompass()">🧭 Bật la bàn</button>
+      <button class="btn-compass" id="btn-compass" onclick="activateCompass()">🧭 La bàn</button>
       <button class="ar-exit" onclick="showScreen('screen-login')">✕</button>
     </div>
   </div>
 
-  <div id="notification" class="notification">
-    <div class="notification-title" id="notif-title"></div>
-    <div class="notification-desc" id="notif-desc"></div>
-    <button class="notification-btn" onclick="acceptHunt()">⚔️ Truy tìm</button>
+  <!-- ★ KHÔNG CÒN NOTIFICATION "Truy tìm" ★ -->
+  <!-- Notification chỉ dùng khi TÌM THẤY yêu thú -->
+  <div id="notif-found" class="notif-found">
+    <div class="notif-found-icon" id="notif-found-icon">🐾</div>
+    <div class="notif-found-info">
+      <div class="notif-found-name" id="notif-found-name"></div>
+      <div class="notif-found-detail" id="notif-found-detail"></div>
+    </div>
+    <button class="notif-found-btn" onclick="closeNotifFound()">✕</button>
   </div>
 
+  <!-- Distance -->
   <div class="ar-distance" id="ar-distance" style="display:none">
     <div class="ar-dist-val" id="ar-dist-val">~0m</div>
     <div class="ar-dist-hint" id="ar-dist-hint">Xoay camera</div>
   </div>
 
+  <!-- Manual turn fallback -->
   <div class="manual-turn" id="manual-turn">
     <button onclick="manualTurnLeft()">◀</button>
     <button onclick="manualTurnRight()">▶</button>
   </div>
 
+  <!-- ★ SIDE NAV — LÚN HIỂN THỊ, KHÔNG BỊ CHE ★ -->
+  <div class="side-nav">
+    <button class="side-nav-btn" onclick="showScreen('screen-profile')" title="Hồ sơ">
+      <span class="side-nav-icon">👤</span>
+      <span class="side-nav-label">Hồ sơ</span>
+    </button>
+    <button class="side-nav-btn" onclick="showScreen('screen-inventory')" title="Túi">
+      <span class="side-nav-icon">🎒</span>
+      <span class="side-nav-label">Túi</span>
+    </button>
+    <!-- ★ KÍNH LÚP — Tìm yêu thú ★ -->
+    <button class="side-nav-btn search-btn" id="btn-search" onclick="startSearch()" title="Tìm yêu thú">
+      <span class="side-nav-icon">🔍</span>
+      <span class="side-nav-label">Tìm</span>
+    </button>
+  </div>
+
+  <!-- Balls -->
   <div class="ar-balls-row" id="ar-balls-row"></div>
-  <div class="ar-bottom safe-bottom">
+
+  <!-- ★ BOTTOM — Rate + Capture, ĐẨY LÊN TRÁNH CHROME TOOLBAR ★ -->
+  <div class="ar-bottom">
     <div class="ar-rate-row">
       <div class="ar-rate-label">Tỷ lệ</div>
       <div class="ar-rate-track"><div class="ar-rate-fill" id="ar-rate-fill" style="width:0%;background:#f44336"></div></div>
