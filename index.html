@@ -333,15 +333,20 @@ function placeCreature(c){
   c.lat=playerLat+dLat;c.lng=playerLng+dLng;
 }
 function generateCreature(){
-  var pL=GS.level;
-  var cands=CREATURE_DB.filter(function(c){return c.minLvl<=pL+5&&c.maxLvl>=pL-2;});
-  var base=cands[Math.floor(Math.random()*cands.length)]||CREATURE_DB[0];
+  var pL=gameState.level;
+  var candidates=CREATURE_DB.filter(function(c){return c.minLvl<=pL+5&&c.maxLvl>=pL-2;});
+  var base=candidates[Math.floor(Math.random()*candidates.length)]||CREATURE_DB[0];
   var cL=Math.max(base.minLvl,Math.min(base.maxLvl,pL+Math.floor(Math.random()*8)-3));
-  var creature=Object.assign({},base,{level:cL,lat:0,lng:0,
+  var angle=Math.random()*360;
+  var dist=2+Math.random()*3; // ★ 2-5m trong phòng ★
+  var dLat=(dist*Math.cos(angle*Math.PI/180))/111320;
+  var dLng=(dist*Math.sin(angle*Math.PI/180))/(111320*Math.cos(playerLat*Math.PI/180));
+  return Object.assign({},base,{
+    level:cL,lat:playerLat+dLat,lng:playerLng+dLng,
+    spawnTime:Date.now(),
     escapeChances:CONFIG.ESCAPE_MIN+Math.floor(Math.random()*(CONFIG.ESCAPE_MAX-CONFIG.ESCAPE_MIN+1)),
-    escapeAttemptsUsed:0});
-  placeCreature(creature);
-  return creature;
+    escapeAttemptsUsed:0
+  });
 }
 
 // ==================== DETECTION ====================
