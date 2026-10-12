@@ -9,8 +9,6 @@
 body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hidden;height:100vh;width:100vw}
 .screen{display:none;position:absolute;top:0;left:0;width:100%;height:100%;overflow-y:auto}
 .screen.active{display:flex;flex-direction:column}
-
-/* LOGIN */
 #screen-login{justify-content:center;align-items:center;background:linear-gradient(135deg,#0a0a2e,#1a0a3e,#0a2a4e);padding:20px}
 .login-\boxed{width:100%;max-width:350px;background:rgba(255,255,255,.08);border-radius:20px;padding:30px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1)}
 .login-box h1{text-align:center;font-size:28px;margin-bottom:5px}
@@ -21,20 +19,16 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .btn-primary{background:linear-gradient(135deg,#7c4dff,#448aff);color:#fff}
 .btn-primary:active{transform:scale(.97)}
 .btn-google{background:#fff;color:#333;display:flex;align-items:center;justify-content:center;gap:10px}
-.divider{text-align:center;margin:20px 0;color:#888;font-size:13px;position:relative}
-.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:rgba(255,255,255,.15)}
-.divider::before{left:0}.divider::after{right:0}
+.divider{text-align:center;margin:20px 0;color:#888;font-size:13px}
 .toggle-text{text-align:center;margin-top:15px;font-size:13px;color:#aaa}
 .toggle-text a{color:#7c4dff;cursor:pointer;text-decoration:none}
 
-/* AR SCREEN */
 #screen-ar{background:#000;position:relative}
 #camera-feed{width:100%;height:100%;object-fit:cover;position:absolute}
 #ar-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 
-/* ★ CROSSHAIR — DẤU + TÂM NGẮM ★ */
 .crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:15;pointer-events:none}
-.crosshair-ring{width:90px;height:90px;border:2.5px solid rgba(255,255,255,.45);border-radius:50%;position:relative;transition:border-color .3s,box-shadow .3s}
+.crosshair-ring{width:90px;height:90px;border:2.5px solid rgba(255,255,255,.45);border-radius:50%;position:relative;transition:all .3s}
 .crosshair-ring.locked{border-color:#4caf50;box-shadow:0 0 30px rgba(76,175,80,.5)}
 .crosshair-ring.close{border-color:#ffc107}
 .crosshair-h{position:absolute;top:50%;left:-20px;right:-20px;height:1.5px;background:rgba(255,255,255,.5)}
@@ -43,32 +37,27 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .crosshair-pulse{position:absolute;top:50%;left:50%;width:120px;height:120px;border:2px solid rgba(76,175,80,.35);border-radius:50%;transform:translate(-50%,-50%);animation:crossPulse 1.5s infinite;display:none}
 @keyframes crossPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5}50%{transform:translate(-50%,-50%) scale(1.35);opacity:0}}
 
-/* Top HUD */
 .hud-top{position:absolute;top:0;left:0;right:0;padding:15px;display:flex;justify-content:space-between;align-items:flex-start;z-index:20}
 .hud-info{background:rgba(0,0,0,.65);border-radius:12px;padding:10px 15px;backdrop-filter:blur(10px)}
 .hud-level{font-size:12px;color:#aaa}.hud-realm{font-size:18px;font-weight:700;color:#ffd700}
 .hud-xp-bar{width:120px;height:6px;background:rgba(255,255,255,.2);border-radius:3px;margin-top:5px;overflow:hidden}
 .hud-xp-fill{height:100%;background:linear-gradient(90deg,#7c4dff,#448aff);border-radius:3px;transition:width .5s}
-.hud-compass{background:rgba(0,0,0,.6);border-radius:50%;width:55px;height:55px;display:flex;align-items:center;justify-content:center;font-size:22px;backdrop-filter:blur(10px);transition:transform .3s}
+.hud-compass{background:rgba(0,0,0,.6);border-radius:50%;width:55px;height:55px;display:flex;align-items:center;justify-content:center;font-size:22px;backdrop-filter:blur(10px);transition:transform .1s}
 
-/* Distance */
 .ar-distance{position:absolute;bottom:195px;left:50%;transform:translateX(-50%);z-index:15;background:rgba(0,0,0,.7);border-radius:12px;padding:8px 20px;text-align:center;backdrop-filter:blur(10px)}
 .ar-dist-val{font-size:18px;font-weight:700;color:#4fc3f7}
 .ar-dist-hint{font-size:11px;color:#aaa;margin-top:2px}
 
-/* Balls */
 .ar-balls-row{position:absolute;bottom:120px;left:10px;right:10px;z-index:15;display:flex;gap:6px;justify-content:center;overflow-x:auto;padding:5px}
 .ar-ball{width:56px;height:72px;border-radius:12px;border:2.5px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;font-size:10px;font-weight:600;position:relative;flex-shrink:0}
 .ar-ball.selected{border-color:#fff;transform:scale(1.1);box-shadow:0 0 15px rgba(255,255,255,.4)}
 .ar-ball.advantage{border-color:rgba(76,175,80,.6)}
 .ar-ball.disadvantage{border-color:rgba(244,67,54,.4);opacity:.6}
-.ar-ball-icon{font-size:20px}.ar-ball-name{font-size:9px;margin-top:1px}
-.ar-ball-rate{font-size:10px;font-weight:700}.ar-ball-count{font-size:8px;opacity:.7}
+.ar-ball-icon{font-size:20px}.ar-ball-name{font-size:9px}.ar-ball-rate{font-size:10px;font-weight:700}.ar-ball-count{font-size:8px;opacity:.7}
 .ar-ball-rel{font-size:7px;position:absolute;top:-10px;left:50%;transform:translateX(-50%);padding:1px 5px;border-radius:6px;font-weight:700;white-space:nowrap}
 .ar-ball-rel.khac{background:rgba(76,175,80,.8);color:#fff}
 .ar-ball-rel.sinh{background:rgba(244,67,54,.8);color:#fff}
 
-/* Rate + Capture */
 .ar-bottom{position:absolute;bottom:15px;left:0;right:0;z-index:15;display:flex;flex-direction:column;align-items:center;gap:8px}
 .ar-rate-row{display:flex;align-items:center;gap:10px;width:85%}
 .ar-rate-label{font-size:12px;color:#aaa;white-space:nowrap}
@@ -79,7 +68,6 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .ar-capture-btn:active{transform:scale(.85)}
 .ar-capture-btn.disabled{opacity:.15;cursor:not-allowed;box-shadow:none}
 
-/* Result modal */
 .result-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);z-index:400;display:none;justify-content:center;align-items:center;flex-direction:column;padding:30px}
 .result-modal.active{display:flex}
 .result-icon{font-size:80px;margin-bottom:20px}
@@ -89,23 +77,19 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .result-btn.ok{background:linear-gradient(135deg,#7c4dff,#448aff)}
 .result-btn.fail{background:linear-gradient(135deg,#f44336,#e57373)}
 
-/* Notification */
-.notification{position:absolute;top:85px;left:15px;right:15px;background:linear-gradient(135deg,rgba(124,77,255,.9),rgba(68,138,255,.9));border-radius:15px;padding:15px 20px;z-index:25;transform:translateY(-130%);transition:transform .5s cubic-bezier(.175,.885,.32,1.275)}
+.notification{position:absolute;top:85px;left:15px;right:15px;background:linear-gradient(135deg,rgba(124,77,255,.9),rgba(68,138,255,.9));border-radius:15px;padding:15px 20px;z-index:25;transform:translateY(-130%);transition:transform .5s}
 .notification.show{transform:translateY(0)}
 .notification-title{font-size:14px;font-weight:600;margin-bottom:5px}
 .notification-desc{font-size:12px;opacity:.9}
 .notification-btn{margin-top:10px;padding:8px 20px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:8px;color:#fff;font-size:13px;cursor:pointer}
 
-/* Bottom nav buttons */
 .hud-nav{position:absolute;bottom:200px;left:15px;z-index:15;display:flex;flex-direction:column;gap:8px}
 .hud-nav-btn{width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(0,0,0,.5);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(10px)}
 .hud-nav-btn:active{transform:scale(.9)}
 
-/* Toast */
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:1000;transition:transform .4s;backdrop-filter:blur(10px)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-/* Profile & Inventory */
 #screen-profile,#screen-inventory{background:linear-gradient(135deg,#0a0a2e,#1a0a3e);padding:20px}
 .profile-header{text-align:center;padding:20px 0}
 .profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#7c4dff,#448aff);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 15px}
@@ -125,17 +109,16 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 <body>
 <div id="toast" class="toast"></div>
 
-<!-- ===== LOGIN ===== -->
 <div id="screen-login" class="screen active">
   <div class="login-box">
     <h1>🔮 Yêu Thú Săn Bắt</h1>
-    <div class="subtitle">Thu phục yêu thú ngũ hành — Tu tiên thành tiên</div>
+    <div class="subtitle">Thu phục yêu thú ngũ hành</div>
     <div id="login-form">
       <div class="input-group"><label>Email</label><input type="email" id="input-email" placeholder="email@example.com"></div>
       <div class="input-group"><label>Mật khẩu</label><input type="password" id="input-password" placeholder="••••••••"></div>
       <button class="btn btn-primary" onclick="handleLogin()">Đăng nhập</button>
       <div class="divider">hoặc</div>
-      <button class="btn btn-google" onclick="handleGoogleLogin()">🔵 Đăng nhập với Google</button>
+      <button class="btn btn-google" onclick="handleGoogleLogin()">🔵 Google</button>
       <div class="toggle-text">Chưa có tài khoản? <a onclick="toggleRegister()">Đăng ký</a></div>
     </div>
     <div id="register-form" style="display:none">
@@ -148,12 +131,9 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   </div>
 </div>
 
-<!-- ===== AR SCREEN — MỌI THỨ TRÊN ĐÂY ===== -->
 <div id="screen-ar" class="screen">
   <video id="camera-feed" autoplay playsinline muted></video>
   <canvas id="ar-canvas"></canvas>
-
-  <!-- ★ DẤU + TÂM NGẮM — LUÔN HIỂN THỊ ★ -->
   <div class="crosshair" id="crosshair">
     <div class="crosshair-ring" id="crosshair-ring">
       <div class="crosshair-h"></div>
@@ -162,8 +142,6 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
     </div>
     <div class="crosshair-pulse" id="crosshair-pulse"></div>
   </div>
-
-  <!-- Top HUD -->
   <div class="hud-top">
     <div class="hud-info">
       <div class="hud-level" id="hud-level">Level 1</div>
@@ -172,29 +150,21 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
     </div>
     <div class="hud-compass" id="hud-compass">🧭</div>
   </div>
-
-  <!-- Notification -->
   <div id="notification" class="notification">
     <div class="notification-title" id="notif-title"></div>
     <div class="notification-desc" id="notif-desc"></div>
-    <button class="notification-btn" onclick="acceptHunt()">⚔️ Truy tìm ngay</button>
+    <button class="notification-btn" onclick="acceptHunt()">⚔️ Truy tìm</button>
   </div>
-
-  <!-- Distance -->
   <div class="ar-distance" id="ar-distance" style="display:none">
     <div class="ar-dist-val" id="ar-dist-val">~0m</div>
     <div class="ar-dist-hint" id="ar-dist-hint">Xoay camera theo mũi tên</div>
   </div>
-
-  <!-- Side nav buttons -->
   <div class="hud-nav">
     <div class="hud-nav-btn" onclick="showScreen('screen-profile')">👤</div>
     <div class="hud-nav-btn" onclick="showScreen('screen-inventory')">🎒</div>
     <div class="hud-nav-btn" onclick="triggerDetection()">🔍</div>
     <div class="hud-nav-btn" onclick="showScreen('screen-login')">🚪</div>
   </div>
-
-  <!-- ★ BALLS + RATE + CAPTURE — SÁT NHAU ★ -->
   <div class="ar-balls-row" id="ar-balls-row"></div>
   <div class="ar-bottom">
     <div class="ar-rate-row">
@@ -206,7 +176,6 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   </div>
 </div>
 
-<!-- ===== RESULT MODAL ===== -->
 <div class="result-modal" id="result-modal">
   <div class="result-icon" id="result-icon"></div>
   <div class="result-title" id="result-title"></div>
@@ -214,7 +183,6 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   <button class="result-btn ok" id="result-btn" onclick="closeResult()">Tiếp tục</button>
 </div>
 
-<!-- ===== PROFILE ===== -->
 <div id="screen-profile" class="screen">
   <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
   <div class="profile-header"><div class="profile-avatar">🧙</div><div class="profile-realm" id="profile-realm"></div><div class="profile-level" id="profile-level"></div></div>
@@ -226,7 +194,6 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   </div>
 </div>
 
-<!-- ===== INVENTORY ===== -->
 <div id="screen-inventory" class="screen">
   <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
   <div class="inv-title">🎒 Túi Bảo Bối</div>
@@ -235,16 +202,9 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 
 <script>
 // ==================== CONFIG ====================
-var CONFIG={
-  SPAWN_MIN:2, SPAWN_MAX:5,
-  CAPTURE_RANGE:5,
-  CROSSHAIR_LOCK_PX:50,
-  FOV:60,
-  XP_CAPTURE:100, XP_FAIL:-30,
-  ESCAPE_MIN:1, ESCAPE_MAX:3
-};
+var CONFIG={SPAWN_MIN:2,SPAWN_MAX:5,CAPTURE_RANGE:5,CROSSHAIR_LOCK_PX:50,FOV:90,XP_CAPTURE:100,XP_FAIL:-30,ESCAPE_MIN:1,ESCAPE_MAX:3};
 
-// ==================== NGŨ HÀNH ====================
+// ==================== ELEMENTS ====================
 var ELEMENTS={
   KIM:{name:'Kim',icon:'⚔️',color:'#FFD700',bg:'linear-gradient(135deg,#B8860B,#FFD700)',primary:'#FFD700',glow:'#FFF8DC'},
   MOC:{name:'Mộc',icon:'🌿',color:'#228B22',bg:'linear-gradient(135deg,#006400,#228B22)',primary:'#228B22',glow:'#90EE90'},
@@ -254,13 +214,10 @@ var ELEMENTS={
 };
 var SINH={KIM:'THUY',THUY:'MOC',MOC:'HOA',HOA:'THO',THO:'KIM'};
 var KHAC={KIM:'MOC',MOC:'THO',THO:'THUY',THUY:'HOA',HOA:'KIM'};
-
-// ==================== TU TIÊN ====================
 var REALMS=[{name:'Luyện Khí',min:1,icon:'🌀'},{name:'Trúc Cơ',min:11,icon:'🏗️'},{name:'Kết Đan',min:21,icon:'💎'},{name:'Nguyên Anh',min:31,icon:'👶'},{name:'Hóa Thần',min:41,icon:'⚡'},{name:'Luyện Hư',min:51,icon:'🌌'},{name:'Hợp Thể',min:61,icon:'☯️'},{name:'Đại Thừa',min:71,icon:'🏔️'},{name:'Độ Kiếp',min:81,icon:'🌩️'},{name:'Tiên Nhân',min:91,icon:'✨'}];
 function getRealm(l){for(var i=REALMS.length-1;i>=0;i--)if(l>=REALMS[i].min)return REALMS[i];return REALMS[0];}
 function xpForLevel(l){return Math.floor(100*Math.pow(1.15,l-1));}
 
-// ==================== YÊU THÚ DB ====================
 var CREATURE_DB=[
   {id:1,name:'Kim Ưng',element:'KIM',emoji:'🦅',rarity:'common',minLvl:1,maxLvl:10},
   {id:2,name:'Bạch Hổ',element:'KIM',emoji:'🐅',rarity:'rare',minLvl:15,maxLvl:35},
@@ -282,24 +239,19 @@ var RARITY_COLORS={common:'#4caf50',rare:'#2196f3',legendary:'#ff9800'};
 var RARITY_NAMES={common:'Thường',rare:'Hiếm',legendary:'Huyền thoại'};
 
 // ==================== GAME STATE ====================
-var GS={user:null,level:1,xp:0,totalXp:0,caught:0,failed:0,
-  inventory:{KIM:20,MOC:20,THUY:20,HOA:20,THO:20},
-  collection:[],currentTarget:null,selectedBall:'HOA'};
-
+var GS={user:null,level:1,xp:0,totalXp:0,caught:0,failed:0,inventory:{KIM:20,MOC:20,THUY:20,HOA:20,THO:20},collection:[],currentTarget:null,selectedBall:'HOA'};
 function loadState(){var s=localStorage.getItem('yeuthu_v2');if(s){try{var d=JSON.parse(s);for(var k in d)GS[k]=d[k];}catch(e){}}}
 function saveState(){localStorage.setItem('yeuthu_v2',JSON.stringify(GS));}
 
-// ==================== CAPTURE LOGIC ====================
 function getLevelRate(cL,pL){var d=cL-pL;if(d<=-2)return 1;if(d===-1)return .8;if(d===0)return .5;if(d===1)return .3;if(d===2)return .1;if(d===3)return .01;if(d===4)return .004;if(d===5)return .001;return 0;}
 function getElemMod(b,c){if(KHAC[b]===c)return 1.5;if(SINH[b]===c)return .5;return 1;}
 function getRate(b,c,cL,pL,acc){return Math.min(1,getLevelRate(cL,pL)*getElemMod(b,c)*acc);}
 
 // ==================== UI ====================
 function showScreen(id){
-  var ss=document.querySelectorAll('.screen');
-  for(var i=0;i<ss.length;i++)ss[i].classList.remove('active');
+  var ss=document.querySelectorAll('.screen');for(var i=0;i<ss.length;i++)ss[i].classList.remove('active');
   document.getElementById(id).classList.add('active');
-  if(id==='screen-ar'){startCamera();updateHUD();}
+  if(id==='screen-ar'){startCamera();initCompass();updateHUD();}
   if(id==='screen-profile')updateProfile();
   if(id==='screen-inventory')updateInventory();
 }
@@ -308,20 +260,85 @@ function updateHUD(){var r=getRealm(GS.level);document.getElementById('hud-level
 function updateProfile(){var r=getRealm(GS.level);document.getElementById('profile-realm').textContent=r.icon+' '+r.name;document.getElementById('profile-level').textContent='Level '+GS.level+' — '+GS.xp+'/'+xpForLevel(GS.level)+' XP';document.getElementById('stat-caught').textContent=GS.caught;document.getElementById('stat-failed').textContent=GS.failed;var t=GS.caught+GS.failed;document.getElementById('stat-rate').textContent=(t>0?Math.round(GS.caught/t*100):0)+'%';document.getElementById('stat-total-xp').textContent=GS.totalXp;}
 function updateInventory(){var c=document.getElementById('ball-inventory');c.innerHTML='';for(var k in GS.inventory){var el=ELEMENTS[k];c.innerHTML+='<div class="inv-item"><div class="inv-ball-icon" style="background:'+el.bg+'">'+el.icon+'</div><div class="inv-ball-name" style="color:'+el.color+'">'+el.name+'</div><div class="inv-ball-count">×'+GS.inventory[k]+'</div></div>';}}
 
-// ==================== AUTH ====================
 function toggleRegister(){var l=document.getElementById('login-form'),r=document.getElementById('register-form');if(l.style.display==='none'){l.style.display='';r.style.display='none';}else{l.style.display='none';r.style.display='';}}
-function handleLogin(){var e=document.getElementById('input-email').value,p=document.getElementById('input-password').value;if(!e||!p){showToast('Nhập thông tin');return;}GS.user={email:e,name:e.split('@')[0]};saveState();showToast('Đăng nhập! 🔮');showScreen('screen-ar');}
+function handleLogin(){var e=document.getElementById('input-email').value,p=document.getElementById('input-password').value;if(!e||!p){showToast('Nhập thông tin');return;}GS.user={email:e,name:e.split('@')[0]};saveState();showToast('Đăng nhập!');showScreen('screen-ar');}
 function handleRegister(){var n=document.getElementById('reg-name').value,e=document.getElementById('reg-email').value;if(!n||!e){showToast('Điền đủ');return;}GS.user={email:e,name:n};saveState();showToast('Chào '+n+'!');showScreen('screen-ar');}
 function handleGoogleLogin(){GS.user={email:'google@gmail.com',name:'Thợ Săn'};saveState();showToast('Google OK!');showScreen('screen-ar');}
 
 // ==================== CAMERA ====================
 var cameraStream=null;
-function startCamera(){if(cameraStream)return;navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false}).then(function(s){cameraStream=s;document.getElementById('camera-feed').srcObject=s;var cv=document.getElementById('ar-canvas');var v=document.getElementById('camera-feed');v.onloadedmetadata=function(){cv.width=v.videoWidth;cv.height=v.videoHeight;};}).catch(function(e){showToast('Không mở camera!');});}
+function startCamera(){
+  if(cameraStream)return;
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false}).then(function(s){
+    cameraStream=s;document.getElementById('camera-feed').srcObject=s;
+    var cv=document.getElementById('ar-canvas');var v=document.getElementById('camera-feed');
+    v.onloadedmetadata=function(){cv.width=v.videoWidth;cv.height=v.videoHeight;};
+  }).catch(function(){showToast('Không mở camera!');});
+}
 
-// ==================== GPS + COMPASS ====================
-var currentHeading=0,playerLat=10.762622,playerLng=106.660172;
-window.addEventListener('deviceorientationabsolute',function(e){if(e.alpha!==null){currentHeading=e.alpha;document.getElementById('hud-compass').style.transform='rotate('+(-currentHeading)+'deg)';}});
-window.addEventListener('deviceorientation',function(e){if(e.webkitCompassHeading!==undefined)currentHeading=e.webkitCompassHeading;else if(e.alpha!==null)currentHeading=360-e.alpha;document.getElementById('hud-compass').style.transform='rotate('+(-currentHeading)+'deg)';});
+// ================================================================
+// ★★★ COMPASS — ĐÃ SỬA: iOS 13+ permission + smoothing ★★★
+// ================================================================
+var rawHeading=0, smoothHeading=0, compassReady=false, compassRequested=false;
+
+function initCompass(){
+  if(compassReady||compassRequested)return;
+  compassRequested=true;
+
+  // ★ iOS 13+: PHẢI request permission từ user gesture ★
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(function(response){
+      if(response==='granted'){
+        setupCompassListeners();
+        compassReady=true;
+        showToast('🧭 La bàn OK!');
+      }else{
+        showToast('⛔ Cần cho phép la bàn!');
+      }
+    }).catch(function(){
+      showToast('⛔ Lỗi quyền la bàn!');
+    });
+  }else{
+    // Android / older iOS: không cần permission
+    setupCompassListeners();
+    compassReady=true;
+    showToast('🧭 La bàn OK!');
+  }
+}
+
+function setupCompassListeners(){
+  // ★ Method 1: deviceorientationabsolute (Chrome Android) ★
+  window.addEventListener('deviceorientationabsolute',function(e){
+    if(e.alpha!==null){rawHeading=e.alpha;}
+  },true);
+
+  // ★ Method 2: deviceorientation (universal fallback) ★
+  window.addEventListener('deviceorientation',function(e){
+    if(e.webkitCompassHeading!==undefined&&e.webkitCompassHeading!==null){
+      rawHeading=e.webkitCompassHeading;
+    }else if(e.alpha!==null){
+      rawHeading=360-e.alpha;
+    }
+  },true);
+
+  // ★ Method 3: webkitCompassNeedsCalibration — hiển thị hướng dẫn ★
+  window.addEventListener('webkitCompassNeedsCalibration',function(){
+    showToast('📱 Xoay điện thoại hình số 8 để hiệu chỉnh la bàn!',5000);
+  });
+}
+
+// ★ SMOOTHING — la bàn mượt, không giật ★
+function smoothCompass(){
+  var diff=rawHeading-smoothHeading;
+  if(diff>180)diff-=360;
+  if(diff<-180)diff+=360;
+  smoothHeading+=diff*0.15; // interpolation factor
+  if(smoothHeading<0)smoothHeading+=360;
+  if(smoothHeading>=360)smoothHeading-=360;
+}
+
+// ==================== GPS ====================
+var playerLat=10.762622,playerLng=106.660172;
 if(navigator.geolocation){navigator.geolocation.watchPosition(function(p){playerLat=p.coords.latitude;playerLng=p.coords.longitude;},function(){},{enableHighAccuracy:true,maximumAge:3000});}
 function getDist(a,b,c,d){var R=6371000,dLa=(c-a)*Math.PI/180,dLn=(d-b)*Math.PI/180;var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLn/2)*Math.sin(dLn/2);return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));}
 function getBearing(a,b,c,d){var dLn=(d-b)*Math.PI/180;var y=Math.sin(dLn)*Math.cos(c*Math.PI/180);var x=Math.cos(a*Math.PI/180)*Math.sin(c*Math.PI/180)-Math.sin(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.cos(dLn);return((Math.atan2(y,x)*180/Math.PI)+360)%360;}
@@ -333,23 +350,14 @@ function placeCreature(c){
   c.lat=playerLat+dLat;c.lng=playerLng+dLng;
 }
 function generateCreature(){
-  var pL=gameState.level;
-  var candidates=CREATURE_DB.filter(function(c){return c.minLvl<=pL+5&&c.maxLvl>=pL-2;});
-  var base=candidates[Math.floor(Math.random()*candidates.length)]||CREATURE_DB[0];
+  var pL=GS.level;
+  var cands=CREATURE_DB.filter(function(c){return c.minLvl<=pL+5&&c.maxLvl>=pL-2;});
+  var base=cands[Math.floor(Math.random()*cands.length)]||CREATURE_DB[0];
   var cL=Math.max(base.minLvl,Math.min(base.maxLvl,pL+Math.floor(Math.random()*8)-3));
-  var angle=Math.random()*360;
-  var dist=2+Math.random()*3; // ★ 2-5m trong phòng ★
-  var dLat=(dist*Math.cos(angle*Math.PI/180))/111320;
-  var dLng=(dist*Math.sin(angle*Math.PI/180))/(111320*Math.cos(playerLat*Math.PI/180));
-  return Object.assign({},base,{
-    level:cL,lat:playerLat+dLat,lng:playerLng+dLng,
-    spawnTime:Date.now(),
-    escapeChances:CONFIG.ESCAPE_MIN+Math.floor(Math.random()*(CONFIG.ESCAPE_MAX-CONFIG.ESCAPE_MIN+1)),
-    escapeAttemptsUsed:0
-  });
+  var c=Object.assign({},base,{level:cL,lat:0,lng:0,escapeChances:CONFIG.ESCAPE_MIN+Math.floor(Math.random()*(CONFIG.ESCAPE_MAX-CONFIG.ESCAPE_MIN+1)),escapeAttemptsUsed:0});
+  placeCreature(c);return c;
 }
 
-// ==================== DETECTION ====================
 function triggerDetection(){
   var creature=generateCreature();
   GS.currentTarget=creature;saveState();
@@ -363,10 +371,9 @@ function acceptHunt(){
   document.getElementById('notification').classList.remove('show');
   document.getElementById('ar-distance').style.display='';
   renderBalls();
-  showToast('⚔️ Truy tìm! Xoay camera theo mũi tên!');
+  showToast('⚔️ Xoay camera theo mũi tên!');
 }
 
-// ==================== RENDER BALLS ====================
 function renderBalls(){
   var row=document.getElementById('ar-balls-row');row.innerHTML='';
   if(!GS.currentTarget)return;
@@ -382,116 +389,111 @@ function renderBalls(){
     row.innerHTML+='<div class="ar-ball'+(GS.selectedBall===key?' selected':'')+ballCls+'" onclick="selectBall(this,\''+key+'\')" style="background:'+el.bg+';opacity:'+(count>0?1:.3)+'">'+relHtml+'<div class="ar-ball-icon">'+el.icon+'</div><div class="ar-ball-name">'+el.name+'</div><div class="ar-ball-rate" style="color:'+rateColor+'">'+ratePct+'%</div><div class="ar-ball-count">×'+count+'</div></div>';
   }
 }
-function selectBall(elem,key){
-  GS.selectedBall=key;
-  document.querySelectorAll('.ar-ball').forEach(function(b){b.classList.remove('selected');});
-  elem.classList.add('selected');
-}
+function selectBall(elem,key){GS.selectedBall=key;document.querySelectorAll('.ar-ball').forEach(function(b){b.classList.remove('selected');});elem.classList.add('selected');}
 
-// ==================== AR RENDER LOOP ====================
+// ================================================================
+// ★★★ AR RENDER LOOP — mũi tên + yêu thú idle + crosshair ★★★
+// ================================================================
 var creatureOnScreen=false,crosshairLocked=false,currentAccuracy=0;
+
 function renderAR(){
+  // ★ Luôn smoothing la bàn mỗi frame ★
+  smoothCompass();
+
   var canvas=document.getElementById('ar-canvas');
   if(!canvas.width){requestAnimationFrame(renderAR);return;}
   var ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
   var target=GS.currentTarget;if(!target){requestAnimationFrame(renderAR);return;}
+
   var cx=canvas.width/2,cy=canvas.height/2;
   var time=Date.now()/1000;
+
+  // ★ Tính hướng bằng smoothHeading ★
   var gpsDist=getDist(playerLat,playerLng,target.lat,target.lng);
   var bearing=getBearing(playerLat,playerLng,target.lat,target.lng);
-  var relAngle=((bearing-currentHeading)+360)%360;
+  var relAngle=((bearing-smoothHeading)+360)%360;
   var aCenter=relAngle>180?360-relAngle:relAngle;
   var halfFOV=CONFIG.FOV/2;
 
-  // Update distance UI
+  // Update compass icon
+  document.getElementById('hud-compass').style.transform='rotate('+(-smoothHeading)+'deg)';
   document.getElementById('ar-dist-val').textContent='~'+Math.round(gpsDist)+'m';
 
   if(aCenter>halfFOV){
-    // ★ MŨI TÊN DUY NHẤT — trên canvas, quay theo la bàn ★
+    // ===== CHƯA THẤY YÊU THÚ — MŨI TÊN CHỈ HƯỚNG =====
     creatureOnScreen=false;crosshairLocked=false;currentAccuracy=0;
+
     var dirs=['Bắc','Đông Bắc','Đông','Đông Nam','Nam','Tây Nam','Tây','Tây Bắc'];
     var dirName=dirs[Math.round(bearing/45)%8];
-    document.getElementById('ar-dist-hint').textContent='Xoay về hướng '+dirName;
+    document.getElementById('ar-dist-hint').textContent='🧭 Hướng '+dirName+' | Xoay camera';
 
-    // Arrow
     var arrowSize=Math.min(canvas.width,canvas.height)*0.11;
     var pulse=0.7+Math.sin(time*3)*0.3;
-    // Glow bg
+
+    // Glow
     var bgGrad=ctx.createRadialGradient(cx,cy,10,cx,cy,250);
     bgGrad.addColorStop(0,'rgba(76,195,247,'+(0.2*pulse)+')');bgGrad.addColorStop(1,'transparent');
     ctx.fillStyle=bgGrad;ctx.fillRect(0,0,canvas.width,canvas.height);
 
+    // ★ MŨI TÊN — quay theo relAngle, CẬP NHẬT MỖI FRAME ★
     ctx.save();
-    ctx.translate(cx,cy-40);
+    ctx.translate(cx,cy-50);
     ctx.rotate(relAngle*Math.PI/180);
     var ag=ctx.createLinearGradient(0,-arrowSize,0,arrowSize*0.3);
     ag.addColorStop(0,'#4caf50');ag.addColorStop(1,'#81c784');
     ctx.fillStyle=ag;ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=3;
     ctx.beginPath();
-    ctx.moveTo(0,-arrowSize);
-    ctx.lineTo(arrowSize*0.5,-arrowSize*0.2);
-    ctx.lineTo(arrowSize*0.22,-arrowSize*0.2);
-    ctx.lineTo(arrowSize*0.22,arrowSize*0.3);
-    ctx.lineTo(-arrowSize*0.22,arrowSize*0.3);
-    ctx.lineTo(-arrowSize*0.22,-arrowSize*0.2);
-    ctx.lineTo(-arrowSize*0.5,-arrowSize*0.2);
-    ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.moveTo(0,-arrowSize);ctx.lineTo(arrowSize*0.5,-arrowSize*0.2);
+    ctx.lineTo(arrowSize*0.22,-arrowSize*0.2);ctx.lineTo(arrowSize*0.22,arrowSize*0.3);
+    ctx.lineTo(-arrowSize*0.22,arrowSize*0.3);ctx.lineTo(-arrowSize*0.22,-arrowSize*0.2);
+    ctx.lineTo(-arrowSize*0.5,-arrowSize*0.2);ctx.closePath();
+    ctx.fill();ctx.stroke();
     ctx.shadowColor='rgba(76,195,247,0.8)';ctx.shadowBlur=15*pulse;
     ctx.fill();ctx.shadowBlur=0;
     ctx.restore();
 
-    // Direction text below arrow
+    // Text
     ctx.save();
     ctx.fillStyle='rgba(0,0,0,0.7)';
-    ctx.fillRect(cx-100,cy+40,200,45);
+    ctx.fillRect(cx-100,cy+50,200,45);
     ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle='#4fc3f7';ctx.fillText('🧭 '+dirName,cx,cy+55);
-    ctx.font='13px sans-serif';ctx.fillStyle='#fff';
-    ctx.fillText('~'+Math.round(gpsDist)+'m',cx,cy+75);
+    ctx.fillStyle='#4fc3f7';ctx.fillText('🧭 '+dirName,cx,cy+65);
+    ctx.font='13px sans-serif';ctx.fillStyle='#fff';ctx.fillText('~'+Math.round(gpsDist)+'m',cx,cy+85);
     ctx.restore();
 
   }else{
-    // ★ YÊU THÚ HIỂN THỊ TRÊN CAMERA — vị trí trên screen theo góc ★
+    // ===== YÊU THÚ TRÊN CAMERA =====
     creatureOnScreen=true;
     var fovRatio=aCenter/halfFOV;
     var side=relAngle<180?1:-1;
     var creatureX=cx+side*fovRatio*(canvas.width*0.35);
     var creatureY=cy;
 
-    // Size theo GPS distance (gần = to)
     var distFactor=Math.max(0.3,Math.min(1.5,CONFIG.SPAWN_MIN/Math.max(0.5,gpsDist)));
     var creatureSize=Math.min(canvas.width,canvas.height)*0.12*distFactor*2;
 
-    // Vẽ yêu thú idle animation
     drawCreatureIdle(ctx,creatureX,creatureY,creatureSize,target,time);
 
-    // ★ TÍNH CROSSHAIR LOCK — khoảng cách từ tâm (dấu +) đến yêu thú ★
     var dx=creatureX-cx,dy=creatureY-cy;
     var crossDist=Math.sqrt(dx*dx+dy*dy);
     crosshairLocked=crossDist<CONFIG.CROSSHAIR_LOCK_PX;
+    if(crosshairLocked){currentAccuracy=Math.max(0.5,1-crossDist/CONFIG.CROSSHAIR_LOCK_PX*0.5);}
+    else{currentAccuracy=Math.max(0,1-crossDist/(CONFIG.CROSSHAIR_LOCK_PX*3));}
 
-    if(crosshairLocked){
-      currentAccuracy=Math.max(0.5,1-crossDist/CONFIG.CROSSHAIR_LOCK_PX*0.5);
-    }else{
-      currentAccuracy=Math.max(0,1-crossDist/(CONFIG.CROSSHAIR_LOCK_PX*3));
-    }
-
-    // Link line crosshair→creature khi gần
     if(crossDist<CONFIG.CROSSHAIR_LOCK_PX*3){
       ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;ctx.setLineDash([5,5]);
       ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(creatureX,creatureY);ctx.stroke();ctx.setLineDash([]);
     }
 
-    // Distance text
     document.getElementById('ar-dist-hint').textContent=crosshairLocked?'✅ ĐÃ NHẮM ĐÚNG! Nhấn Bắt!':'🎯 Đưa dấu + vào yêu thú';
   }
 
-  // ★ CẬP NHẬT CROSSHAIR ★
+  // Crosshair
   var ring=document.getElementById('crosshair-ring');
   if(crosshairLocked){ring.classList.add('locked');ring.classList.remove('close');document.getElementById('crosshair-pulse').style.display='';}
   else{ring.classList.remove('locked');document.getElementById('crosshair-pulse').style.display='none';if(creatureOnScreen&&currentAccuracy>0.3)ring.classList.add('close');else ring.classList.remove('close');}
 
-  // ★ CẬP NHẬT RATE ★
+  // Rate
   var ball=GS.selectedBall;
   var rate=creatureOnScreen?getRate(ball,target.element,target.level,GS.level,currentAccuracy):0;
   var pct=Math.round(rate*1000)/10;
@@ -500,7 +502,7 @@ function renderAR(){
   fill.style.width=pct+'%';
   fill.style.background=pct<=0?'#f44336':pct<=30?'#ff9800':pct<=70?'#ffc107':'#4caf50';
 
-  // ★ NÚT BẮT ★
+  // Button
   var btn=document.getElementById('capture-btn');
   if(creatureOnScreen&&crosshairLocked)btn.classList.remove('disabled');
   else btn.classList.add('disabled');
@@ -509,111 +511,70 @@ function renderAR(){
 }
 
 // ================================================================
-// ★★★ CREATURE IDLE ANIMATION — sinh vật sống thực thụ ★★★
+// ★★★ CREATURE IDLE ANIMATION — sinh vật sống ★★★
 // ================================================================
 function drawCreatureIdle(ctx,cx,cy,size,creature,time){
-  var el=ELEMENTS[creature.element];
-  var s=size/100;
-
-  // Animations
+  var el=ELEMENTS[creature.element],s=size/100;
   var bodySway=Math.sin(time*0.78)*4*s;
   var breathScale=1+Math.sin(time*1.25)*0.02;
   var headTurn=Math.sin(time*0.52)*12;
   var headBob=Math.sin(time*1.6)*3*s;
-  var blinkT=(time%4);
-  var isBlinking=blinkT>3.85&&blinkT<4.0;
+  var blinkT=(time%4),isBlinking=blinkT>3.85&&blinkT<4.0;
   var tailWag=Math.sin(time*2.1)*30;
-  var footTapT=(time%3);
-  var footTapY=footTapT<0.3?-15*Math.sin(footTapT/0.3*Math.PI)*s:0;
-  var earTwitchT=(time%5);
-  var earTwitch=earTwitchT>4.7?-8*Math.sin((earTwitchT-4.7)/0.3*Math.PI):0;
+  var footTapT=(time%3),footTapY=footTapT<0.3?-15*Math.sin(footTapT/0.3*Math.PI)*s:0;
+  var earTwitchT=(time%5),earTwitch=earTwitchT>4.7?-8*Math.sin((earTwitchT-4.7)/0.3*Math.PI):0;
   var hipSway=Math.sin(time*0.9+1)*2*s;
 
-  // Glow
   var glowGrad=ctx.createRadialGradient(cx,cy,size*0.2,cx,cy,size*1.2);
   glowGrad.addColorStop(0,el.primary+'35');glowGrad.addColorStop(1,'transparent');
   ctx.fillStyle=glowGrad;ctx.fillRect(cx-size*1.5,cy-size*1.5,size*3,size*3);
 
-  // Shadow
-  ctx.fillStyle='rgba(0,0,0,0.25)';
-  ctx.beginPath();ctx.ellipse(cx+bodySway*0.5,cy+size*0.52,size*0.38,size*0.08,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(cx+bodySway*0.5,cy+size*0.52,size*0.38,size*0.08,0,0,Math.PI*2);ctx.fill();
 
   // Tail
-  ctx.save();
-  ctx.translate(cx+bodySway*0.3,cy+hipSway*0.5);
-  ctx.rotate(tailWag*Math.PI/180*0.5);
+  ctx.save();ctx.translate(cx+bodySway*0.3,cy+hipSway*0.5);ctx.rotate(tailWag*Math.PI/180*0.5);
   ctx.strokeStyle=el.primary;ctx.lineWidth=5*s;ctx.lineCap='round';
   ctx.beginPath();ctx.moveTo(-18*s,10*s);ctx.quadraticCurveTo(-42*s,-5*s+Math.sin(time*2)*5*s,-52*s,-25*s);ctx.stroke();
-  ctx.fillStyle=el.primary+'70';ctx.beginPath();ctx.arc(-52*s,-25*s,10*s,0,Math.PI*2);ctx.fill();
-  ctx.restore();
+  ctx.fillStyle=el.primary+'70';ctx.beginPath();ctx.arc(-52*s,-25*s,10*s,0,Math.PI*2);ctx.fill();ctx.restore();
 
-  // Left foot
-  ctx.save();ctx.translate(cx+bodySway*0.5-15*s,cy+size*0.38);
-  ctx.fillStyle='#FFE0BD';ctx.strokeStyle=el.primary+'40';ctx.lineWidth=2;
-  ctx.beginPath();ctx.ellipse(0,0,10*s,8*s,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
-
-  // Right foot (taps)
-  ctx.save();ctx.translate(cx+bodySway*0.5+hipSway*0.3+15*s,cy+size*0.38+footTapY);
-  ctx.fillStyle='#FFE0BD';ctx.strokeStyle=el.primary+'40';ctx.lineWidth=2;
-  ctx.beginPath();ctx.ellipse(0,0,10*s,8*s,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
+  // Feet
+  ctx.save();ctx.translate(cx+bodySway*0.5-15*s,cy+size*0.38);ctx.fillStyle='#FFE0BD';ctx.strokeStyle=el.primary+'40';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,10*s,8*s,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
+  ctx.save();ctx.translate(cx+bodySway*0.5+hipSway*0.3+15*s,cy+size*0.38+footTapY);ctx.fillStyle='#FFE0BD';ctx.strokeStyle=el.primary+'40';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,10*s,8*s,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
 
   // Body
   ctx.save();ctx.translate(cx+bodySway,cy+hipSway*0.3);ctx.scale(breathScale,breathScale);
   ctx.fillStyle='#FFE0BD';ctx.strokeStyle=el.primary+'60';ctx.lineWidth=2.5;
   ctx.beginPath();ctx.ellipse(0,5*s,26*s,24*s,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,0.15)';ctx.beginPath();ctx.ellipse(0,12*s,16*s,14*s,0,0,Math.PI*2);ctx.fill();
-  ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,0.15)';ctx.beginPath();ctx.ellipse(0,12*s,16*s,14*s,0,0,Math.PI*2);ctx.fill();ctx.restore();
 
   // Head
   ctx.save();ctx.translate(cx+bodySway,cy-18*s+headBob);ctx.rotate(headTurn*Math.PI/180);
-
-  // Ears (twitch)
   [[-1,earTwitch],[1,-earTwitch]].forEach(function(pair){
-    var sx=pair[0],tw=pair[1];
-    ctx.save();ctx.translate(sx*18*s,-28*s);ctx.rotate(tw*Math.PI/180);
+    var sx=pair[0],tw=pair[1];ctx.save();ctx.translate(sx*18*s,-28*s);ctx.rotate(tw*Math.PI/180);
     ctx.fillStyle='#FFE0BD';ctx.strokeStyle=el.primary+'60';ctx.lineWidth=2;
     ctx.beginPath();ctx.moveTo(0,10*s);ctx.lineTo(sx*10*s,-18*s);ctx.lineTo(-sx*12*s,5*s);ctx.closePath();ctx.fill();ctx.stroke();
-    ctx.fillStyle='#FFB6C1';
-    ctx.beginPath();ctx.moveTo(-sx*2*s,6*s);ctx.lineTo(sx*6*s,-12*s);ctx.lineTo(-sx*10*s,3*s);ctx.closePath();ctx.fill();
-    ctx.restore();
+    ctx.fillStyle='#FFB6C1';ctx.beginPath();ctx.moveTo(-sx*2*s,6*s);ctx.lineTo(sx*6*s,-12*s);ctx.lineTo(-sx*10*s,3*s);ctx.closePath();ctx.fill();ctx.restore();
   });
-
-  // Face
   var hr=28*s;
   ctx.fillStyle='#FFE0BD';ctx.strokeStyle=el.primary+'50';ctx.lineWidth=2;
   ctx.beginPath();ctx.ellipse(0,0,hr,hr*1.05,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-
-  // Blush
-  ctx.fillStyle='#FFB6C150';
-  ctx.beginPath();ctx.ellipse(-hr*0.55,5*s,7*s,5*s,0,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(hr*0.55,5*s,7*s,5*s,0,0,Math.PI*2);ctx.fill();
-
-  // Eyes (blink)
+  ctx.fillStyle='#FFB6C150';ctx.beginPath();ctx.ellipse(-hr*0.55,5*s,7*s,5*s,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(hr*0.55,5*s,7*s,5*s,0,0,Math.PI*2);ctx.fill();
   [-1,1].forEach(function(sx){
-    if(isBlinking){
-      ctx.strokeStyle='#333';ctx.lineWidth=3;
-      ctx.beginPath();ctx.moveTo(sx*10*s-5*s,-2*s);ctx.lineTo(sx*10*s+5*s,-2*s);ctx.stroke();
-    }else{
+    if(isBlinking){ctx.strokeStyle='#333';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx*10*s-5*s,-2*s);ctx.lineTo(sx*10*s+5*s,-2*s);ctx.stroke();}
+    else{
       ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(sx*10*s,-2*s,9*s,11*s,0,0,Math.PI*2);ctx.fill();
       ctx.fillStyle=el.primary;ctx.beginPath();ctx.arc(sx*10*s,0,6*s,0,Math.PI*2);ctx.fill();
       ctx.fillStyle='#1a1a2e';ctx.beginPath();ctx.arc(sx*10*s,0,3*s,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(sx*10*s-2.5*s,-3*s,2.5*s,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.arc(sx*10*s+1.5*s,2*s,1.2*s,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(sx*10*s-2.5*s,-3*s,2.5*s,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(sx*10*s+1.5*s,2*s,1.2*s,0,Math.PI*2);ctx.fill();
     }
   });
-
-  // Mouth + nose
-  ctx.strokeStyle='#333';ctx.lineWidth=2.5;
-  ctx.beginPath();ctx.arc(0,10*s,7*s,Math.PI*0.15,Math.PI*0.85);ctx.stroke();
+  ctx.strokeStyle='#333';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,10*s,7*s,Math.PI*0.15,Math.PI*0.85);ctx.stroke();
   ctx.fillStyle=el.primary+'80';ctx.beginPath();ctx.ellipse(0,4*s,3*s,2.5*s,0,0,Math.PI*2);ctx.fill();
   ctx.restore();
 
-  // Sparkles
   for(var sp=0;sp<6;sp++){
-    var spAngle=time*1.5+sp*(Math.PI*2/6);
-    var spDist=size*0.65+Math.sin(time*2+sp)*size*0.15;
-    ctx.fillStyle=el.glow+'60';
-    ctx.beginPath();ctx.arc(cx+Math.cos(spAngle)*spDist,cy+Math.sin(spAngle)*spDist*0.7,Math.max(1,1.5+Math.sin(time*3+sp*1.5)*1.5),0,Math.PI*2);ctx.fill();
+    var sa=time*1.5+sp*(Math.PI*2/6),sd=size*0.65+Math.sin(time*2+sp)*size*0.15;
+    ctx.fillStyle=el.glow+'60';ctx.beginPath();ctx.arc(cx+Math.cos(sa)*sd,cy+Math.sin(sa)*sd*0.7,Math.max(1,1.5+Math.sin(time*3+sp*1.5)*1.5),0,Math.PI*2);ctx.fill();
   }
 }
 
@@ -622,13 +583,10 @@ function doCapture(){
   var creature=GS.currentTarget;if(!creature)return;
   if(!creatureOnScreen||!crosshairLocked){showToast('Đưa dấu + vào yêu thú!');return;}
   var ball=GS.selectedBall;
-  if(GS.inventory[ball]<=0){showToast('Hết bảo bối hệ này!');return;}
+  if(GS.inventory[ball]<=0){showToast('Hết bảo bối!');return;}
   GS.inventory[ball]--;
-
   var rate=getRate(ball,creature.element,creature.level,GS.level,currentAccuracy);
-  var success=Math.random()<rate;
-
-  if(success){
+  if(Math.random()<rate){
     GS.caught++;GS.xp+=CONFIG.XP_CAPTURE;GS.totalXp+=CONFIG.XP_CAPTURE;
     GS.collection.push(Object.assign({},creature,{caughtAt:Date.now(),caughtWith:ball}));
     checkLevelUp();
@@ -637,13 +595,12 @@ function doCapture(){
     GS.failed++;GS.xp+=CONFIG.XP_FAIL;if(GS.xp<0)GS.xp=0;
     var remain=(creature.escapeChances||1)-(creature.escapeAttemptsUsed||0)-1;
     if(remain<=0){
-      showResult('💨',creature.emoji+' <strong>'+creature.name+'</strong> biến mất!','Hết lượt thoát. Tỷ lệ: '+Math.round(rate*100)+'%','fail');
+      showResult('💨',creature.emoji+' <strong>'+creature.name+'</strong> biến mất!','Hết lượt. Tỷ lệ: '+Math.round(rate*100)+'%','fail');
     }else{
-      // ★ CHẠY TRỐN — chạy sang vị trí mới trong phòng ★
       creature.escapeAttemptsUsed=(creature.escapeAttemptsUsed||0)+1;
       placeCreature(creature);
       creatureOnScreen=false;crosshairLocked=false;currentAccuracy=0;
-      showResult('🏃',creature.emoji+' <strong>'+creature.name+'</strong> chạy trốn!','Còn '+remain+' lượt | Tỷ lệ: '+Math.round(rate*100)+'%<br>Yêu thú chạy sang vị trí mới! Theo mũi tên tìm lại!','fail');
+      showResult('🏃',creature.emoji+' <strong>'+creature.name+'</strong> chạy trốn!','Còn '+remain+' lượt | Tỷ lệ: '+Math.round(rate*100)+'%<br>Yêu thú chạy sang chỗ mới! Theo mũi tên!','fail');
     }
   }
   saveState();updateHUD();renderBalls();
@@ -660,21 +617,18 @@ function closeResult(){
   document.getElementById('result-modal').classList.remove('active');
   var c=GS.currentTarget;
   if(c&&c.escapeAttemptsUsed>=(c.escapeChances||1)){GS.currentTarget=null;}
-  // Nếu còn chạy trốn → tiếp tục tìm (mũi tên tự hiển thị)
-  // Nếu bắt được/biến mất → auto detect mới
   if(!GS.currentTarget){
     document.getElementById('ar-distance').style.display='none';
     setTimeout(function(){if(document.getElementById('screen-ar').classList.contains('active'))triggerDetection();},2000);
   }
 }
-
 function checkLevelUp(){var need=xpForLevel(GS.level);if(GS.xp>=need){GS.xp-=need;GS.level++;showToast('🎊 Level '+GS.level+'!',5000);checkLevelUp();}}
 
 // ==================== INIT ====================
 loadState();
 renderAR();
 setTimeout(function(){if(document.getElementById('screen-ar').classList.contains('active'))triggerDetection();},8000);
-console.log('🔮 Yêu Thú Săn Bắt v2 — Crosshair + Idle + Single Arrow');
+console.log('🔮 Yêu Thú Săn Bắt — Compass Fixed');
 </script>
 </body>
 </html>
