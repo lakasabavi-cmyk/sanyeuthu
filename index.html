@@ -2,12 +2,19 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a2e">
 <title>🔮 Yêu Thú Săn Bắt</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div id="toast" class="toast"></div>
+
+<!-- ★ FULLSCREEN TOGGLE ★ -->
+<button class="fullscreen-btn" id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
 
 <!-- ===== LOGIN ===== -->
 <div id="screen-login" class="screen active">
@@ -44,15 +51,17 @@
     <div class="crosshair-pulse" id="crosshair-pulse"></div>
   </div>
 
-  <div class="hud-top">
+  <div class="hud-top safe-top">
     <div class="hud-info">
       <div class="hud-level" id="hud-level">Level 1</div>
       <div class="hud-realm" id="hud-realm">🌀 Luyện Khí</div>
       <div class="hud-xp-bar"><div class="hud-xp-fill" id="hud-xp-fill" style="width:0%"></div></div>
       <div class="hud-compass-status" id="compass-status">🧭 Chưa bật</div>
     </div>
-    <button class="btn-compass" id="btn-compass" onclick="activateCompass()">🧭 Bật la bàn</button>
-    <button class="ar-exit" onclick="showScreen('screen-login')">✕</button>
+    <div class="hud-top-right">
+      <button class="btn-compass" id="btn-compass" onclick="activateCompass()">🧭 Bật la bàn</button>
+      <button class="ar-exit" onclick="showScreen('screen-login')">✕</button>
+    </div>
   </div>
 
   <div id="notification" class="notification">
@@ -66,14 +75,13 @@
     <div class="ar-dist-hint" id="ar-dist-hint">Xoay camera</div>
   </div>
 
-  <!-- Manual heading fallback -->
   <div class="manual-turn" id="manual-turn">
     <button onclick="manualTurnLeft()">◀</button>
     <button onclick="manualTurnRight()">▶</button>
   </div>
 
   <div class="ar-balls-row" id="ar-balls-row"></div>
-  <div class="ar-bottom">
+  <div class="ar-bottom safe-bottom">
     <div class="ar-rate-row">
       <div class="ar-rate-label">Tỷ lệ</div>
       <div class="ar-rate-track"><div class="ar-rate-fill" id="ar-rate-fill" style="width:0%;background:#f44336"></div></div>
@@ -110,7 +118,6 @@
   <div class="ball-inventory" id="ball-inventory"></div>
 </div>
 
-<!-- SCRIPTS — thứ tự quan trọng! -->
 <script src="js/config.js"></script>
 <script src="js/creatures.js"></script>
 <script src="js/idle.js"></script>
