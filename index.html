@@ -12,7 +12,6 @@
 </head>
 <body>
 <div id="toast" class="toast"></div>
-
 <button class="fullscreen-btn" id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
 
 <!-- ===== LOGIN ===== -->
@@ -43,7 +42,6 @@
   <video id="camera-feed" autoplay playsinline muted></video>
   <canvas id="ar-canvas"></canvas>
 
-  <!-- Crosshair -->
   <div class="crosshair" id="crosshair">
     <div class="crosshair-ring" id="crosshair-ring">
       <div class="crosshair-h"></div><div class="crosshair-v"></div><div class="crosshair-dot"></div>
@@ -51,7 +49,6 @@
     <div class="crosshair-pulse" id="crosshair-pulse"></div>
   </div>
 
-  <!-- TOP HUD -->
   <div class="hud-top">
     <div class="hud-info">
       <div class="hud-level" id="hud-level">Level 1</div>
@@ -65,7 +62,6 @@
     </div>
   </div>
 
-  <!-- Found notification -->
   <div id="notif-found" class="notif-found">
     <div class="notif-found-icon" id="notif-found-icon">🐾</div>
     <div class="notif-found-info">
@@ -75,29 +71,25 @@
     <button class="notif-found-btn" onclick="closeNotifFound()">✕</button>
   </div>
 
-  <!-- Distance -->
   <div class="ar-distance" id="ar-distance" style="display:none">
     <div class="ar-dist-val" id="ar-dist-val">~0m</div>
     <div class="ar-dist-hint" id="ar-dist-hint">Xoay camera</div>
   </div>
 
-  <!-- ★★ SIDE NAV — 3 NÚT BÊN TRÁI ★★ -->
+  <!-- ★ SIDE NAV: 👤 Hồ sơ + 🐾 Yêu thú + 🔍 Tìm ★ -->
   <div class="side-nav">
     <button class="side-nav-btn" onclick="showScreen('screen-profile')">
       <span class="side-nav-icon">👤</span>
     </button>
-    <button class="side-nav-btn" onclick="showScreen('screen-inventory')">
-      <span class="side-nav-icon">🎒</span>
+    <button class="side-nav-btn" onclick="showScreen('screen-collection')">
+      <span class="side-nav-icon">🐾</span>
     </button>
     <button class="side-nav-btn search-btn" id="btn-search" onclick="startSearch()">
       <span class="side-nav-icon">🔍</span>
     </button>
   </div>
 
-  <!-- Balls -->
   <div class="ar-balls-row" id="ar-balls-row"></div>
-
-  <!-- Bottom -->
   <div class="ar-bottom">
     <div class="ar-rate-row">
       <div class="ar-rate-label">Tỷ lệ</div>
@@ -128,11 +120,22 @@
   </div>
 </div>
 
-<!-- INVENTORY -->
-<div id="screen-inventory" class="screen">
+<!-- ★★★ COLLECTION — YÊU THÚ ĐANG SỞ HỮU ★★★ -->
+<div id="screen-collection" class="screen">
   <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
-  <div class="inv-title">🎒 Túi Bảo Bối</div>
-  <div class="ball-inventory" id="ball-inventory"></div>
+  <div class="coll-header">
+    <div class="coll-title">🐾 Yêu Thú</div>
+    <div class="coll-count" id="coll-count">0 con</div>
+    <div class="coll-filter">
+      <button class="coll-filter-btn active" onclick="filterCollection('all',this)">Tất cả</button>
+      <button class="coll-filter-btn" onclick="filterCollection('KIM',this)">⚔️</button>
+      <button class="coll-filter-btn" onclick="filterCollection('MOC',this)">🌿</button>
+      <button class="coll-filter-btn" onclick="filterCollection('THUY',this)">💧</button>
+      <button class="coll-filter-btn" onclick="filterCollection('HOA',this)">🔥</button>
+      <button class="coll-filter-btn" onclick="filterCollection('THO',this)">🏔️</button>
+    </div>
+  </div>
+  <div class="coll-grid" id="coll-grid"></div>
 </div>
 
 <script src="js/config.js"></script>
