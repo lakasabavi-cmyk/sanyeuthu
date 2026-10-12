@@ -12,12 +12,15 @@
 
 <!-- ============================================================
      📋 VERSION HISTORY
-     v1.00 — Khởi tạo: AR game ngũ hành
-     v1.01 — Thêm fullscreen + safe area (iPhone notch)
-     v1.02 — Bỏ "Truy tìm", thêm 🔍 search, bỏ manual turn
-     v1.03 — Đổi 🎒 Túi → 🐾 Collection (yêu thú sở hữu)
-     v1.04 — FIX: ** → Math.pow (navigation.js chết)
-     v1.05 — Bỏ nút fullscreen ⛶
+     v1.00 — Khởi tạo
+     v1.01 — Fullscreen + safe area
+     v1.02 — 🔍 search, bỏ manual turn
+     v1.03 — 🐾 Collection
+     v1.04 — FIX ** → Math.pow
+     v1.05 — Bỏ fullscreen button
+     v1.06 — Balls trên nút Bắt. Bỏ tên+% balls. Bỏ thanh tỷ lệ.
+             Túi x1 mỗi loại + daily +1. Tăng size nút Bắt.
+     ★★★ CSS RULE: KHÔNG tự ý đổi vị trí/kích thước icon, button ★★★
      ============================================================ -->
 </head>
 <body>
@@ -43,7 +46,7 @@
       <button class="btn btn-primary" onclick="handleRegister()">Tạo tài khoản</button>
       <div class="toggle-text">Đã có tài khoản? <a onclick="toggleRegister()">Đăng nhập</a></div>
     </div>
-    <div class="login-version">v1.05</div>
+    <div class="login-version">v1.06</div>
   </div>
 </div>
 
@@ -92,13 +95,9 @@
     <button class="sn-btn sn-search" id="btn-search" onclick="startSearch()" title="Tìm"><span>🔍</span></button>
   </div>
 
-  <div class="ar-balls" id="ar-balls-row"></div>
+  <!-- ★ BOTTOM: balls trên nút Bắt, không có thanh tỷ lệ ★ -->
   <div class="ar-bottom">
-    <div class="ar-rate">
-      <div class="ar-rate-label">Tỷ lệ</div>
-      <div class="ar-rate-track"><div class="ar-rate-fill" id="ar-rate-fill" style="width:0%;background:#f44336"></div></div>
-      <div class="ar-rate-pct" id="ar-rate-pct">0%</div>
-    </div>
+    <div class="ar-balls" id="ar-balls-row"></div>
     <button class="ar-capture disabled" id="capture-btn" onclick="doCapture()">🎯</button>
   </div>
 </div>
