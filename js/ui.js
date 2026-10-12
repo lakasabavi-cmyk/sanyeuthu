@@ -1,8 +1,7 @@
 /* ============================================================
    MODULE: ui.js
-   Chức năng: UI + Auth + Search + Fullscreen + Init
-   ★ ĐÃ BỎ manual turn + notification "Truy tìm" ★
-   ★ THAY BẰNG KÍNH LÚP 🔍 TRÊN SIDE NAV ★
+   Chức năng: UI + Auth + Search + Collection + Fullscreen + Init
+   ★ ĐÃ ĐỔI TÚI → YÊU THÚ SỞ HỮU ★
    ============================================================ */
 
 /* ===== FULLSCREEN ===== */
@@ -51,7 +50,7 @@ function showScreen(id){
   document.getElementById(id).classList.add('active');
   if(id==='screen-ar'){startCamera();initGPS();updateHUD();}
   if(id==='screen-profile')updateProfile();
-  if(id==='screen-inventory')updateInventory();
+  if(id==='screen-collection')updateCollection();
 }
 function showToast(m,d){d=d||3000;var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},d);}
 function updateHUD(){
@@ -69,6 +68,103 @@ function updateProfile(){
   var t=GS.caught+GS.failed;
   document.getElementById('stat-rate').textContent=(t>0?Math.round(GS.caught/t*100):0)+'%';
   document.getElementById('stat-total-xp').textContent=GS.totalXp;
+}
+
+/* ================================================================
+   ★★★ COLLECTION — YÊU THÚ ĐANG SỞ HỮU ★★★
+   ================================================================ */
+var currentFilter='all';
+
+function updateCollection(){
+  var grid=document.getElementById('coll-grid');
+  var countEl=document.getElementById('coll-count');
+  var creatures=GS.collection||[];
+
+  countEl.textContent=creatures.length+' con';
+
+  if(!creatures.length){
+    grid.innerHTML='<div class="coll-empty">'+
+      '<div class="coll-empty-icon">🐾</div>'+
+      '<div class="coll-empty-text">Chưa có yêu thú nào!</div>'+
+      '<div class="coll-empty-hint">Bấm 🔍 để tìm và bắt yêu thú</div>'+
+    '</div>';
+    return;
+  }
+
+  var filtered=creatures;
+  if(currentFilter!=='all'){
+    filtered=creatures.filter(function(c){return c.element===currentFilter;});
+  }
+
+  if(!filtered.length){
+    grid.innerHTML='<div class="coll-empty">'+
+      '<div class="coll-empty-icon">🔍</div>'+
+      '<div class="coll-empty-text">Không có yêu thú hệ này</div>'+
+    '</div>';
+    return;
+  }
+
+  grid.innerHTML='';
+  for(var i=0;i<filtered.length;i++){
+    var c=filtered[i];
+    var el=ELEMENTS[c.element]||ELEMENTS.KIM;
+    var rarity=c.rarity||'common';
+
+    grid.innerHTML+='<div class="coll-card '+rarity+'" onclick="showCreatureDetail('+creatures.indexOf(c)+')">'+
+      '<div class="coll-card-rarity '+rarity+'">'+(RARITY_NAMES[rarity]||'Thường')+'</div>'+
+      '<div class="coll-card-icon">'+(c.emoji||'🐾')+'</div>'+
+      '<div class="coll-card-name">'+c.name+'</div>'+
+      '<div class="coll-card-element" style="background:'+el.bg+';color:#fff">'+el.icon+' '+el.name+'</div>'+
+      '<div class="coll-card-level">Lv.'+c.level+'</div>'+
+    '</div>';
+  }
+}
+
+function filterCollection(el,btn){
+  currentFilter=el;
+  var btns=document.querySelectorAll('.coll-filter-btn');
+  for(var i=0;i<btns.length;i++)btns[i].classList.remove('active');
+  btn.classList.add('active');
+  updateCollection();
+}
+
+/* ★ CHI TIẾT YÊU THÚ ★ */
+function showCreatureDetail(idx){
+  var c=GS.collection[idx];
+  if(!c)return;
+  var el=ELEMENTS[c.element]||ELEMENTS.KIM;
+  var rarity=c.rarity||'common';
+  var realm=getRealm(c.level);
+
+  // Tạo modal detail
+  var existing=document.getElementById('coll-detail');
+  if(existing)existing.remove();
+
+  var modal=document.createElement('div');
+  modal.className='coll-detail active';
+  modal.id='coll-detail';
+  modal.innerHTML=
+    '<div class="coll-detail-icon">'+(c.emoji||'🐾')+'</div>'+
+    '<div class="coll-detail-name">'+c.name+'</div>'+
+    '<div class="coll-detail-badges">'+
+      '<div class="coll-detail-badge" style="background:'+el.bg+'">'+el.icon+' '+el.name+'</div>'+
+      '<div class="coll-detail-badge" style="background:'+(RARITY_COLORS[rarity]||'#4caf50')+'">'+(RARITY_NAMES[rarity]||'Thường')+'</div>'+
+    '</div>'+
+    '<div class="coll-detail-stats">'+
+      '<div class="coll-detail-row"><div class="coll-detail-label">Level</div><div class="coll-detail-value">Lv.'+c.level+' — '+realm.icon+' '+realm.name+'</div></div>'+
+      '<div class="coll-detail-row"><div class="coll-detail-label">Hệ</div><div class="coll-detail-value">'+el.icon+' '+el.name+'</div></div>'+
+      '<div class="coll-detail-row"><div class="coll-detail-label">Hiếm</div><div class="coll-detail-value">'+(RARITY_NAMES[rarity]||'Thường')+'</div></div>'+
+      '<div class="coll-detail-row"><div class="coll-detail-label">Bắt lúc</div><div class="coll-detail-value">'+(c.caughtAt?new Date(c.caughtAt).toLocaleDateString('vi'):'—')+'</div></div>'+
+      '<div class="coll-detail-row"><div class="coll-detail-label">Bắt bằng</div><div class="coll-detail-value">'+(ELEMENTS[c.caughtWith]?ELEMENTS[c.caughtWith].icon+' '+ELEMENTS[c.caughtWith].name:'—')+'</div></div>'+
+    '</div>'+
+    '<button class="coll-detail-close" onclick="closeCreatureDetail()">Đóng</button>';
+
+  document.body.appendChild(modal);
+}
+
+function closeCreatureDetail(){
+  var m=document.getElementById('coll-detail');
+  if(m)m.remove();
 }
 
 /* ===== AUTH ===== */
@@ -95,11 +191,8 @@ function handleGoogleLogin(){
   autoFullscreenOnMobile();showScreen('screen-ar');
 }
 
-/* ================================================================
-   ★★★ SEARCH — KÍNH LÚP 🔍 ★★★
-   ================================================================ */
+/* ===== SEARCH ===== */
 var searchActive=false;
-
 function startSearch(){
   if(searchActive){showToast('🔍 Đang tìm...');return;}
   searchActive=true;
@@ -107,7 +200,6 @@ function startSearch(){
   showToast('🔍 Đang quét yêu thú xung quanh...',2000);
   setTimeout(function(){triggerDetection();},2000);
 }
-
 function triggerDetection(){
   var creature=generateCreature();
   GS.currentTarget=creature;saveState();
@@ -122,7 +214,6 @@ function triggerDetection(){
   setTimeout(function(){closeNotifFound();},5000);
   if(!compassActive){showToast('👉 Bấm 🧭 La bàn để tìm đường!',5000);}
 }
-
 function closeNotifFound(){
   document.getElementById('notif-found').classList.remove('show');
 }
@@ -132,4 +223,4 @@ loadState();
 renderAR();
 setTimeout(hideAddressBar,200);
 setTimeout(hideAddressBar,1000);
-console.log('🔮 Yêu Thú Săn Bắt — Fixed Layout');
+console.log('🔮 Yêu Thú Săn Bắt — Collection Edition');
