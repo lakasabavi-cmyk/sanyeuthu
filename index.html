@@ -11,20 +11,17 @@
 <link rel="stylesheet" href="css/style.css">
 
 <!-- ============================================================
-     📋 VERSION HISTORY — Mỗi lần sửa: thêm dòng mới + tăng version
-
+     📋 VERSION HISTORY
      v1.00 — Khởi tạo: AR game ngũ hành
      v1.01 — Thêm fullscreen + safe area (iPhone notch)
-     v1.02 — Bỏ "Truy tìm", thêm 🔍 search, bỏ manual turn ◀▶
+     v1.02 — Bỏ "Truy tìm", thêm 🔍 search, bỏ manual turn
      v1.03 — Đổi 🎒 Túi → 🐾 Collection (yêu thú sở hữu)
-     v1.04 — FIX: ** operator → Math.pow (navigation.js chết)
-
-     ★ File versions.js luôn được load TRƯỚC ★
+     v1.04 — FIX: ** → Math.pow (navigation.js chết)
+     v1.05 — Bỏ nút fullscreen ⛶
      ============================================================ -->
 </head>
 <body>
 <div id="toast" class="toast"></div>
-<button class="fs-btn" id="fs-btn" onclick="toggleFullscreen()">⛶</button>
 
 <!-- ==================== LOGIN ==================== -->
 <div id="screen-login" class="screen active">
@@ -46,7 +43,7 @@
       <button class="btn btn-primary" onclick="handleRegister()">Tạo tài khoản</button>
       <div class="toggle-text">Đã có tài khoản? <a onclick="toggleRegister()">Đăng nhập</a></div>
     </div>
-    <div class="login-version">v1.04</div>
+    <div class="login-version">v1.05</div>
   </div>
 </div>
 
@@ -148,7 +145,6 @@
   <div class="coll-grid" id="coll-grid"></div>
 </div>
 
-<!-- ★ versions.js LUÔN LOAD ĐẦU ★ -->
 <script src="js/versions.js"></script>
 <script src="js/config.js"></script>
 <script src="js/creatures.js"></script>
