@@ -13,7 +13,6 @@
 <body>
 <div id="toast" class="toast"></div>
 
-<!-- FULLSCREEN -->
 <button class="fullscreen-btn" id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
 
 <!-- ===== LOGIN ===== -->
@@ -52,13 +51,13 @@
     <div class="crosshair-pulse" id="crosshair-pulse"></div>
   </div>
 
-  <!-- ★ TOP HUD — chỉ info + compass + exit ★ -->
+  <!-- TOP HUD -->
   <div class="hud-top">
     <div class="hud-info">
       <div class="hud-level" id="hud-level">Level 1</div>
       <div class="hud-realm" id="hud-realm">🌀 Luyện Khí</div>
       <div class="hud-xp-bar"><div class="hud-xp-fill" id="hud-xp-fill" style="width:0%"></div></div>
-      <div class="hud-compass-status" id="compass-status">🧭 La bàn chưa bật</div>
+      <div class="hud-compass-status" id="compass-status">🧭 Chưa bật</div>
     </div>
     <div class="hud-top-right">
       <button class="btn-compass" id="btn-compass" onclick="activateCompass()">🧭 La bàn</button>
@@ -66,8 +65,7 @@
     </div>
   </div>
 
-  <!-- ★ KHÔNG CÒN NOTIFICATION "Truy tìm" ★ -->
-  <!-- Notification chỉ dùng khi TÌM THẤY yêu thú -->
+  <!-- Found notification -->
   <div id="notif-found" class="notif-found">
     <div class="notif-found-icon" id="notif-found-icon">🐾</div>
     <div class="notif-found-info">
@@ -83,33 +81,23 @@
     <div class="ar-dist-hint" id="ar-dist-hint">Xoay camera</div>
   </div>
 
-  <!-- Manual turn fallback -->
-  <div class="manual-turn" id="manual-turn">
-    <button onclick="manualTurnLeft()">◀</button>
-    <button onclick="manualTurnRight()">▶</button>
-  </div>
-
-  <!-- ★ SIDE NAV — LÚN HIỂN THỊ, KHÔNG BỊ CHE ★ -->
+  <!-- ★★ SIDE NAV — 3 NÚT BÊN TRÁI ★★ -->
   <div class="side-nav">
-    <button class="side-nav-btn" onclick="showScreen('screen-profile')" title="Hồ sơ">
+    <button class="side-nav-btn" onclick="showScreen('screen-profile')">
       <span class="side-nav-icon">👤</span>
-      <span class="side-nav-label">Hồ sơ</span>
     </button>
-    <button class="side-nav-btn" onclick="showScreen('screen-inventory')" title="Túi">
+    <button class="side-nav-btn" onclick="showScreen('screen-inventory')">
       <span class="side-nav-icon">🎒</span>
-      <span class="side-nav-label">Túi</span>
     </button>
-    <!-- ★ KÍNH LÚP — Tìm yêu thú ★ -->
-    <button class="side-nav-btn search-btn" id="btn-search" onclick="startSearch()" title="Tìm yêu thú">
+    <button class="side-nav-btn search-btn" id="btn-search" onclick="startSearch()">
       <span class="side-nav-icon">🔍</span>
-      <span class="side-nav-label">Tìm</span>
     </button>
   </div>
 
   <!-- Balls -->
   <div class="ar-balls-row" id="ar-balls-row"></div>
 
-  <!-- ★ BOTTOM — Rate + Capture, ĐẨY LÊN TRÁNH CHROME TOOLBAR ★ -->
+  <!-- Bottom -->
   <div class="ar-bottom">
     <div class="ar-rate-row">
       <div class="ar-rate-label">Tỷ lệ</div>
