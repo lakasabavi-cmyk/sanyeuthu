@@ -1,6 +1,6 @@
 /* ============================================================
    camera.js — Camera + AR Render
-   ★ v1.06: Bỏ update thanh tỷ lệ (không hiển thị nữa) ★
+   ★ v1.07 FIX: Xóa canvas text Tây Bắc/ĐN (trùng với HTML ar-distance) ★
    ============================================================ */
 
 var cameraStream=null,creatureOnScreen=false,crosshairLocked=false,currentAccuracy=0;
@@ -30,29 +30,34 @@ function renderAR(){
   var aCenter=relAngle>180?360-relAngle:relAngle;
   var halfFOV=CONFIG.FOV/2;
 
+  /* ★ HTML element hiển thị khoảng cách — CHỈ 1 chỗ ★ */
   document.getElementById('ar-dist-val').textContent='~'+Math.round(gpsDist)+'m';
 
   if(aCenter>halfFOV){
     creatureOnScreen=false;crosshairLocked=false;currentAccuracy=0;
+
     var dirs=['Bắc','Đông Bắc','Đông','Đông Nam','Nam','Tây Nam','Tây','Tây Bắc'];
     var dir=dirs[Math.round(bearing/45)%8];
+
+    /* ★ HTML element hiển thị hướng — CHỈ 1 chỗ ★ */
     document.getElementById('ar-dist-hint').textContent='🧭 '+dir+' | Xoay camera';
 
     var sz=Math.min(canvas.width,canvas.height)*0.12,pulse=0.7+Math.sin(time*3)*0.3;
+
+    /* Glow bg */
     var bg=ctx.createRadialGradient(cx,cy,10,cx,cy,250);
     bg.addColorStop(0,'rgba(76,195,247,'+(0.2*pulse)+')');bg.addColorStop(1,'transparent');
     ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);
 
+    /* Mũi tên */
     ctx.save();ctx.translate(cx,cy-50);ctx.rotate(relAngle*Math.PI/180);
     var ag=ctx.createLinearGradient(0,-sz,0,sz*0.3);ag.addColorStop(0,'#4caf50');ag.addColorStop(1,'#81c784');
     ctx.fillStyle=ag;ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=3;
     ctx.beginPath();ctx.moveTo(0,-sz);ctx.lineTo(sz*0.5,-sz*0.2);ctx.lineTo(sz*0.22,-sz*0.2);ctx.lineTo(sz*0.22,sz*0.3);ctx.lineTo(-sz*0.22,sz*0.3);ctx.lineTo(-sz*0.22,-sz*0.2);ctx.lineTo(-sz*0.5,-sz*0.2);ctx.closePath();ctx.fill();ctx.stroke();
     ctx.shadowColor='rgba(76,195,247,0.8)';ctx.shadowBlur=15*pulse;ctx.fill();ctx.shadowBlur=0;ctx.restore();
 
-    ctx.save();ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(cx-100,cy+50,200,50);
-    ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle='#4fc3f7';ctx.fillText('🧭 '+dir,cx,cy+65);
-    ctx.font='13px sans-serif';ctx.fillStyle='#fff';ctx.fillText('~'+Math.round(gpsDist)+'m',cx,cy+88);ctx.restore();
+    /* ★★ v1.07: ĐÃ XÓA canvas text "Tây Bắc ~5m" ở đây ★★ */
+    /* ★★ (trước đây có ctx.fillRect + ctx.fillText) ★★ */
 
   }else{
     creatureOnScreen=true;
@@ -78,8 +83,6 @@ function renderAR(){
   var ring=document.getElementById('crosshair-ring');
   if(crosshairLocked){ring.classList.add('locked');ring.classList.remove('close');document.getElementById('crosshair-pulse').style.display='';}
   else{ring.classList.remove('locked');document.getElementById('crosshair-pulse').style.display='none';if(creatureOnScreen&&currentAccuracy>0.3)ring.classList.add('close');else ring.classList.remove('close');}
-
-  /* ★ v1.06: KHÔNG cập nhật thanh tỷ lệ — đã bỏ ★ */
 
   /* Capture button */
   var btn=document.getElementById('capture-btn');
