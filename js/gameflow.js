@@ -288,17 +288,33 @@ function stopWalkArrow() {
 }
 
 function addCrosshairArrow() {
-  if (document.getElementById('crosshair-arrow')) return;
+  /* ★ XÓA TẤT CẢ mũi tên cũ trước khi tạo ★ */
+  removeAllArrows();
   var wrap = document.querySelector('.crosshair');
   if (!wrap) return;
   var a = document.createElement('div');
-  a.id = 'crosshair-arrow'; a.className = 'crosshair-arrow'; a.innerHTML = '➤';
+  a.id = 'crosshair-arrow';
+  a.className = 'crosshair-arrow';
+  a.innerHTML = '➤';
   wrap.appendChild(a);
 }
 
+function removeAllArrows() {
+  /* Xóa mũi tên gameflow */
+  var old = document.getElementById('crosshair-arrow');
+  if (old) old.remove();
+
+  /* Xóa mũi tên từ navigation.js / camera.js */
+  var allArrows = document.querySelectorAll('.nav-arrow, .compass-arrow, .arrow, .direction-arrow, [class*="arrow"]');
+  for (var i = 0; i < allArrows.length; i++) {
+    if (allArrows[i].id !== 'crosshair-arrow') {
+      allArrows[i].remove();
+    }
+  }
+}
+
 function removeCrosshairArrow() {
-  var a = document.getElementById('crosshair-arrow');
-  if (a) a.remove();
+  removeAllArrows();
 }
 
 /* ================================================================
