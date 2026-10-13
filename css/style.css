@@ -214,3 +214,108 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .coll-detail-label{color:#aaa}
 .coll-detail-value{font-weight:600}
 .coll-detail-close{margin-top:20px;padding:12px 40px;border:1px solid rgba(255,255,255,.3);background:none;color:#aaa;border-radius:25px;font-size:14px;cursor:pointer}
+
+/* ============================================================
+   ★★★ CREATURE ART — SVG Chibi Animation ★★★
+   ★ v1.11: Bộ 15 yêu thú mặc định animated
+   ============================================================ */
+
+/* SVG container */
+.creature-svg{
+  display:block;
+  margin:0 auto;
+  overflow:visible;
+}
+
+/* ★ Body breathing (thở) ★ */
+.art-body{
+  animation:breathe 3s ease-in-out infinite;
+  transform-origin:center bottom;
+}
+@keyframes breathe{
+  0%,100%{transform:scaleY(1) scaleX(1)}
+  50%{transform:scaleY(1.03) scaleX(0.98)}
+}
+
+/* ★ Head bobbing (lắc đầu) ★ */
+.art-head{
+  animation:headBob 2.5s ease-in-out infinite;
+  transform-origin:center 65%;
+}
+@keyframes headBob{
+  0%,100%{transform:rotate(0deg)}
+  25%{transform:rotate(-3deg)}
+  75%{transform:rotate(3deg)}
+}
+
+/* ★ Eye blink (chớp mắt) ★ */
+.art-eyes{
+  animation:blink 4s ease-in-out infinite;
+}
+@keyframes blink{
+  0%,42%,46%,100%{transform:scaleY(1)}
+  44%{transform:scaleY(0.1)}
+}
+
+/* ★ Glow pulse (nhấp nháy) ★ */
+.art-glow{
+  animation:glowPulse 2s ease-in-out infinite;
+}
+@keyframes glowPulse{
+  0%,100%{opacity:0.4;transform:scale(1)}
+  50%{opacity:0.8;transform:scale(1.1)}
+}
+
+/* ★ Sparkles (tinh tú bay) ★ */
+.art-sparkle{
+  animation:sparkleFloat 2s ease-in-out infinite;
+}
+.art-sparkle.s0{animation-delay:0s;animation-duration:1.8s}
+.art-sparkle.s1{animation-delay:0.4s;animation-duration:2.2s}
+.art-sparkle.s2{animation-delay:0.8s;animation-duration:1.6s}
+.art-sparkle.s3{animation-delay:1.2s;animation-duration:2.5s}
+@keyframes sparkleFloat{
+  0%,100%{opacity:0.2;transform:translateY(0) scale(1)}
+  50%{opacity:0.9;transform:translateY(-8px) scale(1.3)}
+}
+
+/* ★ Ears wiggle (tai động) ★ */
+.art-ears{
+  animation:earWiggle 3s ease-in-out infinite;
+  transform-origin:center top;
+}
+@keyframes earWiggle{
+  0%,100%{transform:rotate(0deg)}
+  30%{transform:rotate(-2deg)}
+  60%{transform:rotate(2deg)}
+}
+
+/* ★ Collection card art ★ */
+.coll-card-art{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:85px;
+  margin:6px auto;
+}
+.coll-card-art img{
+  width:80px;height:80px;
+  border-radius:16px;
+  object-fit:cover;
+  border:2px solid rgba(255,255,255,.15);
+}
+
+/* ★ Detail art ★ */
+.coll-detail-art{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* ★ Rarity glow for cards ★ */
+.coll-card.legendary .art-glow{
+  animation:glowPulse 1.5s ease-in-out infinite;
+}
+.coll-card.rare .art-glow{
+  animation:glowPulse 2s ease-in-out infinite;
+}
