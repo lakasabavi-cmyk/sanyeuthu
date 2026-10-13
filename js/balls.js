@@ -62,9 +62,14 @@ function getRate(ball, creatureElement, creatureLevel, playerLevel, accuracy) {
 function renderBalls() {
   var row = document.getElementById('ar-balls-row');
   if (!row) return;
-
   if (!GS.inventory) GS.inventory = {KIM:5, MOC:5, THUY:5, HOA:5, THO:5};
   if (!GS.selectedBall) GS.selectedBall = 'KIM';
+
+  /* ★ Lấy element yêu thú hiện tại nếu có ★ */
+  var creatureEl = null;
+  if (_state === 'scanning' && GS.currentTarget) {
+    creatureEl = GS.currentTarget.element;
+  }
 
   var html = '';
   for (var i = 0; i < BALL_KEYS.length; i++) {
@@ -78,6 +83,12 @@ function renderBalls() {
     html += '<div class="ball-icon">' + b.icon + '</div>';
     html += '<div class="ball-name" style="color:' + b.color + '">' + b.name.replace('Bùa ','') + '</div>';
     html += '<div class="ball-count">' + count + '</div>';
+
+    /* ★ Advantage % khi có yêu thú ★ */
+    if (creatureEl) {
+      var adv = getAdvantageLabel(key, creatureEl);
+      html += '<div class="ball-adv" style="color:' + adv.color + '">' + adv.bonus + '</div>';
+    }
     html += '</div>';
   }
   row.innerHTML = html;
