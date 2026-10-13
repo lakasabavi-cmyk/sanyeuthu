@@ -4,31 +4,104 @@
    ============================================================ */
 
 var cameraStream=null,creatureOnScreen=false,crosshairLocked=false,currentAccuracy=0;
+var displayModeActive='camera';
+
+function supportsCamera(){
+  var host=location.hostname;
+  var secure=window.isSecureContext||location.protocol==='https:'||host==='localhost'||host==='127.0.0.1';
+  return !!(secure&&navigator.mediaDevices&&typeof navigator.mediaDevices.getUserMedia==='function');
+}
+
+function getDisplayModeLabel(){
+  if(GS.displayMode==='screen') return '📱 Không AR';
+  if(GS.displayMode==='sensor') return displayModeActive==='camera'?'📷 AR cảm biến':'📱 Không AR*';
+  return displayModeActive==='camera'?'✨ Tự động':'📱 Không AR*';
+}
+
+function updateDisplayModeButton(){
+  var btn=document.getElementById('btn-display-mode');
+  if(!btn) return;
+  btn.textContent=getDisplayModeLabel();
+  btn.title='Đổi chế độ hiển thị (đang dùng: '+(displayModeActive==='camera'?'camera':'không AR')+')';
+}
+
+function applyDisplayMode(mode,notify){
+  if(['auto','sensor','screen'].indexOf(mode)<0) mode='auto';
+  GS.displayMode=mode;
+  if(_state&&_state!=='idle'&&typeof cleanupAfterResult==='function') cleanupAfterResult();
+
+  var wantsCamera=mode!=='screen'&&supportsCamera();
+  displayModeActive=wantsCamera?'camera':'screen';
+  var screen=document.getElementById('screen-ar');
+  if(screen) screen.classList.toggle('no-camera',!wantsCamera);
+
+  if(wantsCamera) startCamera();
+  else stopCamera();
+  updateDisplayModeButton();
+  if(notify){
+    if(wantsCamera){
+      showToast(mode==='sensor'?'📷 Đã bật AR cảm biến. Cho phép camera và la bàn.':'✨ Đã bật chế độ tự động.',3000);
+    }else{
+      showToast(mode==='screen'?'📱 Đã bật chế độ không AR. Vật thể sẽ xuất hiện giữa màn hình.':'📱 Thiết bị chưa hỗ trợ camera an toàn; đang dùng chế độ không AR.',3500);
+    }
+  }
+}
+
+function cycleDisplayMode(){
+  var modes=['auto','sensor','screen'];
+  var index=modes.indexOf(GS.displayMode||'auto');
+  applyDisplayMode(modes[(index+1)%modes.length],true);
+  saveState();
+}
+
+function stopCamera(){
+  if(cameraStream){
+    cameraStream.getTracks().forEach(function(track){track.stop();});
+    cameraStream=null;
+  }
+  var video=document.getElementById('camera-feed');
+  if(video) video.srcObject=null;
+}
+
+function handleCameraError(error){
+  stopCamera();
+  displayModeActive='screen';
+  var screen=document.getElementById('screen-ar');
+  if(screen) screen.classList.add('no-camera');
+  updateDisplayModeButton();
+  if(error&&error.name==='NotAllowedError'){
+    showToast('Chưa được cấp quyền camera. Chuyển sang không AR; có thể bật camera trong cài đặt.');
+  }else if(error&&error.name==='NotFoundError'){
+    showToast('Không tìm thấy camera. Chuyển sang chế độ không AR.');
+  }else{
+    showToast('Không mở được camera. Chuyển sang chế độ không AR; hãy thử HTTPS và kiểm tra quyền camera.');
+  }
+}
 
 function startCamera(){
   if(cameraStream) return;
-  if(!navigator.mediaDevices||typeof navigator.mediaDevices.getUserMedia!=='function'){
-    showToast('Camera cần mở ứng dụng qua HTTPS hoặc localhost trên trình duyệt hỗ trợ.');
+  if(!supportsCamera()){
+    handleCameraError();
     return;
   }
   navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false}).then(function(s){
+    if(displayModeActive!=='camera'){
+      s.getTracks().forEach(function(track){track.stop();});
+      return;
+    }
     cameraStream=s;
     document.getElementById('camera-feed').srcObject=s;
     var cv=document.getElementById('ar-canvas'),v=document.getElementById('camera-feed');
     v.onloadedmetadata=function(){cv.width=v.videoWidth;cv.height=v.videoHeight;};
-  }).catch(function(error){
-    if(error&&error.name==='NotAllowedError'){
-      showToast('Chưa được cấp quyền camera. Hãy cho phép camera trong cài đặt trình duyệt.');
-    }else if(error&&error.name==='NotFoundError'){
-      showToast('Không tìm thấy camera trên thiết bị.');
-    }else{
-      showToast('Không mở được camera. Hãy dùng HTTPS và kiểm tra quyền camera.');
-    }
-  });
+  }).catch(handleCameraError);
 }
 
 function renderAR(){
   updateSmoothHeading();
+  if(displayModeActive==='screen'){
+    requestAnimationFrame(renderAR);
+    return;
+  }
   var canvas=document.getElementById('ar-canvas');
   if(!canvas.width){requestAnimationFrame(renderAR);return;}
   var ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
