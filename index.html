@@ -9,19 +9,6 @@
 <meta name="theme-color" content="#0a0a2e">
 <title>🔮 Yêu Thú Săn Bắt</title>
 <link rel="stylesheet" href="css/style.css">
-
-<!-- ============================================================
-     📋 VERSION HISTORY
-     v1.00 — Khởi tạo
-     v1.01 — Fullscreen + safe area
-     v1.02 — 🔍 search, bỏ manual turn
-     v1.03 — 🐾 Collection
-     v1.04 — FIX ** → Math.pow
-     v1.05 — Bỏ fullscreen button
-     v1.06 — Balls trên nút Bắt. Bỏ tên+% balls. Bỏ thanh tỷ lệ.
-             Túi x1 mỗi loại + daily +1. Tăng size nút Bắt.
-     ★★★ CSS RULE: KHÔNG tự ý đổi vị trí/kích thước icon, button ★★★
-     ============================================================ -->
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -46,7 +33,7 @@
       <button class="btn btn-primary" onclick="handleRegister()">Tạo tài khoản</button>
       <div class="toggle-text">Đã có tài khoản? <a onclick="toggleRegister()">Đăng nhập</a></div>
     </div>
-    <div class="login-version">v1.06</div>
+    <div class="login-version">v1.40</div>
   </div>
 </div>
 
@@ -62,16 +49,20 @@
     <div class="crosshair-pulse" id="crosshair-pulse"></div>
   </div>
 
+  <!-- ★ HUD MỚI ★ -->
   <div class="hud-top">
     <div class="hud-info">
-      <div class="hud-level" id="hud-level">Level 1</div>
-      <div class="hud-realm" id="hud-realm">🌀 Luyện Khí</div>
+      <div class="hud-player-line">
+        <span class="hud-name" id="hud-name">Người chơi</span>
+        <span class="hud-level" id="hud-level">Level 1</span>
+        <button class="hud-logout" onclick="doLogout()" title="Đăng xuất">✕</button>
+      </div>
+      <div class="hud-realm" id="hud-realm">@Luyện Khí</div>
       <div class="hud-xp-bar"><div class="hud-xp-fill" id="hud-xp-fill" style="width:0%"></div></div>
       <div class="hud-compass" id="compass-status">🧭 Chưa bật</div>
     </div>
     <div class="hud-tr">
-      <button class="btn-compass" id="btn-compass" onclick="activateCompass()">🧭 La bàn</button>
-      <button class="ar-exit" onclick="showScreen('screen-login')">✕</button>
+      <button class="btn-compass" id="btn-compass" onclick="activateCompass()">🧭</button>
     </div>
   </div>
 
@@ -89,13 +80,14 @@
     <div class="ar-dist-hint" id="ar-dist-hint">Xoay camera</div>
   </div>
 
+  <!-- ★ NAV MỚI: Profile → Yêu thú → Đan dược → Search ★ -->
   <div class="side-nav">
     <button class="sn-btn" onclick="showScreen('screen-profile')" title="Hồ sơ"><span>👤</span></button>
-    <button class="sn-btn" onclick="showScreen('screen-collection')" title="Yêu thú"><span>🐾</span></button>
-    <button class="sn-btn sn-search" id="btn-search" onclick="startSearch()" title="Tìm"><span>🔍</span></button>
+    <button class="sn-btn" onclick="showScreen('screen-collection')" title="Túi yêu thú"><span>🐾</span></button>
+    <button class="sn-btn" onclick="showScreen('screen-pills')" title="Túi đan dược"><span>💊</span></button>
+    <button class="sn-btn sn-search" id="btn-search" onclick="startSearchPhase()" title="Kính chiếu yêu"><span>🔍</span></button>
   </div>
 
-  <!-- ★ BOTTOM: balls trên nút Bắt, không có thanh tỷ lệ ★ -->
   <div class="ar-bottom">
     <div class="ar-balls" id="ar-balls-row"></div>
     <button class="ar-capture disabled" id="capture-btn" onclick="doCapture()">🎯</button>
@@ -110,14 +102,24 @@
   <button class="result-btn" id="result-btn" onclick="closeResult()">Tiếp tục</button>
 </div>
 
-<!-- PROFILE -->
+<!-- ==================== PROFILE ==================== -->
 <div id="screen-profile" class="screen">
   <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
+
   <div class="profile-header">
-    <div class="profile-avatar">🧙</div>
+    <div class="profile-avatar-wrap" onclick="openAvatarPicker()">
+      <div class="profile-avatar" id="profile-avatar">🧙</div>
+      <div class="profile-avatar-edit">✏️</div>
+    </div>
+    <div class="profile-name-row">
+      <input class="profile-name-input" id="profile-name-input" placeholder="Nhập tên..." onchange="updateAccountName(this.value)">
+    </div>
+    <div class="profile-email" id="profile-email"></div>
     <div class="profile-realm" id="profile-realm"></div>
     <div class="profile-level" id="profile-level"></div>
+    <div class="hud-xp-bar profile-xp"><div class="hud-xp-fill" id="profile-xp-fill" style="width:0%"></div></div>
   </div>
+
   <div class="profile-stats">
     <div class="stat-card"><div class="stat-value" id="stat-caught" style="color:#4caf50">0</div><div class="stat-label">Bắt được</div></div>
     <div class="stat-card"><div class="stat-value" id="stat-failed" style="color:#f44336">0</div><div class="stat-label">Trượt</div></div>
@@ -126,11 +128,43 @@
   </div>
 </div>
 
-<!-- COLLECTION -->
+<!-- ==================== AVATAR PICKER ==================== -->
+<div class="avatar-picker-overlay" id="avatar-picker-overlay">
+  <div class="ap-box">
+    <div class="ap-title">Chọn Avatar</div>
+
+    <div class="ap-section">
+      <div class="ap-section-title">😀 Icon mặc định</div>
+      <div class="ap-grid" id="ap-emoji-grid"></div>
+    </div>
+
+    <div class="ap-section">
+      <div class="ap-section-title">📱 Ảnh từ điện thoại</div>
+      <label class="ap-upload-btn">
+        📁 Chọn ảnh từ thư viện
+        <input type="file" accept="image/*" onchange="handleAvatarUpload(event)" style="display:none">
+      </label>
+    </div>
+
+    <div class="ap-section" id="ap-creatures-section">
+      <div class="ap-section-title">🐾 Yêu thú sở hữu</div>
+      <div class="ap-grid" id="ap-creature-grid"></div>
+    </div>
+
+    <div class="ap-section" id="ap-ai-section" style="display:none">
+      <div class="ap-section-title">✨ Ảnh AI đã tạo</div>
+      <div class="ap-grid" id="ap-ai-grid"></div>
+    </div>
+
+    <button class="ap-close" onclick="closeAvatarPicker()">Đóng</button>
+  </div>
+</div>
+
+<!-- ==================== COLLECTION ==================== -->
 <div id="screen-collection" class="screen">
   <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
   <div class="coll-header">
-    <div class="coll-title">🐾 Yêu Thú</div>
+    <div class="coll-title">🐾 Túi Yêu Thú</div>
     <div class="coll-count" id="coll-count">0 con</div>
     <div class="coll-filter">
       <button class="coll-fb active" onclick="filterCollection('all',this)">Tất cả</button>
@@ -144,15 +178,25 @@
   <div class="coll-grid" id="coll-grid"></div>
 </div>
 
+<!-- ==================== PILLS BAG ==================== -->
+<div id="screen-pills" class="screen">
+  <button class="btn-back" onclick="showScreen('screen-ar')">←</button>
+  <div class="coll-header">
+    <div class="coll-title">💊 Túi Đan Dược</div>
+    <div class="coll-count" id="pill-count">0 viên</div>
+  </div>
+  <div class="pill-bag-wrap" id="pill-bag-wrap"></div>
+</div>
+
 <script src="js/versions.js"></script>
 <script src="js/config.js"></script>
 <script src="js/creatures.js"></script>
-<script src="js/skills.js"></script>         <!-- ★ THÊM ★ -->
+<script src="js/skills.js"></script>
 <script src="js/idle.js"></script>
 <script src="js/balls.js"></script>
 <script src="js/navigation.js"></script>
 <script src="js/camera.js"></script>
-<script src="js/capture.js"></script> 
+<script src="js/capture.js"></script>
 <script src="js/alchemy.js"></script>
 <script src="js/gameflow.js"></script>
 <script src="js/creature-art.js"></script>
