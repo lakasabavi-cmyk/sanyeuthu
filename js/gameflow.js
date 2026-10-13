@@ -282,47 +282,67 @@ function removeSearchOverlay() {
    ★ GPS = backup (cũng track cho area 50m)
    ================================================================ */
 function startMovementDetection() {
-  /* DeviceMotion — chính */
+  /* Con quay hồi chuyển (rotationRate) + gia tốc: hoạt động tốt trong nhà, không cần GPS */
+  var gyroHistory = [];
+  _lastMotionTs = 0;
   _motionFn = function(e) {
     if (_state !== 'searching') return;
-    var acc = e.accelerationIncludingGravity || e.acceleration;
-    if (!acc) return;
-    var mag = Math.sqrt((acc.x || 0) * (acc.x || 0) + (acc.y || 0) * (acc.y || 0) + (acc.z || 0) * (acc.z || 0));
     var now = Date.now();
-    _accelHistory.push({t: now, v: mag});
+
+    var acc = e.accelerationIncludingGravity || e.acceleration;
+    if (acc) {
+      var mag = Math.sqrt((acc.x || 0) * (acc.x || 0) + (acc.y || 0) * (acc.y || 0) + (acc.z || 0) * (acc.z || 0));
+      _accelHistory.push({t: now, v: mag});
+    }
     while (_accelHistory.length > 0 && _accelHistory[0].t < now - 2000) _accelHistory.shift();
 
-    var moving = false;
+    var rr = e.rotationRate;
+    if (rr) {
+      var gm = Math.sqrt((rr.alpha || 0) * (rr.alpha || 0) + (rr.beta || 0) * (rr.beta || 0) + (rr.gamma || 0) * (rr.gamma || 0));
+      gyroHistory.push({t: now, v: gm});
+    }
+    while (gyroHistory.length > 0 && gyroHistory[0].t < now - 1500) gyroHistory.shift();
+
+    if (!acc && !rr) return;
+
+    var movingGyro = false;
+    if (gyroHistory.length > 5) {
+      var gs = 0;
+      for (var j = 0; j < gyroHistory.length; j++) gs += gyroHistory[j].v;
+      movingGyro = (gs / gyroHistory.length) > CONFIG.GYRO_MOVE_DPS;
+    }
+
+    var movingAcc = false;
     if (_accelHistory.length > 5) {
       var sum = 0;
       for (var i = 1; i < _accelHistory.length; i++) sum += Math.abs(_accelHistory[i].v - _accelHistory[i - 1].v);
-      moving = (sum / (_accelHistory.length - 1)) > 0.15;
+      movingAcc = (sum / (_accelHistory.length - 1)) > 0.15;
     }
 
-    if (moving) {
-      if (_lastMotionTs > 0) _moveTime += (now - _lastMotionTs) / 1000;
-    }
+    var moving = movingGyro || movingAcc;
+    if (moving && _lastMotionTs > 0) _moveTime += Math.min(0.5, (now - _lastMotionTs) / 1000);
     _lastMotionTs = now;
 
-    var hint = null;
-    if (hint) hint.textContent = moving ? 'Đang di chuyển, tiếp tục tìm xung quanh...' : 'Chưa thấy di chuyển, hãy di chuyển để tìm xung quanh';
+    var hint = document.getElementById('so-hint');
+    if (hint && !document.body.classList.contains('toast-on')) {
+      hint.textContent = moving ? 'Đang di chuyển, tiếp tục tìm xung quanh...' : 'Chưa thấy di chuyển, hãy di chuyển để tìm xung quanh';
+    }
 
     if (_moveTime >= _triggerSec) triggerDetection();
   };
   window.addEventListener('devicemotion', _motionFn);
 
-  /* GPS — backup + area tracking */
+  /* GPS chỉ dùng để theo dõi khu vực (50m), không cộng thời gian di chuyển vì trong nhà tín hiệu kém */
   if (navigator.geolocation) {
     _gpsWatchId = navigator.geolocation.watchPosition(function(pos) {
       playerLat = pos.coords.latitude; playerLng = pos.coords.longitude;
-      if (_state === 'searching') { _moveTime += 0.5; if (_moveTime >= _triggerSec) triggerDetection(); }
     }, function() {}, {enableHighAccuracy: true, maximumAge: 3000, timeout: 15000});
   }
 
   /* Fallback: nếu không có DeviceMotion (desktop) */
   var fbTimer = setInterval(function() {
     if (_state !== 'searching') { clearInterval(fbTimer); return; }
-    if (_accelHistory.length === 0) {
+    if (_lastMotionTs === 0) {
       _moveTime += 1;
       if (_moveTime >= _triggerSec) { clearInterval(fbTimer); triggerDetection(); }
     }
