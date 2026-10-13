@@ -304,18 +304,73 @@ function executeTraining(targetIdx, tier, needCount) {
 }
 
 function showTrainResult(success, target, tier) {
-  var m = document.getElementById('result-modal');
-  if (!m) return;
+  var old = document.getElementById('tr-overlay');
+  if (old) old.remove();
+
+  var ov = document.createElement('div');
+  ov.className = 'tr-overlay';
+  ov.id = 'tr-overlay';
+
+  var h = '<div class="tr-stage">';
   if (success) {
-    document.getElementById('result-icon').innerHTML = '⚡';
-    document.getElementById('result-title').innerHTML = '✨ Tu luyện thành công!';
-    document.getElementById('result-sub').innerHTML = 'Nhận được <strong style="color:#ffd700;font-size:16px">' + (target ? target.name : 'Yêu thú') + ' cấp ' + tier + '</strong><br><span style="opacity:.7">Lv.' + (target ? target.level : '?') + ' — Stats +2 mỗi chỉ số</span>';
-  } else {
-    document.getElementById('result-icon').innerHTML = '💥';
-    document.getElementById('result-title').innerHTML = '💔 Tu luyện thất bại!';
-    document.getElementById('result-sub').innerHTML = '<strong style="color:#f44336">Mất vật phẩm</strong><br><span style="opacity:.7">Yêu thú hợp tu + Đan dược đã tiêu hao</span>';
+    h += '<div class="tr-rays"></div><div class="tr-rays tr-rays2"></div>'
+      + '<div class="tr-wave"></div><div class="tr-wave tr-wave2"></div>';
   }
-  m.classList.add('show');
+  h += '<div class="tr-icon' + (success ? ' glow' : '') + '" id="tr-icon">⚡</div>';
+  if (!success) {
+    h += '<div class="tr-shards" id="tr-shards">';
+    for (var i = 0; i < 8; i++) {
+      var a = i * 45, r = a * Math.PI / 180;
+      h += '<span class="tr-shard" style="--dx:' + Math.round(Math.cos(r + 0.4) * 130) + 'px;--dy:' + Math.round(Math.sin(r + 0.4) * 130) + 'px;--rot:' + (i % 2 ? 1 : -1) * (180 + i * 40) + 'deg;clip-path:polygon(50% 50%,' + wedgePt(a) + ',' + wedgePt(a + 45) + ')">⚡</span>';
+    }
+    h += '</div>';
+  }
+  if (success && target) {
+    h += '<div class="tr-creature" id="tr-creature">' + renderCreatureArt(target, 120) + '</div>';
+  }
+  h += '</div><div class="tr-text" id="tr-text"></div><div class="tr-sub" id="tr-sub"></div>'
+    + '<button class="tr-close" id="tr-close" onclick="closeTrainResult()">OK</button>';
+  ov.innerHTML = h;
+  document.body.appendChild(ov);
+  requestAnimationFrame(function() { ov.classList.add('show'); });
+
+  var icon = document.getElementById('tr-icon');
+  var txt = document.getElementById('tr-text');
+  var sub = document.getElementById('tr-sub');
+  icon.classList.add('charge');
+
+  setTimeout(function() {
+    if (!document.getElementById('tr-overlay')) return;
+    if (success) {
+      ov.classList.add('win');
+      setTimeout(function() {
+        if (!document.getElementById('tr-overlay')) return;
+        ov.classList.add('reveal');
+        txt.innerHTML = '✨ Tu luyện thành công, nhận được yêu thú cấp ' + tier;
+        sub.innerHTML = (target ? '<strong>' + target.name + '</strong> Lv.' + target.level + ' — Stats +2 mỗi chỉ số' : '');
+        txt.classList.add('on'); sub.classList.add('on');
+        document.getElementById('tr-close').classList.add('on');
+      }, 1600);
+    } else {
+      ov.classList.add('lose');
+      txt.innerHTML = '💔 Tu luyện thất bại';
+      sub.innerHTML = 'Yêu thú hợp tu và đan dược đã tiêu hao';
+      setTimeout(function() {
+        txt.classList.add('on'); sub.classList.add('on');
+        document.getElementById('tr-close').classList.add('on');
+      }, 700);
+    }
+  }, 1400);
+}
+
+function wedgePt(deg) {
+  var r = deg * Math.PI / 180;
+  return (50 + Math.cos(r) * 100).toFixed(1) + '% ' + (50 + Math.sin(r) * 100).toFixed(1) + '%';
+}
+
+function closeTrainResult() {
+  var o = document.getElementById('tr-overlay');
+  if (o) o.remove();
 }
 
 function closeTrainModal() {
@@ -445,4 +500,13 @@ function renderPillInventory() {
   }
   html += '</div></div>';
   return html;
+}
+
+function updatePillBag() {
+  var total = 0;
+  for (var t in (GS.pills || {})) total += GS.pills[t] > 0 ? GS.pills[t] : 0;
+  var cnt = document.getElementById('pill-count');
+  if (cnt) cnt.textContent = total + ' viên';
+  var wrap = document.getElementById('pill-bag-wrap');
+  if (wrap) wrap.innerHTML = renderPillInventory();
 }
