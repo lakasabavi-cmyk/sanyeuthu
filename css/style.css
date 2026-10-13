@@ -1819,3 +1819,16 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .rg-success{background:rgba(76,175,80,.75)}
 .rg-close{background:rgba(255,167,38,.75)}
 .rg-far{background:rgba(0,0,0,.65)}
+
+/* ============================================================
+   ★★★ BALL BUTTON — Thêm advantage text ★★★
+   ============================================================ */
+.ball-adv{
+  font-size:9px;font-weight:800;
+  margin-top:1px;
+}
+
+/* ★ AR Item scale transition ★ */
+.ar-item{
+  transition:opacity .5s ease, visibility .5s ease, transform .5s ease;
+}
