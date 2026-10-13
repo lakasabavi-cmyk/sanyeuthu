@@ -1763,15 +1763,35 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
    ============================================================ */
 .ar-item{
   position:absolute;
-  transform:translate(-50%,-50%);
+  bottom:27%;
+  display:flex;flex-direction:column;align-items:center;
+  transform:translateX(-50%);
   text-align:center;z-index:200;
-  transition:opacity .4s ease;
+  transition:left .12s linear,opacity .25s ease;
   visibility:hidden;opacity:0;
   pointer-events:none;
 }
 .ar-item .ac-adv-item{pointer-events:auto}
 
-.ac-art{animation:creatureFloat 2.5s ease-in-out infinite}
+.ar-item .ac-info{order:1;margin-bottom:0}
+.ar-item .ac-art{order:2;line-height:0;animation:creatureFloat 2.5s ease-in-out infinite}
+.ar-item .bp-art{order:1;line-height:0;animation:creatureFloat 2s ease-in-out infinite}
+.ar-item .bp-name{order:2}
+.ac-ground{
+  order:3;
+  width:92px;height:18px;margin-top:-2px;
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(10,15,28,.82) 0%,rgba(10,15,28,.45) 42%,rgba(10,15,28,0) 74%);
+  box-shadow:0 5px 14px rgba(0,0,0,.35);
+  position:relative;
+}
+.ac-ground:before{
+  content:"";
+  position:absolute;inset:3px 12px 8px;
+  border:1px solid rgba(255,255,255,.42);
+  border-radius:50%;
+  transform:perspective(40px) rotateX(28deg);
+}
 .ac-name{font-size:18px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);margin-bottom:4px}
 .ac-tags{display:flex;gap:6px;justify-content:center}
 .ac-el{font-size:11px;padding:3px 10px;border-radius:10px;color:#fff;font-weight:600}
@@ -1789,9 +1809,8 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .ac-adv-text{font-size:10px;font-weight:800}
 
 /* ★ Ball ★ */
-.bp-art{animation:creatureFloat 2s ease-in-out infinite}
 .bp-glow{animation:glowPulse 1.5s ease-in-out infinite}
-.bp-name{font-size:16px;font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,.8);margin-top:6px}
+.ar-item .bp-name{font-size:16px;font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,.8);margin-top:6px}
 
 .bp-pickup-btn{
   position:absolute;bottom:180px;left:50%;
@@ -1830,7 +1849,7 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 
 /* ★ AR Item scale transition ★ */
 .ar-item{
-  transition:opacity .5s ease, visibility .5s ease, transform .5s ease;
+  transition:left .12s linear, opacity .25s ease, visibility .25s ease;
 }
 
 .ball-adv{
