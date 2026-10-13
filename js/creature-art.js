@@ -188,8 +188,6 @@ function renderCreatureCard(creature, idx) {
 function renderCreatureDetail(creature, idx) {
   var el = ELEMENTS[creature.element] || ELEMENTS.KIM;
   var rarity = creature.rarity || 'common';
-
-  /* Realm — safe */
   var realm = (typeof getRealm === 'function') ? getRealm(creature.level) : {icon:'🌀', name:'Luyện Khí'};
 
   /* Art */
@@ -200,14 +198,13 @@ function renderCreatureDetail(creature, idx) {
     artHtml = '<div class="coll-detail-art" style="margin-bottom:12px">' + renderCreatureArt(creature, 180) + '</div>';
   }
 
-  /* Stats bars */
+  /* Stats */
   var statsHtml = '';
   if (typeof STAT_KEYS !== 'undefined' && typeof STAT_INFO !== 'undefined' && typeof getTotalStatBudget === 'function') {
     var stats = creature.stats || (typeof generateCreatureStats === 'function' ? generateCreatureStats(creature) : {});
     var budget = getTotalStatBudget(creature);
     var totalStats = 0;
     for (var k in stats) totalStats += stats[k];
-
     statsHtml = '<div class="stats-container">';
     statsHtml += '<div class="stats-budget">Tổng điểm: <strong>' + totalStats + '</strong> / ' + budget + '</div>';
     for (var i = 0; i < STAT_KEYS.length; i++) {
@@ -218,8 +215,7 @@ function renderCreatureDetail(creature, idx) {
         + '<div class="stat-icon">' + info.icon + '</div>'
         + '<div class="stat-name">' + info.name + '</div>'
         + '<div class="stat-bar"><div class="stat-bar-fill" style="width:' + val + '%;background:' + info.color + '"></div></div>'
-        + '<div class="stat-val" style="color:' + info.color + '">' + val + '</div>'
-        + '</div>';
+        + '<div class="stat-val" style="color:' + info.color + '">' + val + '</div></div>';
     }
     statsHtml += '</div>';
   }
@@ -245,17 +241,23 @@ function renderCreatureDetail(creature, idx) {
     skillsHtml += '</div>';
   }
 
-  /* ★ Transform button — SAFE ★ */
+  /* Transform button */
   var transformHtml;
   if (creature.aiImage) {
     transformHtml = '<button class="transform-btn done" onclick="closeCreatureDetail()">✅ Đã biến hình</button>';
-  } else if (!safeAiReady()) {
+  } else if (!(typeof safeAiReady === 'function' ? safeAiReady() : false)) {
     transformHtml = '<button class="transform-btn disabled" onclick="showToast(\'Chưa kết nối AI!\')">✨ Biến hình (chưa kết nối AI)</button>';
   } else {
     transformHtml = '<button class="transform-btn" onclick="requestTransform(' + idx + ')">✨ Biến hình</button>';
   }
 
-  /* ★ TRẢ VỀ 1 LẦN — KHÔNG CODE THỪA ★ */
+  /* ★ Luyện Đan + Tu Luyện ★ */
+  var actionHtml = '<div class="action-btns">'
+    + '<button class="action-btn alchemy-btn" onclick="doAlchemy(' + idx + ')">🔥 Luyện Đan</button>'
+    + '<button class="action-btn training-btn" onclick="doTraining(' + idx + ')">⚡ Tu Luyện</button>'
+    + '</div>';
+
+  /* ★ Trả về — 1 lần duy nhất ★ */
   return artHtml
     + '<div class="coll-detail-name">' + creature.name + '</div>'
     + '<div class="coll-detail-badges">'
@@ -266,6 +268,7 @@ function renderCreatureDetail(creature, idx) {
     + statsHtml
     + skillsHtml
     + transformHtml
+    + actionHtml
     + '<button class="coll-detail-close" onclick="closeCreatureDetail()">Đóng</button>';
 }
 /* ★★★ END ★★★ */
