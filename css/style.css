@@ -957,3 +957,125 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .pill-icon{font-size:22px}
 .pill-name{font-size:10px;font-weight:700;margin-top:2px}
 .pill-count{font-size:12px;color:#aaa;margin-top:2px}
+
+/* ============================================================
+   ★★★ COMPASS PROMPT ★★★
+   ============================================================ */
+.compass-prompt{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.88);
+  display:none;justify-content:center;align-items:center;
+  z-index:99999;
+}
+.compass-prompt.active{display:flex}
+.cp-box{
+  background:rgba(30,30,55,.95);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;padding:32px 28px;
+  width:85%;max-width:340px;
+  text-align:center;
+}
+.cp-icon{font-size:52px;margin-bottom:12px}
+.cp-title{font-size:20px;font-weight:800;color:#4fc3f7;margin-bottom:10px}
+.cp-desc{font-size:14px;color:#bbb;line-height:1.6;margin-bottom:24px}
+.cp-buttons{display:flex;gap:12px}
+.cp-btn{
+  flex:1;padding:14px;border:none;border-radius:14px;
+  font-size:16px;font-weight:700;cursor:pointer;
+}
+.cp-btn.yes{
+  background:linear-gradient(135deg,#4caf50,#66bb6a);
+  color:#fff;
+}
+.cp-btn.no{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15);
+  color:#aaa;
+}
+
+/* ============================================================
+   ★★★ EXPLORE BAR — Đang đi bộ tìm ★★★
+   ============================================================ */
+.explore-bar{
+  position:fixed;
+  bottom:120px;left:50%;transform:translateX(-50%);
+  width:88%;max-width:380px;
+  background:rgba(10,10,30,.88);
+  border:1px solid rgba(79,195,247,.3);
+  border-radius:16px;
+  padding:14px 16px;
+  z-index:500;
+}
+.eb-top{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:10px;
+}
+.eb-icon{font-size:18px;animation:pulse 1.5s infinite}
+.eb-text{
+  flex:1;font-size:12px;color:#ccc;
+}
+.eb-time{
+  font-size:16px;font-weight:800;
+  color:#4fc3f7;
+  min-width:40px;text-align:right;
+}
+.eb-progress{
+  height:8px;
+  background:rgba(255,255,255,.1);
+  border-radius:4px;
+  overflow:hidden;
+}
+.eb-fill{
+  height:100%;
+  background:linear-gradient(90deg,#4fc3f7,#29b6f6);
+  border-radius:4px;
+  transition:width .3s ease;
+}
+
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.5;transform:scale(1.15)}
+}
+
+/* ============================================================
+   ★★★ CREATURE ON AR ★★★
+   ============================================================ */
+.ar-creature{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-55%);
+  text-align:center;
+  z-index:200;
+  pointer-events:none;
+}
+.ac-info{
+  margin-bottom:6px;
+}
+.ac-name{
+  font-size:18px;font-weight:800;
+  color:#fff;
+  text-shadow:0 2px 8px rgba(0,0,0,.8);
+  margin-bottom:4px;
+}
+.ac-tags{
+  display:flex;gap:6px;
+  justify-content:center;
+}
+.ac-el{
+  font-size:11px;padding:3px 10px;
+  border-radius:10px;color:#fff;
+  font-weight:600;
+}
+.ac-lvl{
+  font-size:11px;padding:3px 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.18);
+  color:#fff;font-weight:600;
+}
+.ac-art{
+  animation:creatureFloat 2.5s ease-in-out infinite;
+}
+@keyframes creatureFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+}
