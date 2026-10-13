@@ -182,20 +182,29 @@ function requestDeviceOrientation() {
 
 /* ★ Listener nền — luôn ghi heading ★ */
 var _globalHeading = 0;
+var _globalPitch = 0;
 var _orientationLastSeenAt = 0;
+/* Camera sau hướng ngang khi cầm máy dọc có beta = 90; ngẩng lên thì beta tăng */
+function setPitchFromBeta(beta) {
+  if (beta == null) return;
+  _globalPitch = Math.max(-90, Math.min(90, beta - 90));
+}
 function setupOrientationListener() {
   window.addEventListener('deviceorientationabsolute', function(e) {
     if (e.alpha != null) {
       _globalHeading = (360 - e.alpha + 360) % 360;
+      setPitchFromBeta(e.beta);
       _orientationLastSeenAt = Date.now();
     }
   }, true);
   window.addEventListener('deviceorientation', function(e) {
     if (e.webkitCompassHeading != null && e.webkitCompassHeading !== undefined) {
       _globalHeading = e.webkitCompassHeading;
+      setPitchFromBeta(e.beta);
       _orientationLastSeenAt = Date.now();
     } else if (e.alpha != null) {
       _globalHeading = (360 - e.alpha + 360) % 360;
+      setPitchFromBeta(e.beta);
       _orientationLastSeenAt = Date.now();
     }
   }, true);
@@ -210,6 +219,13 @@ function activateCompass() { toggleCompass(); }
 var _state = 'idle';
 var _findType = 'creature';
 var _lockedHeading = 0;
+var _lockedPitch = 0;
+
+/* Độ cao của item so với đường chân trời: tránh chúc thẳng xuống đất hoặc lên trần */
+function randomItemPitch() {
+  var m = CONFIG.MAX_ITEM_PITCH;
+  return (Math.random() * 2 - 1) * m;
+}
 var _triggerSec = 0;
 var _moveTime = 0;
 var _lastMotionTs = 0;
@@ -377,21 +393,7 @@ function triggerDetection() {
   stopSearchRing();
   setSearchSpinning(false);
   removeSearchOverlay();
-
-  var ring = document.getElementById('crosshair-ring');
-  if (ring) { ring.style.transition = 'all 0.3s ease'; ring.style.borderColor = '#f44336'; ring.style.boxShadow = '0 0 25px rgba(244,67,54,0.8)'; }
-  var pulse = document.getElementById('crosshair-pulse');
-  if (pulse) pulse.style.borderColor = '#f44336';
-
-  var txt = _findType === 'ball' ? 'bùa' : 'yêu thú';
-  showToast('🔴 Phát hiện ' + txt + ' gần đây! Đứng yên, quay camera xung quanh tìm!', 5000);
-
-  /* Random 10-30s trước khi item xuất hiện */
-  var delay = 10000 + Math.random() * 20000;
-  _detectTimer = setTimeout(function() {
-    if (_state !== 'detected') return;
-    startScanning();
-  }, delay);
+  startScanning();
 }
 
 /* ================================================================
@@ -409,7 +411,12 @@ function startScanning() {
   else spawnBallItem();
 
   startOrientationTracking();
-  showToast('🐾 Quay camera xung quanh để tìm!', 3000);
+  var txt = _findType === 'ball' ? 'bùa' : 'yêu thú';
+  if (displayModeActive === 'screen') showToast('Phát hiện ' + txt + '!', 4000);
+  else {
+    if (ring) ring.classList.add('detected');
+    showToast('Phát hiện ' + txt + ', di chuyển camera theo hướng mũi tên', 5000);
+  }
 }
 
 function spawnCreatureItem() {
@@ -435,6 +442,7 @@ function spawnCreatureItem() {
 
   document.getElementById('screen-ar').appendChild(overlay);
   _lockedHeading = getBearing(playerLat, playerLng, creature.lat, creature.lng);
+  _lockedPitch = randomItemPitch();
 
   /* ★ Không còn hàng advantage riêng — gộp vào ball buttons ★ */
   updateBallButtonsWithAdvantage(creature.element);
@@ -492,6 +500,7 @@ function spawnBallItem() {
     + '<div class="ac-ground" aria-hidden="true"></div>';
   document.getElementById('screen-ar').appendChild(overlay);
   _lockedHeading = Math.random() * 360;
+  _lockedPitch = randomItemPitch();
   showSearchOverlay();
   setBallHint(false);
 }
@@ -525,12 +534,17 @@ function startOrientationTracking() {
 
     var screen = document.getElementById('screen-ar');
     var screenWidth = screen ? screen.clientWidth : window.innerWidth;
-    var halfFov = CONFIG.FOV / 2;
-    var visible = absDiff <= halfFov;
-    var itemX = screenWidth / 2 + (diff / CONFIG.FOV) * screenWidth;
+    var screenHeight = screen ? screen.clientHeight : window.innerHeight;
+    var pxPerDeg = screenWidth / CONFIG.FOV;
+    var pitchDiff = _lockedPitch - _globalPitch;
+    var itemX = screenWidth / 2 + diff * pxPerDeg;
+    var itemY = screenHeight / 2 - pitchDiff * pxPerDeg;
+    var visible = itemX >= 0 && itemX <= screenWidth && itemY >= 0 && itemY <= screenHeight;
     itemEl.style.left = Math.max(0, Math.min(screenWidth, itemX)) + 'px';
+    itemEl.style.top = Math.max(0, Math.min(screenHeight, itemY)) + 'px';
+    itemEl.style.bottom = 'auto';
+    itemEl.style.transform = 'translate(-50%,' + (_findType === 'creature' ? '-58%' : '-40%') + ')';
 
-    /* Place the sprite above a fixed ground-contact point in the camera view. */
     if (visible) {
       itemEl.style.opacity = '1';
       itemEl.style.visibility = 'visible';
@@ -539,12 +553,12 @@ function startOrientationTracking() {
       itemEl.style.visibility = 'hidden';
     }
 
-    /* Rotation guide */
-    updateRotationGuide(diff, absDiff);
+    /* Rotation guide: mũi tên 8 hướng, chỉ hiện khi item ngoài khung hình */
+    updateRotationGuide(diff, pitchDiff, visible);
 
     /* Enable capture — CHỈ creature */
     if (_findType === 'creature') {
-      var screenOffset = Math.abs(itemX - screenWidth / 2);
+      var screenOffset = Math.sqrt(Math.pow(itemX - screenWidth / 2, 2) + Math.pow(itemY - screenHeight / 2, 2));
       creatureOnScreen = visible;
       crosshairLocked = visible && screenOffset <= CONFIG.CROSSHAIR_LOCK_PX;
       currentAccuracy = crosshairLocked
@@ -587,7 +601,7 @@ function showItemAtScreenCenter() {
     item.style.visibility = 'visible';
   }
   if (displayModeActive === 'screen') removeRotationGuide();
-  else updateRotationGuide(0, 0);
+  else updateRotationGuide(0, 0, true);
   if (_findType === 'creature') {
     creatureOnScreen = true;
     crosshairLocked = true;
@@ -620,32 +634,42 @@ function stopOrientationTracking() {
 }
 
 /* ================================================================
-   ★★★ ROTATION GUIDE — Mũi tên hai bên Crosshair chỉ hướng quay ★★★
+   ★★★ ROTATION GUIDE — Một mũi tên 8 hướng quanh Crosshair ★★★
+   dx: lệch ngang (độ, + là bên phải), dy: lệch dọc (độ, + là phía trên)
    ================================================================ */
-function updateRotationGuide(diff, absDiff) {
+function updateRotationGuide(dx, dy, visible) {
   var wrap = document.querySelector('.crosshair');
+  var ring = document.getElementById('crosshair-ring');
   if (!wrap) return;
-  var offScreen = absDiff > CONFIG.FOV / 2;
-  var sides = [{ id: 'rg-arrow-left', cls: 'rg-left', ch: '◀', on: offScreen && diff < 0 },
-               { id: 'rg-arrow-right', cls: 'rg-right', ch: '▶', on: offScreen && diff > 0 }];
-  sides.forEach(function(s) {
-    var el = document.getElementById(s.id);
-    if (!s.on) { if (el) el.remove(); return; }
-    if (!el) {
-      el = document.createElement('div');
-      el.id = s.id;
-      el.className = 'rg-arrow ' + s.cls;
-      el.textContent = s.ch;
-      wrap.appendChild(el);
-    }
-  });
+  var el = document.getElementById('rg-arrow');
+  if (visible) {
+    if (el) el.remove();
+    if (ring) ring.classList.remove('detected');
+    return;
+  }
+  if (ring) ring.classList.add('detected');
+
+  var sector = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'rg-arrow';
+    el.className = 'rg-arrow';
+    el.innerHTML = '<div class="rg-in">' + getArrowSvg(CONFIG.ARROW_STYLE) + '</div>';
+    wrap.appendChild(el);
+  }
+  if (el.getAttribute('data-sector') === String(sector)) return;
+  el.setAttribute('data-sector', sector);
+  var ang = sector * 45;
+  var rad = ang * Math.PI / 180;
+  var R = CONFIG.ARROW_RADIUS;
+  el.style.transform = 'translate(-50%,-50%) translate(' + (Math.cos(rad) * R).toFixed(1) + 'px,' + (-Math.sin(rad) * R).toFixed(1) + 'px) rotate(' + (-ang) + 'deg)';
 }
 
 function removeRotationGuide() {
-  ['rg-arrow-left', 'rg-arrow-right'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.remove();
-  });
+  var el = document.getElementById('rg-arrow');
+  if (el) el.remove();
+  var ring = document.getElementById('crosshair-ring');
+  if (ring) ring.classList.remove('detected');
 }
 
 /* ================================================================
