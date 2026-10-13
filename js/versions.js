@@ -19,4 +19,4 @@ var VERSION_HISTORY = [
   {ver:'1.20',date:'2025-01-18',note:'Hệ thống skills: ATK/DEF/HP/SPD/SKI (max 100/stat). Rarity cap: Legendary 450, Rare 400. 5 skill categories ngũ hành. Combat formula + Board formation 1v1/3v3/5v5.',changed:['js/skills.js','js/creatures.js','js/creature-art.js','css/style.css','js/versions.js']}
 ];
 
-console.log('🔮 Yêu Thú Săn Bắt v' + APP_VERSION);
+console.log('🔮 PHỤC YÊU AI v' + APP_VERSION);
