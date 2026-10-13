@@ -688,3 +688,272 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .pill-icon{font-size:22px}
 .pill-name{font-size:10px;font-weight:700;margin-top:2px}
 .pill-count{font-size:12px;color:#aaa;margin-top:2px}
+
+/* ============================================================
+   ★★★ ACTION BUTTONS ★★★
+   ============================================================ */
+.action-btns{
+  display:flex;gap:8px;
+  width:100%;max-width:320px;
+  margin-bottom:8px;
+}
+.action-btn{
+  flex:1;padding:11px 8px;
+  border:none;border-radius:12px;
+  font-size:13px;font-weight:700;
+  color:#fff;cursor:pointer;
+}
+.alchemy-btn{
+  background:linear-gradient(135deg,#ff6f00,#ff8f00);
+}
+.training-btn{
+  background:linear-gradient(135deg,#7c4dff,#651fff);
+}
+
+/* ============================================================
+   ★★★ FURNACE ANIMATION ★★★
+   ============================================================ */
+.furnace-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.88);
+  display:none;justify-content:center;align-items:center;
+  z-index:99999;
+}
+.furnace-overlay.active{display:flex}
+.furnace-box{text-align:center}
+.furnace-svg{filter:drop-shadow(0 0 20px rgba(255,87,34,0.5))}
+.furnace-text{color:#ff8a65;font-size:18px;font-weight:700;margin-top:16px}
+.furnace-sub{color:#aaa;font-size:12px;margin-top:6px}
+
+.flame{
+  transform-origin:center bottom;
+  animation:flameFlicker 0.5s ease-in-out infinite alternate;
+}
+.flame.f1{animation-delay:0s;animation-duration:0.4s}
+.flame.f2{animation-delay:0.15s;animation-duration:0.55s}
+.flame.f3{animation-delay:0.08s;animation-duration:0.35s}
+@keyframes flameFlicker{
+  0%{transform:scaleY(1) scaleX(1) translateY(0)}
+  100%{transform:scaleY(1.15) scaleX(0.9) translateY(-3px)}
+}
+.furnace-glow{animation:glowPulse 1s ease-in-out infinite}
+
+.spark{animation:sparkUp 1.5s ease-out infinite}
+.spark.sp1{animation-delay:0s}
+.spark.sp2{animation-delay:0.3s}
+.spark.sp3{animation-delay:0.6s}
+.spark.sp4{animation-delay:0.9s}
+.spark.sp5{animation-delay:1.2s}
+@keyframes sparkUp{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  100%{opacity:0;transform:translateY(-35px) scale(0.3)}
+}
+
+/* ============================================================
+   ★★★ MEDITATION ANIMATION ★★★
+   ============================================================ */
+.med-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.88);
+  display:none;justify-content:center;align-items:center;
+  z-index:99999;
+}
+.med-overlay.active{display:flex}
+.med-box{text-align:center}
+
+.med-text{
+  color:#b388ff;font-size:18px;font-weight:700;
+  margin-top:16px;
+}
+.med-sub{
+  color:#aaa;font-size:12px;margin-top:6px;
+}
+
+/* Aura pulse */
+.med-aura{
+  animation:medAura 2s ease-in-out infinite;
+}
+@keyframes medAura{
+  0%,100%{opacity:0.5;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.12)}
+}
+
+/* Body breathing */
+.med-body{
+  animation:medBreathe 2.5s ease-in-out infinite;
+  transform-origin:center bottom;
+}
+@keyframes medBreathe{
+  0%,100%{transform:scaleY(1) scaleX(1)}
+  50%{transform:scaleY(1.04) scaleX(0.97)}
+}
+
+/* Head slight bob */
+.med-head{
+  animation:medHeadBob 3s ease-in-out infinite;
+  transform-origin:center 75%;
+}
+@keyframes medHeadBob{
+  0%,100%{transform:rotate(0deg)}
+  50%{transform:rotate(1.5deg)}
+}
+
+/* Third eye glow */
+.med-third-eye{
+  animation:medThirdEye 1.5s ease-in-out infinite;
+}
+@keyframes medThirdEye{
+  0%,100%{opacity:0.3;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.4)}
+}
+
+/* ★ SMOKE — khói bốc lên ★ */
+.med-smoke{
+  animation:smokeRise 2.5s ease-in-out infinite;
+  stroke-dasharray:40;
+  stroke-dashoffset:0;
+}
+.med-smoke.ms1{animation-delay:0s;animation-duration:2.2s}
+.med-smoke.ms2{animation-delay:0.4s;animation-duration:2.8s}
+.med-smoke.ms3{animation-delay:0.8s;animation-duration:2.4s}
+.med-smoke.ms4{animation-delay:1.2s;animation-duration:3s}
+.med-smoke.ms5{animation-delay:1.6s;animation-duration:2.6s}
+
+@keyframes smokeRise{
+  0%{
+    opacity:0;
+    transform:translateY(12px) scaleX(0.8);
+    stroke-dashoffset:40;
+  }
+  30%{
+    opacity:0.6;
+    transform:translateY(-2px) scaleX(1);
+    stroke-dashoffset:0;
+  }
+  70%{
+    opacity:0.35;
+    transform:translateY(-10px) scaleX(1.1);
+    stroke-dashoffset:-15;
+  }
+  100%{
+    opacity:0;
+    transform:translateY(-20px) scaleX(1.3);
+    stroke-dashoffset:-35;
+  }
+}
+
+/* Floating energy dots */
+.med-dot{
+  animation:medFloat 2s ease-in-out infinite;
+}
+.med-dot.md1{animation-delay:0s}
+.med-dot.md2{animation-delay:0.5s}
+.med-dot.md3{animation-delay:1s}
+.med-dot.md4{animation-delay:1.5s}
+@keyframes medFloat{
+  0%,100%{opacity:0.2;transform:translateY(0) scale(1)}
+  50%{opacity:0.7;transform:translateY(-12px) scale(1.3)}
+}
+
+/* ============================================================
+   ★★★ TRAINING MODAL ★★★
+   ============================================================ */
+.train-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.88);
+  display:none;justify-content:center;align-items:center;
+  z-index:99999;
+  overflow-y:auto;
+  padding:16px;
+  box-sizing:border-box;
+}
+.train-overlay.active{display:flex}
+.train-modal{
+  background:rgba(30,30,50,.95);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:20px;
+  padding:20px;
+  width:100%;max-width:380px;
+}
+.train-header{
+  text-align:center;font-size:20px;font-weight:800;
+  color:#7c4dff;margin-bottom:16px;
+}
+.train-label{
+  font-size:12px;color:#aaa;margin-bottom:8px;
+  font-weight:600;text-transform:uppercase;letter-spacing:.5px;
+}
+.train-target-card{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(124,77,255,.15);
+  border:1px solid rgba(124,77,255,.3);
+  border-radius:14px;padding:10px;
+}
+.train-target-info{font-size:13px;color:#ddd;line-height:1.6}
+.train-req{margin:14px 0}
+.req-row{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 10px;border-radius:8px;
+  margin-bottom:4px;font-size:13px;
+  background:rgba(255,255,255,.05);
+}
+.req-row.ok{background:rgba(76,175,80,.12)}
+.req-row.fail{background:rgba(244,67,54,.12)}
+.req-icon{font-size:16px;width:22px;text-align:center}
+.req-count{margin-left:auto;font-size:11px;color:#aaa}
+
+.train-grid{
+  display:flex;flex-wrap:wrap;gap:8px;
+  max-height:200px;overflow-y:auto;
+}
+.train-card{
+  width:72px;padding:8px 4px;
+  background:rgba(255,255,255,.06);
+  border:2px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  text-align:center;cursor:pointer;
+  transition:all .2s;
+  position:relative;
+}
+.train-card.selected{
+  border-color:#7c4dff;
+  background:rgba(124,77,255,.2);
+}
+.train-card.selected::after{
+  content:'✓';position:absolute;top:2px;right:4px;
+  color:#7c4dff;font-size:12px;font-weight:800;
+}
+.tc-name{font-size:10px;color:#ccc;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-lvl{font-size:9px;color:#888}
+.tc-el{font-size:12px;margin-top:2px}
+.train-empty{text-align:center;color:#666;font-size:12px;padding:20px;width:100%}
+.train-warning{
+  text-align:center;font-size:11px;color:#ff8a65;
+  margin:12px 0;padding:8px;border-radius:8px;
+  background:rgba(255,112,67,.1);
+}
+.train-actions{display:flex;gap:8px}
+.train-btn{
+  flex:1;padding:12px;border:none;border-radius:12px;
+  font-size:15px;font-weight:700;color:#fff;cursor:pointer;
+}
+.train-btn.exec{background:linear-gradient(135deg,#7c4dff,#651fff)}
+.train-btn.exec.disabled{background:rgba(255,255,255,.15);color:#666;cursor:not-allowed}
+.train-btn.cancel{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15)}
+
+/* ============================================================
+   ★★★ PILL INVENTORY ★★★
+   ============================================================ */
+.pill-inv{width:100%;max-width:320px;margin-top:12px}
+.pill-inv-title{font-size:14px;font-weight:700;color:#ddd;margin-bottom:8px}
+.pill-empty{font-size:12px;color:#666;padding:14px;text-align:center;background:rgba(255,255,255,.05);border-radius:12px}
+.pill-grid{display:flex;flex-wrap:wrap;gap:8px}
+.pill-item{
+  display:flex;flex-direction:column;align-items:center;
+  padding:8px 12px;border-radius:10px;
+  border:1px solid;background:rgba(255,255,255,.05);
+  min-width:80px;
+}
+.pill-icon{font-size:22px}
+.pill-name{font-size:10px;font-weight:700;margin-top:2px}
+.pill-count{font-size:12px;color:#aaa;margin-top:2px}
