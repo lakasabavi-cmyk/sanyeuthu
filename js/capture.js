@@ -1,7 +1,6 @@
 /* ============================================================
-   MODULE: capture.js
-   Chức năng: Bắt yêu thú + kết quả
-   ★ v1.40: Tích hợp gameflow — onCaptureSuccess / onCaptureFail ★
+   capture.js — Bắt yêu thú + kết quả
+   ★ v1.40: Element advantage + bùa ngũ hành
    ============================================================ */
 
 function doCapture(){
@@ -12,13 +11,17 @@ function doCapture(){
     return;
   }
   var ball=GS.selectedBall;
-  if(GS.inventory[ball]<=0){
-    showToast('Hết bảo bối!');
+  if(!GS.inventory[ball]||GS.inventory[ball]<=0){
+    showToast('Hết '+(BALLS[ball]?BALLS[ball].name:'bùa')+'!');
     return;
   }
   GS.inventory[ball]--;
 
   var rate=getRate(ball,creature.element,creature.level,GS.level,currentAccuracy);
+
+  /* ★ Element advantage display ★ */
+  var adv=getAdvantageLabel(ball,creature.element);
+  var advText='<br><span style="color:'+adv.color+';font-size:11px">'+adv.text+' '+adv.bonus+'</span>';
 
   if(Math.random()<rate){
     /* ★★★ THÀNH CÔNG ★★★ */
@@ -31,11 +34,10 @@ function doCapture(){
     showResult(
       '🎉',
       'Bắt được '+creature.emoji+' <strong>'+creature.name+'</strong>!',
-      '+'+CONFIG.XP_CAPTURE+' XP | '+ELEMENTS[creature.element].icon+' '+ELEMENTS[creature.element].name+' Lv.'+creature.level,
+      '+'+CONFIG.XP_CAPTURE+' XP | '+ELEMENTS[creature.element].icon+' '+ELEMENTS[creature.element].name+' Lv.'+creature.level+advText,
       'ok'
     );
 
-    /* ★ THÊM DÒNG NÀY — gameflow ★ */
     if(typeof onCaptureSuccess==='function') onCaptureSuccess(creature);
 
   }else{
@@ -47,11 +49,10 @@ function doCapture(){
     showResult(
       '🏃',
       creature.emoji+' <strong>'+creature.name+'</strong> đã chạy thoát!',
-      'Hãy tiếp tục tìm kiếm.<br>Tỷ lệ bắt: '+Math.round(rate*100)+'%',
+      'Hãy tiếp tục tìm kiếm.<br>Tỷ lệ bắt: '+Math.round(rate*100)+'%'+advText,
       'fail'
     );
 
-    /* ★ THÊM DÒNG NÀY — gameflow ★ */
     if(typeof onCaptureFail==='function') onCaptureFail(creature);
   }
 
@@ -70,15 +71,9 @@ function showResult(icon,title,sub,cls){
 
 function closeResult(){
   document.getElementById('result-modal').classList.remove('active');
-
-  /* ★ Xóa target sau kết quả ★ */
   GS.currentTarget=null;
   document.getElementById('ar-distance').style.display='none';
-
-  /* ★ Xóa yêu thú trên AR ★ */
   if(typeof removeCreatureOnAR==='function') removeCreatureOnAR();
-
-  /* KHÔNG auto triggerDetection nữa — chờ player bấm 🔍 */
 }
 
 function checkLevelUp(){
