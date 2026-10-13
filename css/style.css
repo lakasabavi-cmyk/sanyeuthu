@@ -50,14 +50,14 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 @keyframes cp{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5}50%{transform:translate(-50%,-50%) scale(1.35);opacity:0}}
 
 /* Top HUD */
-.hud-top{position:absolute;top:0;left:0;right:0;padding:max(10px,env(safe-area-inset-top,10px)) 50px 10px 10px;display:flex;justify-content:space-between;align-items:flex-start;z-index:20;gap:6px}
+.hud-top{position:absolute;top:0;left:0;right:0;padding:max(10px,env(safe-area-inset-top,10px)) max(10px,env(safe-area-inset-right,10px)) 10px max(10px,env(safe-area-inset-left,10px));display:flex;justify-content:space-between;align-items:flex-start;z-index:20;gap:6px}
 .hud-info{background:rgba(0,0,0,.7);border-radius:12px;padding:8px 12px;backdrop-filter:blur(10px);max-width:170px}
 .hud-level{font-size:11px;color:#aaa}
 .hud-realm{font-size:14px;font-weight:700;color:#ffd700}
 .hud-xp-bar{width:100px;height:5px;background:rgba(255,255,255,.2);border-radius:3px;margin-top:4px;overflow:hidden}
 .hud-xp-fill{height:100%;background:linear-gradient(90deg,#7c4dff,#448aff);border-radius:3px}
 .hud-compass{font-size:9px;color:#4fc3f7;margin-top:4px}
-.hud-tr{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.hud-tr{display:flex;flex-direction:column;gap:6px;align-items:flex-end;margin-left:auto;flex-shrink:0}
 .btn-display-mode{padding:6px 9px;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.65);color:#fff;border-radius:10px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap}
 .btn-compass{padding:6px 12px;border:2px solid #4fc3f7;background:rgba(76,195,247,.2);color:#4fc3f7;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
 .btn-compass.active{border-color:#4caf50;background:rgba(76,175,80,.2);color:#4caf50}
@@ -1797,7 +1797,7 @@ body.toast-on .search-overlay{visibility:hidden}
   display:flex;flex-direction:column;align-items:center;
   transform:translateX(-50%);
   text-align:center;z-index:200;
-  transition:left .12s linear,opacity .25s ease;
+  transition:left .12s linear,top .12s linear,opacity .25s ease;
   visibility:hidden;opacity:0;
   pointer-events:none;
 }
@@ -1861,15 +1861,15 @@ body.toast-on .search-overlay{visibility:hidden}
    ★★★ ROTATION GUIDE ★★★
    ============================================================ */
 .rg-arrow{
-  position:absolute;top:50%;
-  font-size:34px;line-height:1;color:#ffa726;
-  text-shadow:0 0 10px rgba(255,167,38,.9),0 2px 6px rgba(0,0,0,.8);
+  position:absolute;left:50%;top:50%;width:40px;height:40px;
+  color:#f44336;
+  filter:drop-shadow(0 0 6px rgba(244,67,54,.9)) drop-shadow(0 2px 4px rgba(0,0,0,.7));
   pointer-events:none;z-index:300;
 }
-.rg-left{right:100%;margin-right:14px;transform:translateY(-50%);animation:rgNudgeL .9s ease-in-out infinite}
-.rg-right{left:100%;margin-left:14px;transform:translateY(-50%);animation:rgNudgeR .9s ease-in-out infinite}
-@keyframes rgNudgeL{0%,100%{transform:translate(0,-50%)}50%{transform:translate(-10px,-50%)}}
-@keyframes rgNudgeR{0%,100%{transform:translate(0,-50%)}50%{transform:translate(10px,-50%)}}
+.rg-in{width:40px;height:40px;animation:rgNudge .9s ease-in-out infinite}
+.rg-in svg{display:block}
+@keyframes rgNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(9px)}}
+.crosshair-ring.detected{border-color:#f44336;box-shadow:0 0 25px rgba(244,67,54,.8)}
 
 /* ============================================================
    ★★★ BALL BUTTON — Thêm advantage text ★★★
