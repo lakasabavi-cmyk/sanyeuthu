@@ -248,7 +248,8 @@ function renderCreatureDetail(creature, idx) {
   } else if (!(typeof safeAiReady === 'function' ? safeAiReady() : false)) {
     transformHtml = '<button class="transform-btn disabled" onclick="showToast(\'Chưa kết nối AI!\')">✨ Biến hình (chưa kết nối AI)</button>';
   } else {
-    transformHtml = '<button class="transform-btn" onclick="requestTransform(' + idx + ')">✨ Biến hình</button>';
+    transformHtml = (typeof renderGuSelect === 'function' ? renderGuSelect() : '')
+      + '<button class="transform-btn" onclick="requestTransform(' + idx + ')">✨ Biến hình</button>';
   }
 
   /* ★ Luyện Đan + Tu Luyện ★ */
