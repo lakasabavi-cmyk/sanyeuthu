@@ -288,7 +288,6 @@ function stopWalkArrow() {
 }
 
 function addCrosshairArrow() {
-  /* ★ XÓA TẤT CẢ mũi tên cũ trước khi tạo ★ */
   removeAllArrows();
   var wrap = document.querySelector('.crosshair');
   if (!wrap) return;
@@ -303,13 +302,10 @@ function removeAllArrows() {
   /* Xóa mũi tên gameflow */
   var old = document.getElementById('crosshair-arrow');
   if (old) old.remove();
-
-  /* Xóa mũi tên từ navigation.js / camera.js */
-  var allArrows = document.querySelectorAll('.nav-arrow, .compass-arrow, .arrow, .direction-arrow, [class*="arrow"]');
-  for (var i = 0; i < allArrows.length; i++) {
-    if (allArrows[i].id !== 'crosshair-arrow') {
-      allArrows[i].remove();
-    }
+  /* Xóa bất kỳ element arrow nào khác trên AR */
+  var all = document.querySelectorAll('.nav-arrow,.compass-arrow,.arrow,.direction-arrow,[class*="arrow"]');
+  for (var i = 0; i < all.length; i++) {
+    if (all[i].id !== 'crosshair-arrow') all[i].remove();
   }
 }
 
@@ -444,23 +440,21 @@ function startOrientationTracking() {
     /* Rotation guide */
     updateRotationGuide(diff, absDiff);
 
-        /* Enable capture — CHỈ cho creature */
+           /* ★ Enable capture — CHỈ creature, KHÔNG ball ★ */
     if (_findType === 'creature') {
       creatureOnScreen = absDiff < 20;
       crosshairLocked = absDiff < 15;
       currentAccuracy = Math.max(0, 1 - absDiff / 15);
-
       var capBtn = document.getElementById('capture-btn');
       if (capBtn) {
         if (absDiff < 15) capBtn.classList.remove('disabled');
         else capBtn.classList.add('disabled');
       }
     } else {
-      /* ★ BALL: KHÔNG enable capture, chỉ hiện nút nhặt ★ */
+      /* ★ BALL: chặn hoàn toàn nút 🎯 Bắt ★ */
       creatureOnScreen = false;
       crosshairLocked = false;
       currentAccuracy = 0;
-
       var capBtn = document.getElementById('capture-btn');
       if (capBtn) capBtn.classList.add('disabled');
     }
