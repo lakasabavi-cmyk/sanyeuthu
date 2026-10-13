@@ -1,14 +1,14 @@
 /* ============================================================
    alchemy.js — Luyện Đan + Tu Luyện Yêu Thú
-   ★ v1.30: Đan dược 11 phẩm chất + nâng cấp yêu thú
-   ★ Luyện đan: Xóa yêu thú → nhận đan dược
-   ★ Tu luyện: Hiến tế yêu thú + đan dược → nâng cấp
+   ★ v1.31: Animation lò luyện đan + ngồi thiền tu luyện
+   ★ Notification: "Nhận được 01 đan dược cấp X"
+   ★ Notification: "Tu luyện thành công nhận được yêu thú cấp X"
+   ★ Notification: "Tu luyện thất bại, mất vật phẩm"
    ============================================================ */
 
 /* ================================================================
-   ★★★ PILL DATABASE — 11 phẩm chất ★★★
+   ★★★ PILL DATABASE ★★★
    ================================================================ */
-
 var PILL_DB = [
   {tier:1,  name:'Nhất Phẩm Đan', icon:'💊', color:'#9e9e9e', desc:'Đan dược hạ phẩm'},
   {tier:2,  name:'Nhị Phẩm Đan', icon:'💊', color:'#8bc34a', desc:'Đan dược trung hạ'},
@@ -29,10 +29,7 @@ function getPillInfo(tier) {
 
 /* ================================================================
    ★★★ TIER SYSTEM ★★★
-   Tier = ceil(level/10), cap 11
-   Lv.1-10 → Tier 1, Lv.11-20 → Tier 2, ... Lv.101+ → Tier 11
    ================================================================ */
-
 function getCreatureTier(creature) {
   return Math.min(11, Math.max(1, Math.ceil((creature.level || 1) / 10)));
 }
@@ -45,9 +42,8 @@ function calcAlchemyPillTier(creature) {
 }
 
 /* ================================================================
-   ★★★ PILL INVENTORY — GS.pills ★★★
+   ★★★ PILL INVENTORY ★★★
    ================================================================ */
-
 function getPillCount(tier) {
   return (GS.pills && GS.pills[tier]) || 0;
 }
@@ -68,9 +64,7 @@ function removePill(tier, count) {
 
 /* ================================================================
    ★★★ TRAINING REQUIREMENTS ★★★
-   Tier 1-2: 5 yêu thú | Tier 3-4: 4 | Tier 5-6: 3 | Tier 7-8: 2 | Tier 9+: 1
    ================================================================ */
-
 function getTrainingReq(tier) {
   var n;
   if (tier <= 2) n = 5;
@@ -103,7 +97,6 @@ function getTrainingRateText(tier) {
    ★★★ LUYỆN ĐAN ★★★
    Xóa yêu thú → Nhận đan dược
    ================================================================ */
-
 function doAlchemy(creatureIdx) {
   var c = GS.collection[creatureIdx];
   if (!c) return;
@@ -118,23 +111,22 @@ function doAlchemy(creatureIdx) {
     GS.collection.splice(creatureIdx, 1);
     saveState();
     updateCollection();
-    showAlchemyResult(pill);
+    showAlchemyResult(pill, pillTier);
   });
 }
 
-function showAlchemyResult(pill) {
+function showAlchemyResult(pill, pillTier) {
   var m = document.getElementById('result-modal');
   if (!m) return;
   document.getElementById('result-icon').innerHTML = pill.icon;
   document.getElementById('result-title').innerHTML = '🔥 Luyện đan thành công!';
-  document.getElementById('result-sub').innerHTML = 'Nhận được <strong style="color:' + pill.color + ';font-size:16px">' + pill.name + '</strong><br><span style="opacity:.7">' + pill.desc + '</span>';
+  document.getElementById('result-sub').innerHTML = 'Nhận được <strong style="color:' + pill.color + ';font-size:16px">01 ' + pill.name + ' (Cấp ' + pillTier + ')</strong><br><span style="opacity:.7">' + pill.desc + '</span>';
   m.classList.add('show');
 }
 
 /* ================================================================
    ★★★ LÒ LUYỆN ĐAN — Animation ★★★
    ================================================================ */
-
 function showFurnaceAnimation(callback) {
   var old = document.getElementById('furnace-overlay');
   if (old) old.remove();
@@ -145,31 +137,23 @@ function showFurnaceAnimation(callback) {
   overlay.innerHTML =
     '<div class="furnace-box">'
     + '<svg class="furnace-svg" viewBox="0 0 200 200" width="180" height="180">'
-    /* Shadow */
-    + '<ellipse cx="100" cy="185" rx="55" ry="12" fill="rgba(0,0,0,0.3)"/>'
-    /* Furnace base */
+    + '<ellipse cx="100" cy="188" rx="55" ry="10" fill="rgba(0,0,0,0.3)"/>'
     + '<path d="M55,180 Q45,140 65,100 L135,100 Q155,140 145,180 Z" fill="#5D4037" stroke="#3E2723" stroke-width="2.5"/>'
-    /* Furnace rim */
     + '<rect x="58" y="95" width="84" height="14" rx="6" fill="#795548"/>'
-    /* Furnace opening */
-    + '<ellipse cx="100" cy="145" rx="22" ry="30" fill="#1a0a00"/>'
-    /* Fire glow */
-    + '<ellipse cx="100" cy="145" rx="18" ry="25" fill="#FF6F00" opacity="0.6" class="furnace-glow"/>'
-    /* Flames */
-    + '<ellipse cx="96" cy="155" rx="10" ry="22" fill="#FF5722" class="flame f1"/>'
-    + '<ellipse cx="104" cy="152" rx="8" ry="18" fill="#FF9800" class="flame f2"/>'
-    + '<ellipse cx="100" cy="150" rx="6" ry="15" fill="#FFEB3B" class="flame f3"/>'
-    /* Sparks */
-    + '<circle cx="80" cy="110" r="3" fill="#FFAB00" class="spark sp1"/>'
-    + '<circle cx="120" cy="105" r="2.5" fill="#FFAB00" class="spark sp2"/>'
-    + '<circle cx="100" cy="98" r="2" fill="#FFD740" class="spark sp3"/>'
-    + '<circle cx="88" cy="115" r="2" fill="#FF6D00" class="spark sp4"/>'
-    + '<circle cx="112" cy="112" r="1.5" fill="#FF6D00" class="spark sp5"/>'
-    /* Handle */
-    + '<path d="M62,100 Q60,85 75,80 L125,80 Q140,85 138,100" fill="none" stroke="#5D4037" stroke-width="4" stroke-linecap="round"/>'
+    + '<ellipse cx="100" cy="148" rx="22" ry="28" fill="#1a0a00"/>'
+    + '<ellipse cx="100" cy="148" rx="18" ry="24" fill="#FF6F00" opacity="0.6" class="furnace-glow"/>'
+    + '<ellipse cx="96" cy="158" rx="10" ry="22" fill="#FF5722" class="flame f1"/>'
+    + '<ellipse cx="104" cy="155" rx="8" ry="18" fill="#FF9800" class="flame f2"/>'
+    + '<ellipse cx="100" cy="152" rx="6" ry="15" fill="#FFEB3B" class="flame f3"/>'
+    + '<circle cx="78" cy="108" r="3" fill="#FFAB00" class="spark sp1"/>'
+    + '<circle cx="122" cy="103" r="2.5" fill="#FFAB00" class="spark sp2"/>'
+    + '<circle cx="100" cy="95" r="2" fill="#FFD740" class="spark sp3"/>'
+    + '<circle cx="86" cy="112" r="2" fill="#FF6D00" class="spark sp4"/>'
+    + '<circle cx="114" cy="110" r="1.5" fill="#FF6D00" class="spark sp5"/>'
+    + '<path d="M62,100 Q60,82 75,77 L125,77 Q140,82 138,100" fill="none" stroke="#5D4037" stroke-width="4" stroke-linecap="round"/>'
     + '</svg>'
     + '<div class="furnace-text">🔥 Đang luyện đan...</div>'
-    + '<div class="furnace-sub">Xin chờ trong giây lát</div>'
+    + '<div class="furnace-sub">Đan dược đang được tôi luyện</div>'
     + '</div>';
   document.body.appendChild(overlay);
 
@@ -179,13 +163,12 @@ function showFurnaceAnimation(callback) {
       overlay.remove();
       if (callback) callback();
     }, 500);
-  }, 7000);
+  }, 6000);
 }
 
 /* ================================================================
-   ★★★ TU LUYỆN — Nâng cấp yêu thú ★★★
+   ★★★ TU LUYỆN ★★★
    ================================================================ */
-
 function doTraining(targetIdx) {
   var target = GS.collection[targetIdx];
   if (!target) return;
@@ -196,7 +179,6 @@ function doTraining(targetIdx) {
   var pillInfo = getPillInfo(tier);
   var pillCount = getPillCount(tier);
 
-  /* Same-tier creatures (exclude target) */
   var sameTier = [];
   for (var i = 0; i < GS.collection.length; i++) {
     if (i === targetIdx) continue;
@@ -209,41 +191,28 @@ function doTraining(targetIdx) {
 }
 
 function showTrainingModal(targetIdx, target, tier, req, rateInfo, pillInfo, pillCount, sameTier) {
-  /* Remove detail modal */
   var dm = document.getElementById('coll-detail');
   if (dm) dm.remove();
 
-  var rateColor = rateInfo.rate >= 100 ? '#4caf50' : rateInfo.rate >= 60 ? '#4caf50' : rateInfo.rate >= 40 ? '#ff9800' : '#f44336';
+  var rateColor = rateInfo.rate >= 60 ? '#4caf50' : rateInfo.rate >= 40 ? '#ff9800' : '#f44336';
   var hasEnoughPills = pillCount >= req.needPillCount;
   var hasEnoughCreatures = sameTier.length >= req.needCreatures;
 
   var html = '<div class="train-modal">';
   html += '<div class="train-header">⚡ Tu Luyện</div>';
 
-  /* Target */
-  html += '<div class="train-target">';
-  html += '<div class="train-label">Yêu thú tu luyện:</div>';
-  html += '<div class="train-target-card">';
+  html += '<div class="train-target"><div class="train-label">Yêu thú tu luyện:</div><div class="train-target-card">';
   html += '<div class="train-target-art">' + renderCreatureArt(target, 70) + '</div>';
   html += '<div class="train-target-info"><strong>' + target.name + '</strong> Lv.' + target.level + '<br>Tier ' + tier + '</div>';
   html += '</div></div>';
 
-  /* Requirements */
-  html += '<div class="train-req">';
-  html += '<div class="train-label">Cần:</div>';
-  html += '<div class="req-row' + (hasEnoughCreatures ? ' ok' : ' fail') + '">'
-    + '<span class="req-icon">🐾</span> ' + req.needCreatures + ' yêu thú Tier ' + tier
-    + ' <span class="req-count">(' + sameTier.length + ')</span></div>';
-  html += '<div class="req-row' + (hasEnoughPills ? ' ok' : ' fail') + '">'
-    + '<span class="req-icon">' + pillInfo.icon + '</span> 1 ' + pillInfo.name
-    + ' <span class="req-count">(Có: ' + pillCount + ')</span></div>';
+  html += '<div class="train-req"><div class="train-label">Cần:</div>';
+  html += '<div class="req-row' + (hasEnoughCreatures ? ' ok' : ' fail') + '"><span class="req-icon">🐾</span> ' + req.needCreatures + ' yêu thú Tier ' + tier + ' <span class="req-count">(' + sameTier.length + ')</span></div>';
+  html += '<div class="req-row' + (hasEnoughPills ? ' ok' : ' fail') + '"><span class="req-icon">' + pillInfo.icon + '</span> 1 ' + pillInfo.name + ' <span class="req-count">(Có: ' + pillCount + ')</span></div>';
   html += '<div class="req-row"><span class="req-icon">🎯</span> Tỷ lệ: <strong style="color:' + rateColor + '">' + rateInfo.text + '</strong></div>';
   html += '</div>';
 
-  /* Sacrifice grid */
-  html += '<div class="train-select">';
-  html += '<div class="train-label">Chọn yêu thú hiến tế (cần ' + req.needCreatures + '):</div>';
-  html += '<div class="train-grid">';
+  html += '<div class="train-select"><div class="train-label">Chọn yêu thú hợp tu (cần ' + req.needCreatures + '):</div><div class="train-grid">';
   for (var i = 0; i < sameTier.length; i++) {
     var sc = sameTier[i].creature;
     var sel = ELEMENTS[sc.element] || ELEMENTS.KIM;
@@ -254,21 +223,16 @@ function showTrainingModal(targetIdx, target, tier, req, rateInfo, pillInfo, pil
     html += '<div class="tc-el">' + sel.icon + '</div>';
     html += '</div>';
   }
-  if (!sameTier.length) {
-    html += '<div class="train-empty">Không có yêu thú Tier ' + tier + ' nào để hiến tế</div>';
-  }
+  if (!sameTier.length) html += '<div class="train-empty">Không có yêu thú Tier ' + tier + ' để hiến tế</div>';
   html += '</div></div>';
 
-  /* Warning */
-  html += '<div class="train-warning">⚠️ Thất bại sẽ mất yêu thú hiến tế + đan dược</div>';
+  html += '<div class="train-warning">⚠️ Thất bại sẽ mất yêu thú hợp tu + đan dược</div>';
 
-  /* Buttons */
   var canExecute = hasEnoughCreatures && hasEnoughPills;
   html += '<div class="train-actions">';
   html += '<button class="train-btn exec' + (canExecute ? '' : ' disabled') + '" onclick="executeTraining(' + targetIdx + ',' + tier + ',' + req.needCreatures + ')">⚡ Tu Luyện</button>';
   html += '<button class="train-btn cancel" onclick="closeTrainModal()">Hủy</button>';
-  html += '</div>';
-  html += '</div>';
+  html += '</div></div>';
 
   var overlay = document.createElement('div');
   overlay.className = 'train-overlay active';
@@ -278,28 +242,16 @@ function showTrainingModal(targetIdx, target, tier, req, rateInfo, pillInfo, pil
 }
 
 function toggleTrainCard(el, maxSelect) {
-  if (el.classList.contains('selected')) {
-    el.classList.remove('selected');
-    return;
-  }
+  if (el.classList.contains('selected')) { el.classList.remove('selected'); return; }
   var selected = document.querySelectorAll('.train-card.selected');
-  if (selected.length >= maxSelect) {
-    showToast('Chỉ chọn tối đa ' + maxSelect + ' yêu thú!');
-    return;
-  }
+  if (selected.length >= maxSelect) { showToast('Chỉ chọn tối đa ' + maxSelect + ' yêu thú!'); return; }
   el.classList.add('selected');
 }
 
 function executeTraining(targetIdx, tier, needCount) {
   var selected = document.querySelectorAll('.train-card.selected');
-  if (selected.length < needCount) {
-    showToast('Cần chọn đủ ' + needCount + ' yêu thú hiến tế!');
-    return;
-  }
-  if (getPillCount(tier) < 1) {
-    showToast('Không đủ đan dược cấp ' + tier + '!');
-    return;
-  }
+  if (selected.length < needCount) { showToast('Cần chọn đủ ' + needCount + ' yêu thú hiến tu!'); return; }
+  if (getPillCount(tier) < 1) { showToast('Không đủ đan dược cấp ' + tier + '!'); return; }
 
   var rateInfo = getTrainingRateText(tier);
   if (!confirm('⚠️ Tu luyện sẽ MẤT ' + needCount + ' yêu thú + 1 đan dược nếu thất bại.\n\nTỷ lệ: ' + rateInfo.text + '\n\nTiếp tục?')) return;
@@ -310,60 +262,58 @@ function executeTraining(targetIdx, tier, needCount) {
     sacIdx.push(parseInt(selected[i].dataset.idx));
   }
 
-  /* Roll */
-  var rate = getTrainingRate(tier);
-  var success = Math.random() * 100 < rate;
+  /* ★ Đóng modal + hiện ngồi thiền ★ */
+  closeTrainModal();
 
-  /* Always consume pill */
-  removePill(tier, 1);
+  var targetCreature = GS.collection[targetIdx];
+  showMeditationAnimation(targetCreature, function() {
+    /* ★ Roll sau animation ★ */
+    var rate = getTrainingRate(tier);
+    var success = Math.random() * 100 < rate;
 
-  /* Remove sacrifices (desc order to keep indices valid) */
-  sacIdx.sort(function(a,b){return b-a;});
-  for (var i = 0; i < sacIdx.length; i++) {
-    GS.collection.splice(sacIdx[i], 1);
-  }
+    /* Luôn tiêu hao đan dược */
+    removePill(tier, 1);
 
-  /* Adjust targetIdx */
-  var adjust = 0;
-  for (var i = 0; i < sacIdx.length; i++) {
-    if (sacIdx[i] < targetIdx) adjust++;
-  }
-  targetIdx -= adjust;
+    /* Xóa yêu thú hiến tế (desc order) */
+    sacIdx.sort(function(a,b){ return b-a; });
+    for (var i = 0; i < sacIdx.length; i++) {
+      GS.collection.splice(sacIdx[i], 1);
+    }
 
-  var target = GS.collection[targetIdx];
+    /* Adjust targetIdx */
+    var adjust = 0;
+    for (var i = 0; i < sacIdx.length; i++) {
+      if (sacIdx[i] < targetIdx) adjust++;
+    }
+    targetIdx -= adjust;
+    var target = GS.collection[targetIdx];
 
-  if (success && target) {
-    /* ★ Thành công: Nâng cấp ★ */
-    target.level = Math.min(100, (target.level || 1) + 1);
-    if (target.stats) {
-      for (var k in target.stats) {
-        target.stats[k] = Math.min(100, target.stats[k] + 2);
+    if (success && target) {
+      target.level = Math.min(100, (target.level || 1) + 1);
+      if (target.stats) {
+        for (var k in target.stats) {
+          target.stats[k] = Math.min(100, target.stats[k] + 2);
+        }
       }
     }
+
     saveState();
-    closeTrainModal();
     updateCollection();
-    showTrainResult(true, target, needCount, sacIdx.length);
-  } else {
-    /* ★ Thất bại: Mất hiến tế + đan dược, giữ target ★ */
-    saveState();
-    closeTrainModal();
-    updateCollection();
-    showTrainResult(false, target, needCount, sacIdx.length);
-  }
+    showTrainResult(success, target, tier);
+  });
 }
 
-function showTrainResult(success, target, needCount, lostCount) {
+function showTrainResult(success, target, tier) {
   var m = document.getElementById('result-modal');
   if (!m) return;
   if (success) {
     document.getElementById('result-icon').innerHTML = '⚡';
-    document.getElementById('result-title').innerHTML = 'Tu luyện thành công!';
-    document.getElementById('result-sub').innerHTML = '<strong style="color:#4caf50">' + (target ? target.name : '') + '</strong> lên <strong style="color:#ffd700">Lv.' + (target ? target.level : '?') + '</strong>!';
+    document.getElementById('result-title').innerHTML = '✨ Tu luyện thành công!';
+    document.getElementById('result-sub').innerHTML = 'Nhận được <strong style="color:#ffd700;font-size:16px">' + (target ? target.name : 'Yêu thú') + ' cấp ' + tier + '</strong><br><span style="opacity:.7">Lv.' + (target ? target.level : '?') + ' — Stats +2 mỗi chỉ số</span>';
   } else {
     document.getElementById('result-icon').innerHTML = '💥';
-    document.getElementById('result-title').innerHTML = 'Tu luyện thất bại!';
-    document.getElementById('result-sub').innerHTML = 'Mất ' + lostCount + ' yêu thú hiến tế + 1 đan dược.<br>' + (target ? '<strong>' + target.name + '</strong> vẫn giữ nguyên Lv.' + target.level : '');
+    document.getElementById('result-title').innerHTML = '💔 Tu luyện thất bại!';
+    document.getElementById('result-sub').innerHTML = '<strong style="color:#f44336">Mất vật phẩm</strong><br><span style="opacity:.7">Yêu thú hợp tu + Đan dược đã tiêu hao</span>';
   }
   m.classList.add('show');
 }
@@ -374,9 +324,112 @@ function closeTrainModal() {
 }
 
 /* ================================================================
+   ★★★ NGỒI THIỀN — Meditation Animation ★★★
+   Yêu thú khoanh chân chắp tay + khói bốc lên đầu
+   ================================================================ */
+function showMeditationAnimation(creature, callback) {
+  var old = document.getElementById('med-overlay');
+  if (old) old.remove();
+
+  /* Colors from element */
+  var colors;
+  if (typeof getCreatureColors === 'function') {
+    colors = getCreatureColors(creature.element, creature.rarity);
+  } else {
+    colors = {body:'#7c4dff', bodyLight:'#b388ff', bodyDark:'#4a148c', belly:'#e1bee7', feet:'#4a148c', blush:'#FFB6C1'};
+  }
+
+  var overlay = document.createElement('div');
+  overlay.className = 'med-overlay active';
+  overlay.id = 'med-overlay';
+
+  overlay.innerHTML = '<div class="med-box">'
+    + '<svg class="med-svg" viewBox="0 0 200 220" width="160" height="176">'
+
+    /* Glow aura */
+    + '<defs><radialGradient id="medGlow" cx="50%" cy="50%" r="50%">'
+    +   '<stop offset="0%" stop-color="' + colors.glow + '" stop-opacity="0.35"/>'
+    +   '<stop offset="100%" stop-color="' + colors.glow + '" stop-opacity="0"/>'
+    + '</radialGradient></defs>'
+    + '<circle cx="100" cy="115" r="80" fill="url(#medGlow)" class="med-aura"/>'
+
+    /* Shadow */
+    + '<ellipse cx="100" cy="188" rx="45" ry="8" fill="rgba(0,0,0,0.2)"/>'
+
+    /* Crossed legs */
+    + '<g class="med-legs">'
+    +   '<ellipse cx="82" cy="168" rx="26" ry="13" fill="' + colors.body + '" stroke="' + colors.bodyDark + '" stroke-width="1.5"/>'
+    +   '<ellipse cx="118" cy="168" rx="26" ry="13" fill="' + colors.body + '" stroke="' + colors.bodyDark + '" stroke-width="1.5"/>'
+    +   '<ellipse cx="82" cy="166" rx="18" ry="8" fill="' + colors.bodyLight + '" opacity="0.4"/>'
+    +   '<ellipse cx="118" cy="166" rx="18" ry="8" fill="' + colors.bodyLight + '" opacity="0.4"/>'
+    + '</g>'
+
+    /* Body */
+    + '<g class="med-body">'
+    +   '<ellipse cx="100" cy="138" rx="24" ry="30" fill="' + colors.body + '" stroke="' + colors.bodyDark + '" stroke-width="1.5"/>'
+    +   '<ellipse cx="100" cy="144" rx="15" ry="20" fill="' + colors.belly + '" opacity="0.45"/>'
+    + '</g>'
+
+    /* Arms — prayer position */
+    + '<g class="med-arms">'
+    +   '<path d="M80,132 Q85,150 98,152" fill="none" stroke="' + colors.bodyDark + '" stroke-width="3.5" stroke-linecap="round"/>'
+    +   '<path d="M120,132 Q115,150 102,152" fill="none" stroke="' + colors.bodyDark + '" stroke-width="3.5" stroke-linecap="round"/>'
+    +   '<ellipse cx="100" cy="150" rx="9" ry="7" fill="' + colors.bodyLight + '" stroke="' + colors.bodyDark + '" stroke-width="1"/>'
+    + '</g>'
+
+    /* Head */
+    + '<g class="med-head">'
+    +   '<circle cx="100" cy="82" r="32" fill="' + colors.body + '" stroke="' + colors.bodyDark + '" stroke-width="1.5"/>'
+
+    /* Closed eyes (meditation) */
+    +   '<path d="M85,86 Q89,82 93,86" fill="none" stroke="#333" stroke-width="2.2" stroke-linecap="round"/>'
+    +   '<path d="M107,86 Q111,82 115,86" fill="none" stroke="#333" stroke-width="2.2" stroke-linecap="round"/>'
+
+    /* Peaceful smile */
+    +   '<path d="M94,98 Q100,103 106,98" fill="none" stroke="#333" stroke-width="1.8" stroke-linecap="round"/>'
+
+    /* Blush */
+    +   '<ellipse cx="80" cy="91" rx="6" ry="3.5" fill="' + colors.blush + '" opacity="0.55"/>'
+    +   '<ellipse cx="120" cy="91" rx="6" ry="3.5" fill="' + colors.blush + '" opacity="0.55"/>'
+
+    /* Third eye dot (meditation symbol) */
+    +   '<circle cx="100" cy="72" r="3" fill="' + colors.glow + '" opacity="0.6" class="med-third-eye"/>'
+    + '</g>'
+
+    /* ★ SMOKE — khói bốc lên ★ */
+    + '<g class="med-smoke-group">'
+    +   '<path class="med-smoke ms1" d="M90,48 Q87,36 92,26 Q95,18 90,10" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="3.5" stroke-linecap="round"/>'
+    +   '<path class="med-smoke ms2" d="M100,44 Q103,32 98,22 Q96,14 100,5" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3" stroke-linecap="round"/>'
+    +   '<path class="med-smoke ms3" d="M110,48 Q113,36 108,26 Q105,18 110,8" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2.5" stroke-linecap="round"/>'
+    +   '<path class="med-smoke ms4" d="M84,52 Q80,42 85,32" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" stroke-linecap="round"/>'
+    +   '<path class="med-smoke ms5" d="M116,52 Q120,42 115,32" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" stroke-linecap="round"/>'
+    + '</g>'
+
+    /* Floating energy dots */
+    + '<circle class="med-dot md1" cx="75" cy="60" r="3" fill="' + colors.glow + '" opacity="0.5"/>'
+    + '<circle class="med-dot md2" cx="125" cy="55" r="2.5" fill="' + colors.glow + '" opacity="0.4"/>'
+    + '<circle class="med-dot md3" cx="80" cy="40" r="2" fill="' + colors.glow + '" opacity="0.3"/>'
+    + '<circle class="med-dot md4" cx="120" cy="38" r="2.5" fill="' + colors.glow + '" opacity="0.35"/>'
+
+    + '</svg>'
+    + '<div class="med-text">🧘 Đang tu luyện...</div>'
+    + '<div class="med-sub">Yêu thú đang hấp thu linh khí</div>'
+    + '</div>';
+
+  document.body.appendChild(overlay);
+
+  setTimeout(function() {
+    overlay.classList.remove('active');
+    setTimeout(function() {
+      overlay.remove();
+      if (callback) callback();
+    }, 500);
+  }, 4500);
+}
+
+/* ================================================================
    ★★★ PILL INVENTORY DISPLAY ★★★
    ================================================================ */
-
 function renderPillInventory() {
   if (!GS.pills || !Object.keys(GS.pills).length) {
     return '<div class="pill-inv"><div class="pill-inv-title">💊 Đan Dược</div><div class="pill-empty">Chưa có đan dược. Luyện đan yêu thú để nhận!</div></div>';
@@ -388,8 +441,7 @@ function renderPillInventory() {
     html += '<div class="pill-item" style="border-color:' + p.color + '">'
       + '<div class="pill-icon">' + p.icon + '</div>'
       + '<div class="pill-name" style="color:' + p.color + '">' + p.name + '</div>'
-      + '<div class="pill-count">x' + GS.pills[t] + '</div>'
-      + '</div>';
+      + '<div class="pill-count">x' + GS.pills[t] + '</div></div>';
   }
   html += '</div></div>';
   return html;
