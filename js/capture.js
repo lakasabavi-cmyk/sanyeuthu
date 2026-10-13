@@ -1,35 +1,63 @@
 /* ============================================================
    MODULE: capture.js
    Chức năng: Bắt yêu thú + kết quả
+   ★ v1.40: Tích hợp gameflow — onCaptureSuccess / onCaptureFail ★
    ============================================================ */
 
 function doCapture(){
-  var creature=GS.currentTarget; if(!creature) return;
-  if(!creatureOnScreen||!crosshairLocked){showToast('Đưa dấu + vào yêu thú!');return;}
+  var creature=GS.currentTarget;
+  if(!creature) return;
+  if(!creatureOnScreen||!crosshairLocked){
+    showToast('Đưa dấu + vào yêu thú!');
+    return;
+  }
   var ball=GS.selectedBall;
-  if(GS.inventory[ball]<=0){showToast('Hết bảo bối!');return;}
+  if(GS.inventory[ball]<=0){
+    showToast('Hết bảo bối!');
+    return;
+  }
   GS.inventory[ball]--;
 
   var rate=getRate(ball,creature.element,creature.level,GS.level,currentAccuracy);
 
   if(Math.random()<rate){
-    GS.caught++; GS.xp+=CONFIG.XP_CAPTURE; GS.totalXp+=CONFIG.XP_CAPTURE;
+    /* ★★★ THÀNH CÔNG ★★★ */
+    GS.caught++;
+    GS.xp+=CONFIG.XP_CAPTURE;
+    GS.totalXp+=CONFIG.XP_CAPTURE;
     GS.collection.push(Object.assign({},creature,{caughtAt:Date.now(),caughtWith:ball}));
     checkLevelUp();
-    showResult('🎉','Bắt được '+creature.emoji+' <strong>'+creature.name+'</strong>!','+'+CONFIG.XP_CAPTURE+' XP | '+ELEMENTS[creature.element].icon+' '+ELEMENTS[creature.element].name+' Lv.'+creature.level,'ok');
+
+    showResult(
+      '🎉',
+      'Bắt được '+creature.emoji+' <strong>'+creature.name+'</strong>!',
+      '+'+CONFIG.XP_CAPTURE+' XP | '+ELEMENTS[creature.element].icon+' '+ELEMENTS[creature.element].name+' Lv.'+creature.level,
+      'ok'
+    );
+
+    /* ★ THÊM DÒNG NÀY — gameflow ★ */
+    if(typeof onCaptureSuccess==='function') onCaptureSuccess(creature);
+
   }else{
-    GS.failed++; GS.xp+=CONFIG.XP_FAIL; if(GS.xp<0)GS.xp=0;
-    var remain=(creature.escapeChances||1)-(creature.escapeAttemptsUsed||0)-1;
-    if(remain<=0){
-      showResult('💨',creature.emoji+' <strong>'+creature.name+'</strong> biến mất!','Hết lượt. Tỷ lệ: '+Math.round(rate*100)+'%','fail');
-    }else{
-      creature.escapeAttemptsUsed=(creature.escapeAttemptsUsed||0)+1;
-      placeCreature(creature);
-      creatureOnScreen=false; crosshairLocked=false; currentAccuracy=0;
-      showResult('🏃',creature.emoji+' <strong>'+creature.name+'</strong> chạy trốn!','Còn '+remain+' lượt<br>Yêu thú chạy sang chỗ mới! Theo mũi tên!','fail');
-    }
+    /* ★★★ THẤT BẠI — Yêu thú biến mất ★★★ */
+    GS.failed++;
+    GS.xp+=CONFIG.XP_FAIL;
+    if(GS.xp<0) GS.xp=0;
+
+    showResult(
+      '🏃',
+      creature.emoji+' <strong>'+creature.name+'</strong> đã chạy thoát!',
+      'Hãy tiếp tục tìm kiếm.<br>Tỷ lệ bắt: '+Math.round(rate*100)+'%',
+      'fail'
+    );
+
+    /* ★ THÊM DÒNG NÀY — gameflow ★ */
+    if(typeof onCaptureFail==='function') onCaptureFail(creature);
   }
-  saveState(); updateHUD(); renderBalls();
+
+  saveState();
+  updateHUD();
+  renderBalls();
 }
 
 function showResult(icon,title,sub,cls){
@@ -42,15 +70,23 @@ function showResult(icon,title,sub,cls){
 
 function closeResult(){
   document.getElementById('result-modal').classList.remove('active');
-  var c=GS.currentTarget;
-  if(c&&c.escapeAttemptsUsed>=(c.escapeChances||1)){GS.currentTarget=null;}
-  if(!GS.currentTarget){
-    document.getElementById('ar-distance').style.display='none';
-    setTimeout(function(){if(document.getElementById('screen-ar').classList.contains('active'))triggerDetection();},2000);
-  }
+
+  /* ★ Xóa target sau kết quả ★ */
+  GS.currentTarget=null;
+  document.getElementById('ar-distance').style.display='none';
+
+  /* ★ Xóa yêu thú trên AR ★ */
+  if(typeof removeCreatureOnAR==='function') removeCreatureOnAR();
+
+  /* KHÔNG auto triggerDetection nữa — chờ player bấm 🔍 */
 }
 
 function checkLevelUp(){
   var need=xpForLevel(GS.level);
-  if(GS.xp>=need){GS.xp-=need;GS.level++;showToast('🎊 Level '+GS.level+'!',5000);checkLevelUp();}
+  if(GS.xp>=need){
+    GS.xp-=need;
+    GS.level++;
+    showToast('🎊 Level '+GS.level+'!',5000);
+    checkLevelUp();
+  }
 }
