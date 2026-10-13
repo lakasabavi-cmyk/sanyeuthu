@@ -1832,3 +1832,8 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .ar-item{
   transition:opacity .5s ease, visibility .5s ease, transform .5s ease;
 }
+
+.ball-adv{
+  font-size:9px;font-weight:800;
+  margin-top:1px;
+}
