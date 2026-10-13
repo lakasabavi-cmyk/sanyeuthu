@@ -1263,3 +1263,95 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   font-size:15px;font-weight:600;
   cursor:pointer;margin-top:8px;
 }
+
+/* ============================================================
+   ★★★ AREA STATUS WIDGET ★★★
+   ============================================================ */
+.area-status{
+  background:rgba(10,10,30,.82);
+  border:1px solid rgba(79,195,247,.2);
+  border-radius:14px;
+  padding:10px 14px;
+  min-width:170px;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+.as-row{
+  display:flex;align-items:center;gap:6px;
+  margin-bottom:5px;
+}
+.as-row:last-child{margin-bottom:0}
+
+.as-icon{
+  font-size:13px;
+  width:18px;text-align:center;
+  flex-shrink:0;
+}
+.as-label{
+  font-size:10px;color:#888;
+  flex:1;
+}
+.as-val{
+  font-size:12px;font-weight:800;
+  color:#fff;
+}
+.as-val.creature{color:#4caf50}
+.as-val.creature.empty{color:#f44336}
+.as-val.ball{color:#4fc3f7}
+.as-val.ball.empty{color:#f44336}
+.as-val.reset{color:#ffd700;font-family:monospace;font-size:11px}
+.as-val.reset.ready{
+  color:#4caf50;
+  animation:pulse 1.5s infinite;
+}
+
+/* ============================================================
+   ★★★ BALL PICKUP ON AR ★★★
+   ============================================================ */
+.ar-ball-pickup{
+  position:absolute;
+  top:45%;left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  z-index:200;
+  pointer-events:auto;
+}
+
+.bp-info{margin-bottom:8px}
+.bp-name{
+  font-size:18px;font-weight:800;
+  text-shadow:0 2px 8px rgba(0,0,0,.8);
+}
+.bp-desc{
+  font-size:11px;color:#ccc;
+  text-shadow:0 1px 4px rgba(0,0,0,.8);
+}
+
+.bp-art{
+  animation:creatureFloat 2s ease-in-out infinite;
+}
+
+.bp-glow{
+  animation:glowPulse 1.5s ease-in-out infinite;
+}
+
+.bp-spark{
+  animation:sparkUp 1.5s ease-out infinite;
+}
+.bp-spark.bs1{animation-delay:0s}
+.bp-spark.bs2{animation-delay:0.3s}
+.bp-spark.bs3{animation-delay:0.6s}
+.bp-spark.bs4{animation-delay:0.9s}
+
+.bp-pickup-btn{
+  margin-top:12px;
+  padding:13px 32px;
+  border:none;border-radius:16px;
+  font-size:16px;font-weight:800;
+  color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,#4fc3f7,#29b6f6);
+  box-shadow:0 4px 20px rgba(79,195,247,.4);
+  animation:pulse 2s infinite;
+}
+.bp-pickup-btn:active{transform:scale(0.95)}
