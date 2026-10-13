@@ -444,19 +444,25 @@ function startOrientationTracking() {
     /* Rotation guide */
     updateRotationGuide(diff, absDiff);
 
-    /* Enable capture */
-    creatureOnScreen = absDiff < 20;
-    crosshairLocked = absDiff < 15;
-    currentAccuracy = Math.max(0, 1 - absDiff / 15);
+        /* Enable capture — CHỈ cho creature */
+    if (_findType === 'creature') {
+      creatureOnScreen = absDiff < 20;
+      crosshairLocked = absDiff < 15;
+      currentAccuracy = Math.max(0, 1 - absDiff / 15);
 
-    var capBtn = document.getElementById('capture-btn');
-    if (capBtn) {
-      if (_findType === 'creature') {
+      var capBtn = document.getElementById('capture-btn');
+      if (capBtn) {
         if (absDiff < 15) capBtn.classList.remove('disabled');
         else capBtn.classList.add('disabled');
-      } else {
-        capBtn.classList.add('disabled');
       }
+    } else {
+      /* ★ BALL: KHÔNG enable capture, chỉ hiện nút nhặt ★ */
+      creatureOnScreen = false;
+      crosshairLocked = false;
+      currentAccuracy = 0;
+
+      var capBtn = document.getElementById('capture-btn');
+      if (capBtn) capBtn.classList.add('disabled');
     }
 
     /* Ball pickup button */
@@ -468,7 +474,10 @@ function startOrientationTracking() {
           bpBtn.id = 'bp-pickup-btn';
           bpBtn.className = 'bp-pickup-btn';
           bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
-          bpBtn.onclick = function(e) { e.stopPropagation(); collectBallItem(GS._pendingBall); };
+          bpBtn.onclick = function(e) {
+            e.stopPropagation();
+            collectBallItem(GS._pendingBall);
+          };
           document.getElementById('screen-ar').appendChild(bpBtn);
         }
       } else {
@@ -478,21 +487,37 @@ function startOrientationTracking() {
   };
   window.addEventListener('deviceorientation', _orientFn);
 
-  /* Fallback: desktop → hiện item sau 3s */
+   /* Fallback: desktop → hiện item sau 3s */
   setTimeout(function() {
     if (_state !== 'scanning') return;
     var item = document.getElementById('ar-creature');
     if (item && item.style.visibility !== 'visible') {
-      item.style.opacity = '1'; item.style.visibility = 'visible';
-      creatureOnScreen = true; crosshairLocked = true; currentAccuracy = 1;
-      var capBtn = document.getElementById('capture-btn');
-      if (capBtn && _findType === 'creature') capBtn.classList.remove('disabled');
-      if (_findType === 'ball') {
-        var bpBtn = document.createElement('button');
-        bpBtn.id = 'bp-pickup-btn'; bpBtn.className = 'bp-pickup-btn';
-        bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
-        bpBtn.onclick = function(e) { e.stopPropagation(); collectBallItem(GS._pendingBall); };
-        document.getElementById('screen-ar').appendChild(bpBtn);
+      item.style.opacity = '1';
+      item.style.visibility = 'visible';
+
+      if (_findType === 'creature') {
+        creatureOnScreen = true;
+        crosshairLocked = true;
+        currentAccuracy = 1;
+        var capBtn = document.getElementById('capture-btn');
+        if (capBtn) capBtn.classList.remove('disabled');
+      } else {
+        /* ★ BALL: chỉ hiện nút nhặt ★ */
+        var capBtn = document.getElementById('capture-btn');
+        if (capBtn) capBtn.classList.add('disabled');
+
+        var bpBtn = document.getElementById('bp-pickup-btn');
+        if (!bpBtn) {
+          bpBtn = document.createElement('button');
+          bpBtn.id = 'bp-pickup-btn';
+          bpBtn.className = 'bp-pickup-btn';
+          bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
+          bpBtn.onclick = function(e) {
+            e.stopPropagation();
+            collectBallItem(GS._pendingBall);
+          };
+          document.getElementById('screen-ar').appendChild(bpBtn);
+        }
       }
     }
   }, 3000);
