@@ -259,14 +259,81 @@ function renderCreatureDetail(creature, idx) {
   var el = ELEMENTS[creature.element] || ELEMENTS.KIM;
   var rarity = creature.rarity || 'common';
   var realm = getRealm(creature.level);
+  var skillCat = getSkillCategory(creature.element);
 
-  /* ★ Ưu tiên: AI image > SVG art > emoji ★ */
+  /* Art */
   var artHtml;
   if (creature.aiImage) {
-    artHtml = '<img src="' + creature.aiImage + '" class="coll-detail-art" style="width:200px;height:200px;border-radius:24px;object-fit:cover;border:2px solid rgba(255,255,255,.2);margin-bottom:15px">';
+    artHtml = '<img src="' + creature.aiImage + '" class="coll-detail-art" style="width:180px;height:180px;border-radius:24px;object-fit:cover;border:2px solid rgba(255,255,255,.2);margin-bottom:12px">';
   } else {
-    artHtml = '<div class="coll-detail-art" style="margin-bottom:15px">' + renderCreatureArt(creature, 200) + '</div>';
+    artHtml = '<div class="coll-detail-art" style="margin-bottom:12px">' + renderCreatureArt(creature, 180) + '</div>';
   }
+
+  /* Stats bars */
+  var stats = creature.stats || generateCreatureStats(creature);
+  var budget = getTotalStatBudget(creature);
+  var totalStats = 0;
+  for (var k in stats) totalStats += stats[k];
+
+  var statsHtml = '<div class="stats-container">';
+  statsHtml += '<div class="stats-budget">Tổng điểm: <strong>' + totalStats + '</strong> / ' + budget + '</div>';
+  for (var i = 0; i < STAT_KEYS.length; i++) {
+    var key = STAT_KEYS[i];
+    var info = STAT_INFO[key];
+    var val = stats[key] || 0;
+    var pct = val;
+    statsHtml += '<div class="stat-row">'
+      + '<div class="stat-icon">' + info.icon + '</div>'
+      + '<div class="stat-name">' + info.name + '</div>'
+      + '<div class="stat-bar">'
+      +   '<div class="stat-bar-fill" style="width:' + pct + '%;background:' + info.color + '"></div>'
+      + '</div>'
+      + '<div class="stat-val" style="color:' + info.color + '">' + val + '</div>'
+      + '</div>';
+  }
+  statsHtml += '</div>';
+
+  /* Skills */
+  var skills = getCreatureSkills(creature);
+  var skillsHtml = '<div class="skills-container">';
+  skillsHtml += '<div class="skills-header" style="color:' + skillCat.color + '">' + skillCat.icon + ' ' + skillCat.name + '</div>';
+  skillsHtml += '<div class="skills-desc">' + skillCat.description + '</div>';
+  for (var i = 0; i < skills.length; i++) {
+    var sk = skills[i];
+    var typeColor = sk.type === 'ultimate' ? '#FFD700' : sk.type === 'heal' ? '#4CAF50' : sk.type === 'shield' ? '#42A5F5' : '#FF5252';
+    skillsHtml += '<div class="skill-row' + (sk.type === 'ultimate' ? ' skill-ultimate' : '') + '">'
+      + '<div class="skill-icon">' + sk.icon + '</div>'
+      + '<div class="skill-info">'
+      +   '<div class="skill-name">' + sk.name + (sk.type === 'ultimate' ? ' <span class="skill-badge ult">ULT</span>' : '') + '</div>'
+      +   '<div class="skill-desc">' + sk.desc + '</div>'
+      +   '<div class="skill-meta">CD:' + sk.cooldown + ' | Lv.' + sk.levelReq + '</div>'
+      + '</div>'
+      + '</div>';
+  }
+  skillsHtml += '</div>';
+
+  /* Transform button */
+  var transformHtml;
+  if (creature.aiImage) {
+    transformHtml = '<button class="transform-btn done" onclick="closeCreatureDetail()">✅ Đã biến hình</button>';
+  } else if (!checkAiConnection()) {
+    transformHtml = '<button class="transform-btn disabled" onclick="showToast(\'Chưa kết nối AI!\')">✨ Biến hình (chưa kết nối AI)</button>';
+  } else {
+    transformHtml = '<button class="transform-btn" onclick="requestTransform(' + idx + ')">✨ Biến hình</button>';
+  }
+
+  return artHtml
+    + '<div class="coll-detail-name">' + creature.name + '</div>'
+    + '<div class="coll-detail-badges">'
+    +   '<div class="coll-detail-badge" style="background:' + el.bg + '">' + el.icon + ' ' + el.name + '</div>'
+    +   '<div class="coll-detail-badge" style="background:' + (RARITY_COLORS[rarity] || '#4caf50') + '">' + (RARITY_NAMES[rarity] || 'Thường') + '</div>'
+    +   '<div class="coll-detail-badge" style="background:rgba(255,255,255,.1)">Lv.' + creature.level + ' ' + realm.icon + ' ' + realm.name + '</div>'
+    + '</div>'
+    + statsHtml
+    + skillsHtml
+    + transformHtml
+    + '<button class="coll-detail-close" onclick="closeCreatureDetail()">Đóng</button>';
+}
 
   /* Nút biến hình */
   var transformHtml;
