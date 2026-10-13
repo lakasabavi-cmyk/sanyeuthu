@@ -1,10 +1,16 @@
 /* ============================================================
    creature-art.js — Bộ 15 yêu thú SVG chibi mặc định
-   ★ v1.20 FIX: Xóa code trùng lặp gây SyntaxError ★
-   ★ Ưu tiên hiển thị: AI image > SVG art > emoji ★
+   ★ v1.21 FIX: checkAiConnection safe + Detail modal ★
    ============================================================ */
 
 var CREATURE_ART = {};
+
+/* ================================================================
+   ★★★ SAFE AI CHECK — không crash nếu ai.js chưa load ★★★
+   ================================================================ */
+function safeAiReady() {
+  return (typeof checkAiConnection === 'function') ? checkAiConnection() : false;
+}
 
 /* ================================================================
    ★★★ TEMPLATE CHIBI BODY ★★★
@@ -177,12 +183,14 @@ function renderCreatureCard(creature, idx) {
 }
 
 /* ================================================================
-   ★★★ DETAIL MODAL — Stats + Skills + Transform ★★★
+   ★★★ DETAIL MODAL ★★★
    ================================================================ */
 function renderCreatureDetail(creature, idx) {
   var el = ELEMENTS[creature.element] || ELEMENTS.KIM;
   var rarity = creature.rarity || 'common';
-  var realm = getRealm(creature.level);
+
+  /* Realm — safe */
+  var realm = (typeof getRealm === 'function') ? getRealm(creature.level) : {icon:'🌀', name:'Luyện Khí'};
 
   /* Art */
   var artHtml;
@@ -193,55 +201,61 @@ function renderCreatureDetail(creature, idx) {
   }
 
   /* Stats bars */
-  var stats = creature.stats || generateCreatureStats(creature);
-  var budget = getTotalStatBudget(creature);
-  var totalStats = 0;
-  for (var k in stats) totalStats += stats[k];
+  var statsHtml = '';
+  if (typeof STAT_KEYS !== 'undefined' && typeof STAT_INFO !== 'undefined' && typeof getTotalStatBudget === 'function') {
+    var stats = creature.stats || (typeof generateCreatureStats === 'function' ? generateCreatureStats(creature) : {});
+    var budget = getTotalStatBudget(creature);
+    var totalStats = 0;
+    for (var k in stats) totalStats += stats[k];
 
-  var statsHtml = '<div class="stats-container">';
-  statsHtml += '<div class="stats-budget">Tổng điểm: <strong>' + totalStats + '</strong> / ' + budget + '</div>';
-  for (var i = 0; i < STAT_KEYS.length; i++) {
-    var key = STAT_KEYS[i];
-    var info = STAT_INFO[key];
-    var val = stats[key] || 0;
-    statsHtml += '<div class="stat-row">'
-      + '<div class="stat-icon">' + info.icon + '</div>'
-      + '<div class="stat-name">' + info.name + '</div>'
-      + '<div class="stat-bar"><div class="stat-bar-fill" style="width:' + val + '%;background:' + info.color + '"></div></div>'
-      + '<div class="stat-val" style="color:' + info.color + '">' + val + '</div>'
-      + '</div>';
+    statsHtml = '<div class="stats-container">';
+    statsHtml += '<div class="stats-budget">Tổng điểm: <strong>' + totalStats + '</strong> / ' + budget + '</div>';
+    for (var i = 0; i < STAT_KEYS.length; i++) {
+      var key = STAT_KEYS[i];
+      var info = STAT_INFO[key];
+      var val = stats[key] || 0;
+      statsHtml += '<div class="stat-row">'
+        + '<div class="stat-icon">' + info.icon + '</div>'
+        + '<div class="stat-name">' + info.name + '</div>'
+        + '<div class="stat-bar"><div class="stat-bar-fill" style="width:' + val + '%;background:' + info.color + '"></div></div>'
+        + '<div class="stat-val" style="color:' + info.color + '">' + val + '</div>'
+        + '</div>';
+    }
+    statsHtml += '</div>';
   }
-  statsHtml += '</div>';
 
   /* Skills */
-  var skillCat = getSkillCategory(creature.element);
-  var skills = getCreatureSkills(creature);
-  var skillsHtml = '<div class="skills-container">';
-  skillsHtml += '<div class="skills-header" style="color:' + skillCat.color + '">' + skillCat.icon + ' ' + skillCat.name + '</div>';
-  skillsHtml += '<div class="skills-desc">' + skillCat.description + '</div>';
-  for (var i = 0; i < skills.length; i++) {
-    var sk = skills[i];
-    skillsHtml += '<div class="skill-row' + (sk.type === 'ultimate' ? ' skill-ultimate' : '') + '">'
-      + '<div class="skill-icon">' + sk.icon + '</div>'
-      + '<div class="skill-info">'
-      +   '<div class="skill-name">' + sk.name + (sk.type === 'ultimate' ? ' <span class="skill-badge ult">ULT</span>' : '') + '</div>'
-      +   '<div class="skill-desc">' + sk.desc + '</div>'
-      +   '<div class="skill-meta">CD:' + sk.cooldown + ' | Lv.' + sk.levelReq + '</div>'
-      + '</div></div>';
+  var skillsHtml = '';
+  if (typeof SKILL_CATEGORIES !== 'undefined' && typeof getSkillCategory === 'function') {
+    var skillCat = getSkillCategory(creature.element);
+    var skills = typeof getCreatureSkills === 'function' ? getCreatureSkills(creature) : [];
+    skillsHtml = '<div class="skills-container">';
+    skillsHtml += '<div class="skills-header" style="color:' + skillCat.color + '">' + skillCat.icon + ' ' + skillCat.name + '</div>';
+    skillsHtml += '<div class="skills-desc">' + skillCat.description + '</div>';
+    for (var i = 0; i < skills.length; i++) {
+      var sk = skills[i];
+      skillsHtml += '<div class="skill-row' + (sk.type === 'ultimate' ? ' skill-ultimate' : '') + '">'
+        + '<div class="skill-icon">' + sk.icon + '</div>'
+        + '<div class="skill-info">'
+        +   '<div class="skill-name">' + sk.name + (sk.type === 'ultimate' ? ' <span class="skill-badge ult">ULT</span>' : '') + '</div>'
+        +   '<div class="skill-desc">' + sk.desc + '</div>'
+        +   '<div class="skill-meta">CD:' + sk.cooldown + ' | Lv.' + sk.levelReq + '</div>'
+        + '</div></div>';
+    }
+    skillsHtml += '</div>';
   }
-  skillsHtml += '</div>';
 
-  /* Transform button */
+  /* ★ Transform button — SAFE ★ */
   var transformHtml;
   if (creature.aiImage) {
     transformHtml = '<button class="transform-btn done" onclick="closeCreatureDetail()">✅ Đã biến hình</button>';
-  } else if (!checkAiConnection()) {
+  } else if (!safeAiReady()) {
     transformHtml = '<button class="transform-btn disabled" onclick="showToast(\'Chưa kết nối AI!\')">✨ Biến hình (chưa kết nối AI)</button>';
   } else {
     transformHtml = '<button class="transform-btn" onclick="requestTransform(' + idx + ')">✨ Biến hình</button>';
   }
 
-  /* ★ TRẢ VỀ 1 LẦN DUY NHẤT ★ */
+  /* ★ TRẢ VỀ 1 LẦN — KHÔNG CODE THỪA ★ */
   return artHtml
     + '<div class="coll-detail-name">' + creature.name + '</div>'
     + '<div class="coll-detail-badges">'
@@ -254,4 +268,4 @@ function renderCreatureDetail(creature, idx) {
     + transformHtml
     + '<button class="coll-detail-close" onclick="closeCreatureDetail()">Đóng</button>';
 }
-/* ★★★ END — KHÔNG CÓ CODE NÀO SAU ĐÂY ★★★ */
+/* ★★★ END ★★★ */
