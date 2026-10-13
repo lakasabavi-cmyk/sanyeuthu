@@ -19,25 +19,38 @@ function updateProfile(){var r=getRealm(GS.level);document.getElementById('profi
 /* ===== COLLECTION ===== */
 var currentFilter='all';
 function updateCollection(){
-  var grid=document.getElementById('coll-grid'),countEl=document.getElementById('coll-count');
+  var grid=document.getElementById('coll-grid');
+  var countEl=document.getElementById('coll-count');
   var creatures=GS.collection||[];
   countEl.textContent=creatures.length+' con';
-  if(!creatures.length){grid.innerHTML='<div class="coll-empty"><div class="coll-empty-icon">🐾</div><div class="coll-empty-text">Chưa có yêu thú nào!</div><div class="coll-empty-hint">Bấm 🔍 để tìm và bắt</div></div>';return;}
+
+  if(!creatures.length){
+    grid.innerHTML='<div class="coll-empty"><div class="coll-empty-icon">🐾</div><div class="coll-empty-text">Chưa có yêu thú nào!</div><div class="coll-empty-hint">Bấm 🔍 để tìm và bắt</div></div>';
+    return;
+  }
+
   var f=currentFilter==='all'?creatures:creatures.filter(function(c){return c.element===currentFilter;});
-  if(!f.length){grid.innerHTML='<div class="coll-empty"><div class="coll-empty-icon">🔍</div><div class="coll-empty-text">Không có yêu thú hệ này</div></div>';return;}
+  if(!f.length){
+    grid.innerHTML='<div class="coll-empty"><div class="coll-empty-icon">🔍</div><div class="coll-empty-text">Không có yêu thú hệ này</div></div>';
+    return;
+  }
+
+  /* ★ Dùng creature-art renderCard ★ */
   grid.innerHTML='';
   for(var i=0;i<f.length;i++){
-    var c=f[i],el=ELEMENTS[c.element]||ELEMENTS.KIM,r=c.rarity||'common';
-    grid.innerHTML+='<div class="coll-card '+r+'" onclick="showCreatureDetail('+creatures.indexOf(c)+')"><div class="coll-card-rarity '+r+'">'+(RARITY_NAMES[r]||'Thường')+'</div><div class="coll-card-icon">'+(c.emoji||'🐾')+'</div><div class="coll-card-name">'+c.name+'</div><div class="coll-card-el" style="background:'+el.bg+'">'+el.icon+' '+el.name+'</div><div class="coll-card-lvl">Lv.'+c.level+'</div></div>';
+    grid.innerHTML+=renderCreatureCard(f[i], creatures.indexOf(f[i]));
   }
 }
 function filterCollection(el,btn){currentFilter=el;document.querySelectorAll('.coll-fb').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');updateCollection();}
 function showCreatureDetail(idx){
   var c=GS.collection[idx];if(!c)return;
-  var el=ELEMENTS[c.element]||ELEMENTS.KIM,r=c.rarity||'common',realm=getRealm(c.level);
   var m=document.getElementById('coll-detail');if(m)m.remove();
-  var modal=document.createElement('div');modal.className='coll-detail active';modal.id='coll-detail';
-  modal.innerHTML='<div class="coll-detail-icon">'+(c.emoji||'🐾')+'</div><div class="coll-detail-name">'+c.name+'</div><div class="coll-detail-badges"><div class="coll-detail-badge" style="background:'+el.bg+'">'+el.icon+' '+el.name+'</div><div class="coll-detail-badge" style="background:'+(RARITY_COLORS[r]||'#4caf50')+'">'+(RARITY_NAMES[r]||'Thường')+'</div></div><div class="coll-detail-stats"><div class="coll-detail-row"><div class="coll-detail-label">Level</div><div class="coll-detail-value">Lv.'+c.level+' — '+realm.icon+' '+realm.name+'</div></div><div class="coll-detail-row"><div class="coll-detail-label">Hệ</div><div class="coll-detail-value">'+el.icon+' '+el.name+'</div></div><div class="coll-detail-row"><div class="coll-detail-label">Hiếm</div><div class="coll-detail-value">'+(RARITY_NAMES[r]||'Thường')+'</div></div><div class="coll-detail-row"><div class="coll-detail-label">Bắt lúc</div><div class="coll-detail-value">'+(c.caughtAt?new Date(c.caughtAt).toLocaleDateString('vi'):'—')+'</div></div><div class="coll-detail-row"><div class="coll-detail-label">Bắt bằng</div><div class="coll-detail-value">'+(ELEMENTS[c.caughtWith]?ELEMENTS[c.caughtWith].icon+' '+ELEMENTS[c.caughtWith].name:'—')+'</div></div></div><button class="coll-detail-close" onclick="closeCreatureDetail()">Đóng</button>';
+
+  /* ★ Dùng creature-art renderDetail ★ */
+  var modal=document.createElement('div');
+  modal.className='coll-detail active';
+  modal.id='coll-detail';
+  modal.innerHTML=renderCreatureDetail(c, idx);
   document.body.appendChild(modal);
 }
 function closeCreatureDetail(){var m=document.getElementById('coll-detail');if(m)m.remove();}
