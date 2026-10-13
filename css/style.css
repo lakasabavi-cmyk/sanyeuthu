@@ -1355,3 +1355,54 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   animation:pulse 2s infinite;
 }
 .bp-pickup-btn:active{transform:scale(0.95)}
+
+/* ============================================================
+   ★★★ BÙA NGŨ HÀNH — Ball Selector ★★★
+   ============================================================ */
+.ar-balls{
+  display:flex;gap:6px;
+  justify-content:center;
+  padding:0 8px 8px;
+}
+
+.ball-item{
+  display:flex;flex-direction:column;align-items:center;
+  padding:6px 8px 5px;
+  border:2px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  background:rgba(10,10,30,.7);
+  cursor:pointer;
+  transition:all .2s;
+  min-width:52px;
+}
+.ball-item.selected{
+  border-color:#ffd700;
+  background:rgba(255,215,0,.12);
+  transform:scale(1.08);
+  box-shadow:0 0 12px rgba(255,215,0,.25);
+}
+.ball-item.empty{
+  opacity:.35;
+}
+.ball-item:active{transform:scale(0.95)}
+
+.ball-icon{
+  font-size:20px;
+  line-height:1;
+}
+.ball-name{
+  font-size:9px;font-weight:700;
+  margin-top:2px;
+}
+.ball-count{
+  font-size:11px;font-weight:800;
+  color:#fff;
+  margin-top:1px;
+}
+
+/* ★ Advantage hint trong capture ★ */
+.capture-advantage{
+  text-align:center;
+  padding:4px;
+  margin-top:4px;
+}
