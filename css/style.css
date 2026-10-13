@@ -1591,3 +1591,127 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   box-shadow:0 4px 20px rgba(79,195,247,.4);
 }
 .bp-pickup-btn:active{transform:scale(0.95)}
+
+/* ============================================================
+   ★★★ CROSSHAIR ARROW ★★★
+   ============================================================ */
+.crosshair-arrow{
+  position:absolute;
+  top:50%;left:50%;
+  width:0;height:0;
+  transform-origin:center center;
+  margin:-52px 0 0 -8px;
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-bottom:16px solid #ffa726;
+  filter:drop-shadow(0 0 6px rgba(255,167,38,0.8));
+  z-index:310;
+  pointer-events:none;
+  transition:transform 1.5s ease;
+}
+
+/* ============================================================
+   ★★★ CROSSHAIR STATES ★★★
+   ============================================================ */
+.crosshair-ring.walking{border-color:#ffa726}
+.crosshair-ring.detected{border-color:#f44336}
+.crosshair-ring.locked{border-color:#4caf50}
+
+/* ============================================================
+   ★★★ LOCK RING ★★★
+   ============================================================ */
+.ac-lock-ring{
+  position:absolute;
+  top:50%;left:50%;
+  width:150px;height:150px;
+  margin:-75px 0 0 -75px;
+  border:3px solid rgba(255,255,255,0.3);
+  border-radius:50%;
+  transition:all .3s ease;
+  display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:12px;
+  pointer-events:none;
+}
+.ac-lock-ring.locked{
+  border-color:#4caf50;
+  box-shadow:0 0 25px rgba(76,175,80,0.6);
+}
+.lock-text{
+  font-size:11px;font-weight:800;
+  text-shadow:0 1px 6px rgba(0,0,0,0.8);
+  white-space:nowrap;
+}
+
+/* ============================================================
+   ★★★ AR CREATURE ★★★
+   ============================================================ */
+.ar-creature{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  z-index:200;
+  pointer-events:none;
+  transition:left .3s ease;
+}
+.ar-creature .ac-adv-item{
+  pointer-events:auto;
+}
+
+.ac-art{animation:creatureFloat 2.5s ease-in-out infinite}
+.ac-name{font-size:18px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8);margin-bottom:4px}
+.ac-tags{display:flex;gap:6px;justify-content:center}
+.ac-el{font-size:11px;padding:3px 10px;border-radius:10px;color:#fff;font-weight:600}
+.ac-lvl{font-size:11px;padding:3px 10px;border-radius:10px;background:rgba(255,255,255,.18);color:#fff;font-weight:600}
+
+.ac-adv{display:flex;gap:6px;justify-content:center;margin-top:8px}
+.ac-adv-item{
+  display:flex;flex-direction:column;align-items:center;
+  padding:5px 8px;border:2px solid rgba(255,255,255,.12);
+  border-radius:10px;background:rgba(10,10,30,.6);
+  cursor:pointer;transition:all .2s;
+}
+.ac-adv-item.selected{border-color:#ffd700;background:rgba(255,215,0,.12)}
+.ac-adv-icon{font-size:16px}
+.ac-adv-text{font-size:10px;font-weight:800}
+
+/* ============================================================
+   ★★★ BALL PICKUP ★★★
+   ============================================================ */
+.ar-ball-pickup{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  text-align:center;z-index:200;
+  pointer-events:none;
+  transition:left .3s ease;
+}
+.ar-ball-pickup .bp-pickup-btn{pointer-events:auto}
+.bp-name{font-size:16px;font-weight:800;text-shadow:0 2px 8px rgba(0,0,0,.8);margin-top:6px}
+.bp-desc{font-size:11px;color:#ccc;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.bp-art{animation:creatureFloat 2s ease-in-out infinite}
+.bp-glow{animation:glowPulse 1.5s ease-in-out infinite}
+.bp-hint{font-size:11px;color:#aaa;margin:8px 0}
+.bp-pickup-btn{
+  margin-top:8px;padding:13px 32px;border:none;border-radius:16px;
+  font-size:16px;font-weight:800;color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,#4fc3f7,#29b6f6);
+  box-shadow:0 4px 20px rgba(79,195,247,.4);
+}
+
+/* ============================================================
+   ★★★ AREA STATUS ★★★
+   ============================================================ */
+.area-status{
+  background:rgba(10,10,30,.82);border:1px solid rgba(79,195,247,.2);
+  border-radius:14px;padding:8px 14px;min-width:130px;
+}
+.as-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.as-row:last-child{margin-bottom:0}
+.as-icon{font-size:13px;width:18px;text-align:center}
+.as-label{font-size:10px;color:#888;flex:1}
+.as-val{font-size:12px;font-weight:800;color:#fff}
+.as-val.creature{color:#4caf50}
+.as-val.creature.empty{color:#f44336}
+.as-val.ball{color:#4fc3f7}
+.as-val.ball.empty{color:#f44336}
+.as-val.reset{color:#ffd700;font-family:monospace;font-size:11px}
+.as-val.reset.ready{color:#4caf50;animation:pulse 1.5s infinite}
