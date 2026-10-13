@@ -120,6 +120,9 @@ function toggleCompass() {
   if (cs) cs.textContent = _compassOn ? '🧭 Bật' : '🧭 Tắt';
 
   if (_compassOn) {
+    /* ★ XIN QUYỀN DeviceOrientation (iOS cần) ★ */
+    requestDeviceOrientation();
+
     initArea();
     startAreaStatusTimer();
     if (isResetDue() || hasMovedEnough()) resetArea();
@@ -131,6 +134,49 @@ function toggleCompass() {
     if (_state !== 'idle') cleanupAfterResult();
   }
   saveState();
+}
+
+/* ★★★ Request DeviceOrientation Permission ★★★ */
+var _oriPermissionGranted = false;
+
+function requestDeviceOrientation() {
+  if (_oriPermissionGranted) return;
+
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    /* iOS 13+ — cần user gesture */
+    DeviceOrientationEvent.requestPermission()
+      .then(function(state) {
+        if (state === 'granted') {
+          _oriPermissionGranted = true;
+          setupOrientationListener();
+          showToast('✅ La bàn cảm biến OK!', 2000);
+        } else {
+          showToast('⚠️ Cần cho phép la bàn trong Cài đặt!', 3000);
+        }
+      })
+      .catch(function() {
+        showToast('⚠️ Lỗi quyền la bàn!', 3000);
+      });
+  } else {
+    /* Android / Desktop */
+    _oriPermissionGranted = true;
+    setupOrientationListener();
+  }
+}
+
+/* ★ Listener nền — luôn ghi heading ★ */
+var _globalHeading = 0;
+function setupOrientationListener() {
+  window.addEventListener('deviceorientationabsolute', function(e) {
+    if (e.alpha != null) _globalHeading = (360 - e.alpha) % 360;
+  }, true);
+  window.addEventListener('deviceorientation', function(e) {
+    if (e.webkitCompassHeading != null && e.webkitCompassHeading !== undefined) {
+      _globalHeading = e.webkitCompassHeading;
+    } else if (e.alpha != null) {
+      _globalHeading = (360 - e.alpha) % 360;
+    }
+  }, true);
 }
 
 function activateCompass() { toggleCompass(); }
@@ -447,18 +493,11 @@ function startOrientationTracking() {
   var item = document.getElementById('ar-creature');
   if (item) { item.style.opacity = '0'; item.style.visibility = 'hidden'; }
 
-  var hasOri = false;
-
-  _orientFn = function(e) {
+  /* ★ Check định kỳ — dùng _globalHeading ★ */
+  _orientFn = function() {
     if (_state !== 'scanning') return;
 
-    var heading;
-    if (e.webkitCompassHeading != null) heading = e.webkitCompassHeading;
-    else if (e.alpha != null) heading = (360 - e.alpha) % 360;
-    else return;
-
-    hasOri = true;
-
+    var heading = _globalHeading;
     var diff = ((_lockedHeading - heading + 540) % 360) - 180;
     var absDiff = Math.abs(diff);
 
@@ -466,16 +505,12 @@ function startOrientationTracking() {
     if (!itemEl) return;
 
     /* ★ Ẩn/hiện theo hướng quay camera ★ */
-    if (absDiff < 20) {
-      /* Đúng hướng → hiện */
+    if (absDiff < 25) {
       itemEl.style.opacity = '1';
       itemEl.style.visibility = 'visible';
-      itemEl.style.transform = 'translate(-50%,-50%) scale(' + (1 + (20-absDiff)/50) + ')';
     } else {
-      /* Sai hướng → ẩn */
       itemEl.style.opacity = '0';
       itemEl.style.visibility = 'hidden';
-      itemEl.style.transform = 'translate(-50%,-50%) scale(0.8)';
     }
 
     /* Rotation guide */
@@ -483,7 +518,7 @@ function startOrientationTracking() {
 
     /* Enable capture — CHỈ creature */
     if (_findType === 'creature') {
-      creatureOnScreen = absDiff < 20;
+      creatureOnScreen = absDiff < 25;
       crosshairLocked = absDiff < 15;
       currentAccuracy = Math.max(0, 1 - absDiff / 15);
       var capBtn = document.getElementById('capture-btn');
@@ -516,29 +551,46 @@ function startOrientationTracking() {
       }
     }
   };
-  window.addEventListener('deviceorientation', _orientFn);
 
-  /* ★ Fallback: nếu 3s không có deviceorientation → hiện item ★ */
+  /* ★ Check mỗi 200ms thay vì event listener ★ */
+  var checkInterval = setInterval(function() {
+    if (_state !== 'scanning') { clearInterval(checkInterval); return; }
+    if (_oriPermissionGranted) {
+      _orientFn();
+    }
+  }, 200);
+
+  /* ★ Fallback: nếu sau 5s vẫn không có sensor → hiện item ★ */
   setTimeout(function() {
-    if (_state !== 'scanning' || hasOri) return;
-    /* Desktop / no sensor → hiện item */
-    var itemEl = document.getElementById('ar-creature');
-    if (itemEl) {
-      itemEl.style.opacity = '1';
-      itemEl.style.visibility = 'visible';
+    if (_state !== 'scanning') return;
+    if (!_oriPermissionGranted) {
+      /* Không có sensor → hiện item ngay */
+      var itemEl = document.getElementById('ar-creature');
+      if (itemEl) {
+        itemEl.style.opacity = '1';
+        itemEl.style.visibility = 'visible';
+      }
+      if (_findType === 'creature') {
+        creatureOnScreen = true; crosshairLocked = true; currentAccuracy = 1;
+        var capBtn = document.getElementById('capture-btn');
+        if (capBtn) capBtn.classList.remove('disabled');
+      } else {
+        var bpBtn = document.getElementById('bp-pickup-btn');
+        if (!bpBtn) {
+          bpBtn = document.createElement('button');
+          bpBtn.id = 'bp-pickup-btn';
+          bpBtn.className = 'bp-pickup-btn';
+          bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
+          bpBtn.onclick = function(e) { e.stopPropagation(); collectBallItem(GS._pendingBall); };
+          document.getElementById('screen-ar').appendChild(bpBtn);
+        }
+      }
     }
-    if (_findType === 'creature') {
-      creatureOnScreen = true; crosshairLocked = true; currentAccuracy = 1;
-      var capBtn = document.getElementById('capture-btn');
-      if (capBtn) capBtn.classList.remove('disabled');
-    } else {
-      var bpBtn = document.createElement('button');
-      bpBtn.id = 'bp-pickup-btn'; bpBtn.className = 'bp-pickup-btn';
-      bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
-      bpBtn.onclick = function(e) { e.stopPropagation(); collectBallItem(GS._pendingBall); };
-      document.getElementById('screen-ar').appendChild(bpBtn);
-    }
-  }, 3000);
+  }, 5000);
+}
+
+function stopOrientationTracking() {
+  /* Interval đã handle cleanup */
 }
 
 function stopOrientationTracking() {
