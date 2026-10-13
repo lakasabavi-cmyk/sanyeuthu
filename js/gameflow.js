@@ -365,28 +365,52 @@ function spawnCreatureItem() {
   removeItemFromAR();
 
   var el = ELEMENTS[creature.element] || ELEMENTS.KIM;
-  var realm = typeof getRealm === 'function' ? getRealm(creature.level) : {icon: '🌀', name: ''};
-
-  var advHtml = '<div class="ac-adv">';
-  var bk = BALL_KEYS || ['KIM', 'MOC', 'THUY', 'HOA', 'THO'];
-  for (var i = 0; i < bk.length; i++) {
-    var key = bk[i], adv = getAdvantageLabel(key, creature.element), b = BALLS[key];
-    var sel = GS.selectedBall === key ? ' selected' : '';
-    advHtml += '<div class="ac-adv-item' + sel + '" onclick="selectBall(\'' + key + '\')"><span class="ac-adv-icon">' + b.icon + '</span><span class="ac-adv-text" style="color:' + adv.color + '">' + adv.bonus + '</span></div>';
-  }
-  advHtml += '</div>';
+  var realm = typeof getRealm === 'function' ? getRealm(creature.level) : {icon:'🌀', name:''};
 
   var overlay = document.createElement('div');
   overlay.className = 'ar-item';
   overlay.id = 'ar-creature';
-  overlay.style.left = '50%'; overlay.style.top = '42%';
+  overlay.style.left = '50%';
+  overlay.style.top = '42%';
   overlay.innerHTML =
     '<div class="ac-art">' + renderCreatureArt(creature, 130) + '</div>'
-    + '<div class="ac-info"><div class="ac-name">' + creature.name + '</div><div class="ac-tags">'
+    + '<div class="ac-info"><div class="ac-name">' + creature.name + '</div>'
+    + '<div class="ac-tags">'
     + '<span class="ac-el" style="background:' + el.bg + '">' + el.icon + ' ' + el.name + '</span>'
-    + '<span class="ac-lvl">Lv.' + creature.level + ' ' + realm.icon + '</span></div></div>'
-    + advHtml;
+    + '<span class="ac-lvl">Lv.' + creature.level + ' ' + realm.icon + '</span></div></div>';
+
   document.getElementById('screen-ar').appendChild(overlay);
+
+  /* ★ Không còn hàng advantage riêng — gộp vào ball buttons ★ */
+  updateBallButtonsWithAdvantage(creature.element);
+}
+
+function updateBallButtonsWithAdvantage(creatureElement) {
+  var row = document.getElementById('ar-balls-row');
+  if (!row) return;
+  if (!GS.inventory) GS.inventory = {};
+  if (!GS.selectedBall) GS.selectedBall = 'KIM';
+
+  var html = '';
+  var bk = BALL_KEYS || ['KIM','MOC','THUY','HOA','THO'];
+  for (var i = 0; i < bk.length; i++) {
+    var key = bk[i];
+    var b = BALLS[key];
+    var count = GS.inventory[key] || 0;
+    var sel = GS.selectedBall === key ? ' selected' : '';
+    var empty = count <= 0 ? ' empty' : '';
+    /* ★ Advantage text trên ball button ★ */
+    var adv = creatureElement ? getAdvantageLabel(key, creatureElement) : {color:'#aaa', bonus:'—'};
+    html += '<div class="ball-item' + sel + empty + '" onclick="selectBall(\'' + key + '\')">';
+    html += '<div class="ball-icon">' + b.icon + '</div>';
+    html += '<div class="ball-name" style="color:' + b.color + '">' + b.name.replace('Bùa ','') + '</div>';
+    html += '<div class="ball-count">' + count + '</div>';
+    if (creatureElement) {
+      html += '<div class="ball-adv" style="color:' + adv.color + '">' + adv.bonus + '</div>';
+    }
+    html += '</div>';
+  }
+  row.innerHTML = html;
 }
 
 function spawnBallItem() {
@@ -419,6 +443,12 @@ function spawnBallItem() {
 function startOrientationTracking() {
   stopOrientationTracking();
 
+  /* ★ Item ẨN mặc định ★ */
+  var item = document.getElementById('ar-creature');
+  if (item) { item.style.opacity = '0'; item.style.visibility = 'hidden'; }
+
+  var hasOri = false;
+
   _orientFn = function(e) {
     if (_state !== 'scanning') return;
 
@@ -427,20 +457,31 @@ function startOrientationTracking() {
     else if (e.alpha != null) heading = (360 - e.alpha) % 360;
     else return;
 
+    hasOri = true;
+
     var diff = ((_lockedHeading - heading + 540) % 360) - 180;
     var absDiff = Math.abs(diff);
 
-    /* Item hiện/ẩn */
-    var item = document.getElementById('ar-creature');
-    if (item) {
-      if (absDiff < 20) { item.style.opacity = '1'; item.style.visibility = 'visible'; }
-      else { item.style.opacity = '0'; item.style.visibility = 'hidden'; }
+    var itemEl = document.getElementById('ar-creature');
+    if (!itemEl) return;
+
+    /* ★ Ẩn/hiện theo hướng quay camera ★ */
+    if (absDiff < 20) {
+      /* Đúng hướng → hiện */
+      itemEl.style.opacity = '1';
+      itemEl.style.visibility = 'visible';
+      itemEl.style.transform = 'translate(-50%,-50%) scale(' + (1 + (20-absDiff)/50) + ')';
+    } else {
+      /* Sai hướng → ẩn */
+      itemEl.style.opacity = '0';
+      itemEl.style.visibility = 'hidden';
+      itemEl.style.transform = 'translate(-50%,-50%) scale(0.8)';
     }
 
     /* Rotation guide */
     updateRotationGuide(diff, absDiff);
 
-           /* ★ Enable capture — CHỈ creature, KHÔNG ball ★ */
+    /* Enable capture — CHỈ creature */
     if (_findType === 'creature') {
       creatureOnScreen = absDiff < 20;
       crosshairLocked = absDiff < 15;
@@ -451,7 +492,6 @@ function startOrientationTracking() {
         else capBtn.classList.add('disabled');
       }
     } else {
-      /* ★ BALL: chặn hoàn toàn nút 🎯 Bắt ★ */
       creatureOnScreen = false;
       crosshairLocked = false;
       currentAccuracy = 0;
@@ -468,10 +508,7 @@ function startOrientationTracking() {
           bpBtn.id = 'bp-pickup-btn';
           bpBtn.className = 'bp-pickup-btn';
           bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
-          bpBtn.onclick = function(e) {
-            e.stopPropagation();
-            collectBallItem(GS._pendingBall);
-          };
+          bpBtn.onclick = function(ev) { ev.stopPropagation(); collectBallItem(GS._pendingBall); };
           document.getElementById('screen-ar').appendChild(bpBtn);
         }
       } else {
@@ -481,38 +518,25 @@ function startOrientationTracking() {
   };
   window.addEventListener('deviceorientation', _orientFn);
 
-   /* Fallback: desktop → hiện item sau 3s */
+  /* ★ Fallback: nếu 3s không có deviceorientation → hiện item ★ */
   setTimeout(function() {
-    if (_state !== 'scanning') return;
-    var item = document.getElementById('ar-creature');
-    if (item && item.style.visibility !== 'visible') {
-      item.style.opacity = '1';
-      item.style.visibility = 'visible';
-
-      if (_findType === 'creature') {
-        creatureOnScreen = true;
-        crosshairLocked = true;
-        currentAccuracy = 1;
-        var capBtn = document.getElementById('capture-btn');
-        if (capBtn) capBtn.classList.remove('disabled');
-      } else {
-        /* ★ BALL: chỉ hiện nút nhặt ★ */
-        var capBtn = document.getElementById('capture-btn');
-        if (capBtn) capBtn.classList.add('disabled');
-
-        var bpBtn = document.getElementById('bp-pickup-btn');
-        if (!bpBtn) {
-          bpBtn = document.createElement('button');
-          bpBtn.id = 'bp-pickup-btn';
-          bpBtn.className = 'bp-pickup-btn';
-          bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
-          bpBtn.onclick = function(e) {
-            e.stopPropagation();
-            collectBallItem(GS._pendingBall);
-          };
-          document.getElementById('screen-ar').appendChild(bpBtn);
-        }
-      }
+    if (_state !== 'scanning' || hasOri) return;
+    /* Desktop / no sensor → hiện item */
+    var itemEl = document.getElementById('ar-creature');
+    if (itemEl) {
+      itemEl.style.opacity = '1';
+      itemEl.style.visibility = 'visible';
+    }
+    if (_findType === 'creature') {
+      creatureOnScreen = true; crosshairLocked = true; currentAccuracy = 1;
+      var capBtn = document.getElementById('capture-btn');
+      if (capBtn) capBtn.classList.remove('disabled');
+    } else {
+      var bpBtn = document.createElement('button');
+      bpBtn.id = 'bp-pickup-btn'; bpBtn.className = 'bp-pickup-btn';
+      bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
+      bpBtn.onclick = function(e) { e.stopPropagation(); collectBallItem(GS._pendingBall); };
+      document.getElementById('screen-ar').appendChild(bpBtn);
     }
   }, 3000);
 }
@@ -528,19 +552,21 @@ function updateRotationGuide(diff, absDiff) {
   var guide = document.getElementById('rotation-guide');
   if (!guide) {
     guide = document.createElement('div');
-    guide.id = 'rotation-guide'; guide.className = 'rotation-guide';
+    guide.id = 'rotation-guide';
+    guide.className = 'rotation-guide';
     document.getElementById('screen-ar').appendChild(guide);
   }
 
   if (absDiff < 15) {
-    guide.innerHTML = '<div class="rg-icon">✅</div><div class="rg-text">Đúng hướng! Bấm nút bắt!</div>';
+    guide.innerHTML = '<div class="rg-icon">✅</div><div class="rg-text">Đúng hướng! Bấm nút!</div>';
     guide.className = 'rotation-guide rg-success';
-  } else if (absDiff < 25) {
-    guide.innerHTML = '<div class="rg-icon">🎯</div><div class="rg-text">Gần rồi! Quay thêm chút nữa</div>';
+  } else if (absDiff < 30) {
+    var dir = diff > 0 ? '→' : '←';
+    guide.innerHTML = '<div class="rg-icon">' + dir + '</div><div class="rg-text">Gần rồi! Quay thêm ' + Math.round(absDiff) + '°</div>';
     guide.className = 'rotation-guide rg-close';
   } else {
-    var dir = diff > 0 ? '→ Quay phải' : '← Quay trái';
-    guide.innerHTML = '<div class="rg-icon">' + (diff > 0 ? '🔄' : '🔄') + '</div><div class="rg-text">' + dir + ' ' + Math.round(absDiff) + '°</div>';
+    var dir = diff > 0 ? '🔄 →' : '← 🔄';
+    guide.innerHTML = '<div class="rg-icon">' + dir + '</div><div class="rg-text">Quay ' + (diff > 0 ? 'phải' : 'trái') + ' ' + Math.round(absDiff) + '°</div>';
     guide.className = 'rotation-guide rg-far';
   }
 }
