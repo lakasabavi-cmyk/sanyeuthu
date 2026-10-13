@@ -81,12 +81,7 @@ function createAreaStatusWidget() {
     + '<div class="as-row"><span class="as-icon">🎯</span><span class="as-label">Bùa:</span><span class="as-val ball" id="as-balls">2</span></div>'
     + '<div class="as-row"><span class="as-icon">⏱</span><span class="as-label">Reset:</span><span class="as-val reset" id="as-reset">--:--</span></div>';
   var hudTr = document.querySelector('.hud-tr');
-  if (hudTr && hudTr.parentNode) {
-    hudTr.parentNode.insertBefore(el, hudTr.nextSibling);
-    el.style.position = 'absolute';
-    el.style.top = (hudTr.offsetTop + hudTr.offsetHeight + 8) + 'px';
-    el.style.right = '12px'; el.style.zIndex = '300';
-  }
+  if (hudTr) hudTr.insertBefore(el, hudTr.firstChild);
 }
 
 function updateAreaStatus() {
@@ -115,13 +110,14 @@ function toggleCompass() {
   _compassOn = !_compassOn;
   compassActive = _compassOn;
   var btn = document.getElementById('btn-compass');
-  if (btn) btn.classList.toggle('active', _compassOn);
+  if (btn) { btn.classList.toggle('active', _compassOn); btn.textContent = _compassOn ? '🧭 Rời bí cảnh' : '🧭 Vào bí cảnh'; }
   var cs = document.getElementById('compass-status');
   if (cs) cs.textContent = _compassOn ? '🧭 Bật' : '🧭 Tắt';
 
   if (_compassOn) {
     /* ★ XIN QUYỀN DeviceOrientation (iOS cần) ★ */
     requestDeviceOrientation();
+    requestDeviceMotion();
 
     initArea();
     startAreaStatusTimer();
@@ -131,6 +127,9 @@ function toggleCompass() {
     showToast('🧭 La bàn bật! ' + rem + ' yêu thú + ' + bRem + ' bùa.', 4000);
   } else {
     showToast('🧭 La bàn tắt.', 2000);
+    var asEl = document.getElementById('area-status');
+    if (asEl) asEl.remove();
+    if (_areaTimer) { clearInterval(_areaTimer); _areaTimer = null; }
     if (_state !== 'idle') cleanupAfterResult();
   }
   saveState();
@@ -138,6 +137,23 @@ function toggleCompass() {
 
 /* ★★★ Request DeviceOrientation Permission ★★★ */
 var _oriPermissionGranted = false;
+var _motionPermissionGranted = false;
+
+function requestDeviceMotion() {
+  if (_motionPermissionGranted) return;
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission()
+      .then(function(state) {
+        _motionPermissionGranted = state === 'granted';
+        if (!_motionPermissionGranted) showToast('⚠️ Chưa được cấp quyền cảm biến chuyển động.', 3000);
+      })
+      .catch(function() {
+        showToast('⚠️ Không thể bật cảm biến chuyển động.', 3000);
+      });
+  } else {
+    _motionPermissionGranted = true;
+  }
+}
 
 function requestDeviceOrientation() {
   if (_oriPermissionGranted) return;
@@ -201,15 +217,23 @@ var _accelHistory = [];
 var _motionFn = null;
 var _gpsWatchId = null;
 var _orientFn = null;
-var _arrowTimer = null;
-var _arrowAngle = 0;
+var _detectTimer = null;
 
 /* ================================================================
    ★★★ BẤM 🔍 — Search Start ★★★
    ================================================================ */
+function setSearchSpinning(on) {
+  var b = document.getElementById('btn-search');
+  if (b) b.classList.toggle('searching', !!on);
+}
+
 function startSearchPhase() {
-  if (_state !== 'idle') { showToast('🔍 Đang tìm kiếm...'); return; }
-  if (!_compassOn) { showToast('🧭 Bật la bàn trước!', 3000); return; }
+  if (_state === 'searching') { showToast('🔍 Đang tìm kiếm...'); return; }
+  if (_state === 'detected' || _state === 'scanning') {
+    cleanupAfterResult();
+    showToast('🔍 Bỏ qua, tìm lại...', 1500);
+  }
+  if (!_compassOn) { showToast('🧭 Hãy vào bí cảnh trước!', 3000); return; }
 
   initArea();
   if (isResetDue() || hasMovedEnough()) { resetArea(); showToast('🗺️ Khu vực mới! 2 yêu thú + 2 bùa.', 4000); return; }
@@ -221,6 +245,7 @@ function startSearchPhase() {
     return;
   }
 
+  requestDeviceMotion();
   _findType = (bl > 0 && cr <= 0) ? 'ball' : (cr > 0 && bl <= 0) ? 'creature' : (Math.random() < 0.4 ? 'ball' : 'creature');
   _state = 'searching';
   _moveTime = 0;
@@ -229,7 +254,8 @@ function startSearchPhase() {
 
   showSearchOverlay();
   startMovementDetection();
-  startWalkArrow();
+  startSearchRing();
+  setSearchSpinning(true);
 }
 
 /* ================================================================
@@ -241,9 +267,7 @@ function showSearchOverlay() {
   el.className = 'search-overlay';
   el.id = 'search-overlay';
   el.innerHTML =
-    '<div class="so-icon">🔍</div>'
-    + '<div class="so-text">Bắt đầu tìm yêu thú</div>'
-    + '<div class="so-hint" id="so-hint">Đi bộ xung quanh khu vực...</div>';
+    '<div class="so-hint" id="so-hint">Chưa thấy di chuyển, hãy di chuyển để tìm xung quanh</div>';
   document.getElementById('screen-ar').appendChild(el);
 }
 
@@ -280,18 +304,20 @@ function startMovementDetection() {
     }
     _lastMotionTs = now;
 
-    var hint = document.getElementById('so-hint');
-    if (hint) hint.textContent = moving ? '🚶 Đang di chuyển... ' + Math.floor(_moveTime) + 's / ' + Math.floor(_triggerSec) + 's' : '⏸ Chưa thấy di chuyển, hãy đi bộ!';
+    var hint = null;
+    if (hint) hint.textContent = moving ? 'Đang di chuyển, tiếp tục tìm xung quanh...' : 'Chưa thấy di chuyển, hãy di chuyển để tìm xung quanh';
 
     if (_moveTime >= _triggerSec) triggerDetection();
   };
   window.addEventListener('devicemotion', _motionFn);
 
   /* GPS — backup + area tracking */
-  _gpsWatchId = navigator.geolocation.watchPosition(function(pos) {
-    playerLat = pos.coords.latitude; playerLng = pos.coords.longitude;
-    if (_state === 'searching') { _moveTime += 0.5; if (_moveTime >= _triggerSec) triggerDetection(); }
-  }, function() {}, {enableHighAccuracy: true, maximumAge: 3000, timeout: 15000});
+  if (navigator.geolocation) {
+    _gpsWatchId = navigator.geolocation.watchPosition(function(pos) {
+      playerLat = pos.coords.latitude; playerLng = pos.coords.longitude;
+      if (_state === 'searching') { _moveTime += 0.5; if (_moveTime >= _triggerSec) triggerDetection(); }
+    }, function() {}, {enableHighAccuracy: true, maximumAge: 3000, timeout: 15000});
+  }
 
   /* Fallback: nếu không có DeviceMotion (desktop) */
   var fbTimer = setInterval(function() {
@@ -305,64 +331,20 @@ function startMovementDetection() {
 
 function stopMovementDetection() {
   if (_motionFn) { window.removeEventListener('devicemotion', _motionFn); _motionFn = null; }
-  if (_gpsWatchId) { navigator.geolocation.clearWatch(_gpsWatchId); _gpsWatchId = null; }
+  if (_gpsWatchId !== null && navigator.geolocation) { navigator.geolocation.clearWatch(_gpsWatchId); _gpsWatchId = null; }
 }
 
 /* ================================================================
-   ★★★ WALK ARROW — Mũi tên trên crosshair khi đi bộ ★★★
+   ★★★ SEARCH RING — Vòng crosshair đổi màu khi đang tìm ★★★
    ================================================================ */
-function startWalkArrow() {
-  addCrosshairArrow();
-  _arrowAngle = Math.floor(Math.random() * 360);
-  updateWalkArrow();
-
-  if (_arrowTimer) clearInterval(_arrowTimer);
-  _arrowTimer = setInterval(function() {
-    if (_state !== 'searching') return;
-    _arrowAngle = (_arrowAngle + (Math.random() > 0.5 ? 1 : -1) * (20 + Math.random() * 40) + 360) % 360;
-    updateWalkArrow();
-  }, 8000 + Math.floor(Math.random() * 7000));
-}
-
-function updateWalkArrow() {
+function startSearchRing() {
   var ring = document.getElementById('crosshair-ring');
   if (ring) { ring.style.borderColor = '#ffa726'; ring.style.boxShadow = '0 0 15px rgba(255,167,38,0.5)'; }
-  var arrow = document.getElementById('crosshair-arrow');
-  if (arrow) { arrow.style.transform = 'rotate(' + _arrowAngle + 'deg)'; arrow.style.display = ''; arrow.style.borderColor = 'transparent transparent #ffa726 transparent'; }
 }
 
-function stopWalkArrow() {
-  if (_arrowTimer) clearInterval(_arrowTimer);
-  _arrowTimer = null;
-  removeCrosshairArrow();
+function stopSearchRing() {
   var ring = document.getElementById('crosshair-ring');
   if (ring) { ring.style.borderColor = ''; ring.style.boxShadow = ''; }
-}
-
-function addCrosshairArrow() {
-  removeAllArrows();
-  var wrap = document.querySelector('.crosshair');
-  if (!wrap) return;
-  var a = document.createElement('div');
-  a.id = 'crosshair-arrow';
-  a.className = 'crosshair-arrow';
-  a.innerHTML = '➤';
-  wrap.appendChild(a);
-}
-
-function removeAllArrows() {
-  /* Xóa mũi tên gameflow */
-  var old = document.getElementById('crosshair-arrow');
-  if (old) old.remove();
-  /* Xóa bất kỳ element arrow nào khác trên AR */
-  var all = document.querySelectorAll('.nav-arrow,.compass-arrow,.arrow,.direction-arrow,[class*="arrow"]');
-  for (var i = 0; i < all.length; i++) {
-    if (all[i].id !== 'crosshair-arrow') all[i].remove();
-  }
-}
-
-function removeCrosshairArrow() {
-  removeAllArrows();
 }
 
 /* ================================================================
@@ -372,7 +354,8 @@ function triggerDetection() {
   if (_state !== 'searching') return;
   _state = 'detected';
   stopMovementDetection();
-  stopWalkArrow();
+  stopSearchRing();
+  setSearchSpinning(false);
   removeSearchOverlay();
 
   var ring = document.getElementById('crosshair-ring');
@@ -385,7 +368,7 @@ function triggerDetection() {
 
   /* Random 10-30s trước khi item xuất hiện */
   var delay = 10000 + Math.random() * 20000;
-  setTimeout(function() {
+  _detectTimer = setTimeout(function() {
     if (_state !== 'detected') return;
     startScanning();
   }, delay);
@@ -475,9 +458,10 @@ function spawnBallItem() {
   removeItemFromAR();
 
   var overlay = document.createElement('div');
-  overlay.className = 'ar-item';
+  overlay.className = 'ar-item ar-ball';
   overlay.id = 'ar-creature';
   overlay.style.left = '50%';
+  overlay.onclick = function(ev) { ev.stopPropagation(); collectBallItem(GS._pendingBall); };
   overlay.innerHTML =
     '<div class="bp-art"><svg viewBox="0 0 100 100" width="110" height="110">'
     + '<defs><radialGradient id="bpG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="' + ball.color + '" stop-opacity="0.5"/><stop offset="100%" stop-color="' + ball.color + '" stop-opacity="0"/></radialGradient></defs>'
@@ -488,6 +472,8 @@ function spawnBallItem() {
     + '<div class="ac-ground" aria-hidden="true"></div>';
   document.getElementById('screen-ar').appendChild(overlay);
   _lockedHeading = Math.random() * 360;
+  showSearchOverlay();
+  setBallHint(false);
 }
 
 /* ================================================================
@@ -500,6 +486,11 @@ function startOrientationTracking() {
   /* ★ Item starts hidden until its compass bearing enters the camera view ★ */
   var item = document.getElementById('ar-creature');
   if (item) { item.style.opacity = '0'; item.style.visibility = 'hidden'; }
+
+  if (displayModeActive === 'screen') {
+    showItemAtScreenCenter();
+    return;
+  }
 
   /* ★ Check định kỳ — dùng _globalHeading ★ */
   _orientFn = function() {
@@ -552,22 +543,8 @@ function startOrientationTracking() {
       if (capBtn) capBtn.classList.add('disabled');
     }
 
-    /* Ball pickup button */
-    if (_findType === 'ball') {
-      var bpBtn = document.getElementById('bp-pickup-btn');
-      if (visible && Math.abs(itemX - screenWidth / 2) <= CONFIG.CROSSHAIR_LOCK_PX) {
-        if (!bpBtn) {
-          bpBtn = document.createElement('button');
-          bpBtn.id = 'bp-pickup-btn';
-          bpBtn.className = 'bp-pickup-btn';
-          bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
-          bpBtn.onclick = function(ev) { ev.stopPropagation(); collectBallItem(GS._pendingBall); };
-          document.getElementById('screen-ar').appendChild(bpBtn);
-        }
-      } else {
-        if (bpBtn) bpBtn.remove();
-      }
-    }
+    /* Ball: gợi ý nhấn vào bùa khi bùa đang trong khung hình */
+    if (_findType === 'ball') setBallHint(visible);
   };
 
   /* ★ Check mỗi 200ms; fall back to a centered, ground-anchored item if no sensor responds ★ */
@@ -577,32 +554,41 @@ function startOrientationTracking() {
     if (_orientationLastSeenAt && Date.now() - _orientationLastSeenAt < 3000) {
       _orientFn();
     } else if (Date.now() - scanStartedAt >= 5000) {
-      var itemEl = document.getElementById('ar-creature');
-      if (itemEl) {
-        itemEl.style.left = '50%';
-        itemEl.style.opacity = '1';
-        itemEl.style.visibility = 'visible';
-      }
-      updateRotationGuide(0, 0);
-      if (_findType === 'creature') {
-        creatureOnScreen = true;
-        crosshairLocked = true;
-        currentAccuracy = 1;
-        var capBtn = document.getElementById('capture-btn');
-        if (capBtn) capBtn.classList.remove('disabled');
-      } else {
-        var bpBtn = document.getElementById('bp-pickup-btn');
-        if (!bpBtn) {
-          bpBtn = document.createElement('button');
-          bpBtn.id = 'bp-pickup-btn';
-          bpBtn.className = 'bp-pickup-btn';
-          bpBtn.textContent = '🎯 Nhặt Bùa (Miễn phí)';
-          bpBtn.onclick = function(e) { e.stopPropagation(); collectBallItem(GS._pendingBall); };
-          document.getElementById('screen-ar').appendChild(bpBtn);
-        }
-      }
+      showItemAtScreenCenter();
     }
   }, 200);
+}
+
+function showItemAtScreenCenter() {
+  var item = document.getElementById('ar-creature');
+  if (item) {
+    item.style.left = '50%';
+    item.style.opacity = '1';
+    item.style.visibility = 'visible';
+  }
+  if (displayModeActive === 'screen') removeRotationGuide();
+  else updateRotationGuide(0, 0);
+  if (_findType === 'creature') {
+    creatureOnScreen = true;
+    crosshairLocked = true;
+    currentAccuracy = 1;
+    var capBtn = document.getElementById('capture-btn');
+    if (capBtn) capBtn.classList.remove('disabled');
+  } else {
+    setBallHint(true);
+  }
+}
+
+function setBallHint(found) {
+  var hint = document.getElementById('so-hint');
+  if (!hint) return;
+  if (found) {
+    var ball = BALLS[GS._pendingBall];
+    var el = ball ? ball.name.replace(/^Bùa\s+/, '') : '';
+    hint.textContent = 'Phát hiện bùa hệ ' + el + ', nhấn vào bùa để nhặt';
+  } else {
+    hint.textContent = 'Chưa thấy di chuyển, hãy di chuyển để tìm xung quanh';
+  }
 }
 
 function stopOrientationTracking() {
@@ -614,34 +600,32 @@ function stopOrientationTracking() {
 }
 
 /* ================================================================
-   ★★★ ROTATION GUIDE — Mũi tên hướng dẫn quay camera ★★★
+   ★★★ ROTATION GUIDE — Mũi tên hai bên Crosshair chỉ hướng quay ★★★
    ================================================================ */
 function updateRotationGuide(diff, absDiff) {
-  var guide = document.getElementById('rotation-guide');
-  if (!guide) {
-    guide = document.createElement('div');
-    guide.id = 'rotation-guide';
-    guide.className = 'rotation-guide';
-    document.getElementById('screen-ar').appendChild(guide);
-  }
-
-  if (absDiff < 15) {
-    guide.innerHTML = '<div class="rg-icon">✅</div><div class="rg-text">Đúng hướng! Bấm nút!</div>';
-    guide.className = 'rotation-guide rg-success';
-  } else if (absDiff < 30) {
-    var dir = diff > 0 ? '→' : '←';
-    guide.innerHTML = '<div class="rg-icon">' + dir + '</div><div class="rg-text">Gần rồi! Quay thêm ' + Math.round(absDiff) + '°</div>';
-    guide.className = 'rotation-guide rg-close';
-  } else {
-    var dir = diff > 0 ? '🔄 →' : '← 🔄';
-    guide.innerHTML = '<div class="rg-icon">' + dir + '</div><div class="rg-text">Quay ' + (diff > 0 ? 'phải' : 'trái') + ' ' + Math.round(absDiff) + '°</div>';
-    guide.className = 'rotation-guide rg-far';
-  }
+  var wrap = document.querySelector('.crosshair');
+  if (!wrap) return;
+  var offScreen = absDiff > CONFIG.FOV / 2;
+  var sides = [{ id: 'rg-arrow-left', cls: 'rg-left', ch: '◀', on: offScreen && diff < 0 },
+               { id: 'rg-arrow-right', cls: 'rg-right', ch: '▶', on: offScreen && diff > 0 }];
+  sides.forEach(function(s) {
+    var el = document.getElementById(s.id);
+    if (!s.on) { if (el) el.remove(); return; }
+    if (!el) {
+      el = document.createElement('div');
+      el.id = s.id;
+      el.className = 'rg-arrow ' + s.cls;
+      el.textContent = s.ch;
+      wrap.appendChild(el);
+    }
+  });
 }
 
 function removeRotationGuide() {
-  var el = document.getElementById('rotation-guide');
-  if (el) el.remove();
+  ['rg-arrow-left', 'rg-arrow-right'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.remove();
+  });
 }
 
 /* ================================================================
@@ -671,7 +655,8 @@ function collectBallItem(ballKey) {
    ================================================================ */
 function cleanupAfterResult() {
   _state = 'idle';
-  stopMovementDetection(); stopOrientationTracking(); stopWalkArrow();
+  clearTimeout(_detectTimer); _detectTimer = null;
+  setSearchSpinning(false); stopOrientationTracking(); stopSearchRing();
   removeSearchOverlay(); removeRotationGuide(); removeItemFromAR();
   var ring = document.getElementById('crosshair-ring');
   if (ring) { ring.style.borderColor = ''; ring.style.boxShadow = ''; }
