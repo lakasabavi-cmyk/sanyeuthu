@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a2e">
-<title>🔮 Yêu Thú Săn Bắt</title>
+<title>🔮 PHỤC YÊU AI</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -16,14 +16,16 @@
 <!-- ==================== LOGIN ==================== -->
 <div id="screen-login" class="screen active">
   <div class="login-box">
-    <h1>🔮 Yêu Thú Săn Bắt</h1>
-    <div class="subtitle">Thu phục yêu thú ngũ hành</div>
+    <h1>🔮 PHỤC YÊU AI</h1>
+    <div class="subtitle">Thu phục yêu thú tam giới</div>
     <div id="login-form">
       <div class="input-group"><label>Email</label><input type="email" id="input-email" placeholder="email@example.com"></div>
       <div class="input-group"><label>Mật khẩu</label><input type="password" id="input-password" placeholder="••••••••"></div>
       <button class="btn btn-primary" onclick="handleLogin()">Đăng nhập</button>
       <div class="divider">hoặc</div>
-      <button class="btn btn-google" onclick="handleGoogleLogin()">🔵 Google</button>
+      <button class="btn btn-google" onclick="handleSocialLogin('google')"><svg class="brand-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.55 21.3 7.27 24 12 24z"/><path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 0 0 0 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.27 0 3.55 2.7 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z"/></svg>Đăng nhập bằng Google</button>
+      <button class="btn btn-apple" onclick="handleSocialLogin('apple')"><svg class="brand-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>Đăng nhập bằng Apple</button>
+      <button class="btn btn-facebook" onclick="handleSocialLogin('facebook')"><svg class="brand-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg>Đăng nhập bằng Facebook</button>
       <div class="toggle-text">Chưa có tài khoản? <a onclick="toggleRegister()">Đăng ký</a></div>
     </div>
     <div id="register-form" style="display:none">
@@ -54,7 +56,7 @@
     <div class="hud-info">
       <div class="hud-player-line">
         <span class="hud-name" id="hud-name">Người chơi</span>
-        <span class="hud-level" id="hud-level">Level 1</span>
+        <span class="hud-level" id="hud-level">1</span>
         <button class="hud-logout" onclick="doLogout()" title="Đăng xuất">✕</button>
       </div>
       <div class="hud-realm" id="hud-realm">@Luyện Khí</div>
@@ -62,7 +64,8 @@
       <div class="hud-compass" id="compass-status">🧭 Chưa bật</div>
     </div>
     <div class="hud-tr">
-      <button class="btn-compass" id="btn-compass" onclick="activateCompass()">🧭</button>
+      <button class="btn-display-mode" id="btn-display-mode" onclick="cycleDisplayMode()" title="Đổi chế độ hiển thị">📷 Tự động</button>
+      <button class="btn-compass" id="btn-compass" onclick="activateCompass()">🧭 Vào bí cảnh</button>
     </div>
   </div>
 
@@ -91,6 +94,18 @@
   <div class="ar-bottom">
     <div class="ar-balls" id="ar-balls-row"></div>
     <button class="ar-capture disabled" id="capture-btn" onclick="doCapture()">🎯</button>
+  </div>
+</div>
+
+<div class="compass-prompt" id="compass-prompt">
+  <div class="cp-box">
+    <div class="cp-icon">🧭</div>
+    <div class="cp-title">Bật cảm biến hướng?</div>
+    <div class="cp-desc">La bàn giúp yêu thú xuất hiện theo hướng bạn xoay điện thoại. Bạn vẫn có thể chơi ở chế độ không AR mà không cần bật cảm biến.</div>
+    <div class="cp-buttons">
+      <button class="cp-btn no" onclick="closeCompassPrompt()">Để sau</button>
+      <button class="cp-btn yes" onclick="enableCompassFromPrompt()">Bật la bàn</button>
+    </div>
   </div>
 </div>
 
@@ -126,6 +141,9 @@
     <div class="stat-card"><div class="stat-value" id="stat-rate" style="color:#4fc3f7">0%</div><div class="stat-label">Tỷ lệ</div></div>
     <div class="stat-card"><div class="stat-value" id="stat-total-xp" style="color:#ffd700">0</div><div class="stat-label">Tổng XP</div></div>
   </div>
+  <button class="btn" style="margin:16px auto;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="addTestCreatures()">🧪 Thêm 20 yêu thú test</button>
+  <button class="btn" style="margin:0 auto 16px;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="addTestPills()">🧪 Thêm 20 đan dược test</button>
+  <button class="btn" style="margin:0 auto 16px;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="openAiConnect()">🔌 Kết nối AI (test)</button>
 </div>
 
 <!-- ==================== AVATAR PICKER ==================== -->
@@ -200,6 +218,7 @@
 <script src="js/alchemy.js"></script>
 <script src="js/gameflow.js"></script>
 <script src="js/creature-art.js"></script>
+<script src="js/ai.js"></script>
 <script src="js/ui.js"></script>
 </body>
 </html>
