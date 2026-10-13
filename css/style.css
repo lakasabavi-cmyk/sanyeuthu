@@ -319,3 +319,75 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .coll-card.rare .art-glow{
   animation:glowPulse 2s ease-in-out infinite;
 }
+
+/* ============================================================
+   ★★★ STATS + SKILLS — Detail Modal ★★★
+   ★ v1.20: Hiển thị chỉ số + kỹ năng
+   ============================================================ */
+
+.stats-container{
+  width:100%;max-width:320px;
+  background:rgba(255,255,255,.06);
+  border-radius:14px;padding:14px;margin-top:12px;
+}
+.stats-budget{
+  text-align:center;font-size:12px;color:#aaa;
+  margin-bottom:10px;padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.stats-budget strong{color:#ffd700;font-size:14px}
+
+.stat-row{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:6px;
+}
+.stat-icon{width:22px;font-size:16px;text-align:center;flex-shrink:0}
+.stat-name{width:62px;font-size:11px;color:#ccc;flex-shrink:0}
+.stat-bar{
+  flex:1;height:10px;background:rgba(255,255,255,.1);
+  border-radius:5px;overflow:hidden;
+}
+.stat-bar-fill{
+  height:100%;border-radius:5px;
+  transition:width .5s ease;
+}
+.stat-val{
+  width:30px;font-size:12px;font-weight:700;
+  text-align:right;flex-shrink:0;
+}
+
+/* Skills */
+.skills-container{
+  width:100%;max-width:320px;
+  margin-top:12px;
+}
+.skills-header{
+  font-size:15px;font-weight:700;margin-bottom:4px;
+}
+.skills-desc{
+  font-size:11px;color:#aaa;line-height:1.5;
+  margin-bottom:10px;
+}
+.skill-row{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(255,255,255,.05);
+  border-radius:12px;padding:10px 12px;
+  margin-bottom:6px;
+  border-left:3px solid rgba(255,255,255,.15);
+}
+.skill-row.skill-ultimate{
+  border-left-color:#FFD700;
+  background:rgba(255,215,0,.08);
+}
+.skill-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.skill-info{flex:1}
+.skill-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.skill-badge{
+  font-size:9px;padding:1px 6px;border-radius:6px;
+  font-weight:700;
+}
+.skill-badge.ult{
+  background:#FFD700;color:#1a1a2e;
+}
+.skill-desc{font-size:11px;color:#aaa;line-height:1.4;margin-top:3px}
+.skill-meta{font-size:10px;color:#666;margin-top:3px}
