@@ -1,10 +1,9 @@
-/* ============================================================
-   MODULE: creatures.js
-   Chức năng: Yêu thú — DB + sinh + di chuyển
+/* creatures.js — Yêu thú DB + sinh + stats
+   ★ v1.20: Thêm stat generation ★
    ============================================================ */
 
 var RARITY_COLORS = {common:'#4caf50',rare:'#2196f3',legendary:'#ff9800'};
-var RARITY_NAMES  = {common:'Thường',rare:'Hiếm',legendary:'Huyền thoại'};
+var RARITY_NAMES = {common:'Thường',rare:'Hiếm',legendary:'Huyền thoại'};
 
 var CREATURE_DB = [
   {id:1,name:'Kim Ưng',element:'KIM',emoji:'🦅',rarity:'common',minLvl:1,maxLvl:10},
@@ -24,24 +23,29 @@ var CREATURE_DB = [
   {id:15,name:'Kỳ Lân',element:'THO',emoji:'🦄',rarity:'legendary',minLvl:40,maxLvl:80}
 ];
 
-function placeCreature(c){
-  var angle=Math.random()*360;
-  var dist=CONFIG.SPAWN_MIN+Math.random()*(CONFIG.SPAWN_MAX-CONFIG.SPAWN_MIN);
-  var dLat=(dist*Math.cos(angle*Math.PI/180))/111320;
-  var dLng=(dist*Math.sin(angle*Math.PI/180))/(111320*Math.cos(playerLat*Math.PI/180));
-  c.lat=playerLat+dLat; c.lng=playerLng+dLng;
+function placeCreature(c) {
+  var angle = Math.random() * 360;
+  var dist = CONFIG.SPAWN_MIN + Math.random() * (CONFIG.SPAWN_MAX - CONFIG.SPAWN_MIN);
+  c.lat = playerLat + (dist * Math.cos(angle * Math.PI / 180)) / 111320;
+  c.lng = playerLng + (dist * Math.sin(angle * Math.PI / 180)) / (111320 * Math.cos(playerLat * Math.PI / 180));
 }
 
-function generateCreature(){
-  var pL=GS.level;
-  var cands=CREATURE_DB.filter(function(c){return c.minLvl<=pL+5&&c.maxLvl>=pL-2;});
-  var base=cands[Math.floor(Math.random()*cands.length)]||CREATURE_DB[0];
-  var cL=Math.max(base.minLvl,Math.min(base.maxLvl,pL+Math.floor(Math.random()*8)-3));
-  var c=Object.assign({},base,{
-    level:cL,lat:0,lng:0,
-    escapeChances:CONFIG.ESCAPE_MIN+Math.floor(Math.random()*(CONFIG.ESCAPE_MAX-CONFIG.ESCAPE_MIN+1)),
-    escapeAttemptsUsed:0
+function generateCreature() {
+  var pL = GS.level;
+  var cands = CREATURE_DB.filter(function(c) { return c.minLvl <= pL + 5 && c.maxLvl >= pL - 2; });
+  var base = cands[Math.floor(Math.random() * cands.length)] || CREATURE_DB[0];
+  var cL = Math.max(base.minLvl, Math.min(base.maxLvl, pL + Math.floor(Math.random() * 8) - 3));
+
+  var c = Object.assign({}, base, {
+    level: cL,
+    lat: 0, lng: 0,
+    escapeChances: CONFIG.ESCAPE_MIN + Math.floor(Math.random() * (CONFIG.ESCAPE_MAX - CONFIG.ESCAPE_MIN + 1)),
+    escapeAttemptsUsed: 0
   });
+
+  /* ★ v1.20: Sinh stats ★ */
+  c.stats = generateCreatureStats(c);
+
   placeCreature(c);
   return c;
 }
