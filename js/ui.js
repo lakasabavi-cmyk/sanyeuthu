@@ -63,7 +63,9 @@ function handleLogin(){
   GS.user={email:e,name:e.split('@')[0]};
   saveState();
   showScreen('screen-ar');
-  showToast('Đăng nhập! Bấm 🔍 để tìm yêu thú!',4000);
+  showToast('Đăng nhập thành công!',3000);
+  /* ★ Hiện compass prompt ★ */
+  setTimeout(function(){ showCompassPrompt(); }, 500);
 }
 function handleRegister(){
   var n=document.getElementById('reg-name').value,e=document.getElementById('reg-email').value;
@@ -81,11 +83,7 @@ function handleGoogleLogin(){
 /* ===== SEARCH ===== */
 var searchActive=false;
 function startSearch(){
-  if(searchActive){showToast('🔍 Đang tìm...');return;}
-  searchActive=true;
-  document.getElementById('btn-search').classList.add('active');
-  showToast('🔍 Đang quét yêu thú...',2000);
-  setTimeout(function(){triggerDetection();},2000);
+  startSearchPhase();
 }
 function triggerDetection(){
   var creature=generateCreature();
