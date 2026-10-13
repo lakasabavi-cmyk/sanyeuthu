@@ -20,7 +20,11 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .input-group input{width:100%;padding:12px 15px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.05);color:#fff;font-size:16px;outline:none}
 .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:10px}
 .btn-primary{background:linear-gradient(135deg,#7c4dff,#448aff);color:#fff}
-.btn-google{background:#fff;color:#333;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-google{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;gap:10px}
+.brand-ico{width:20px;height:20px;flex:none}
+.btn-apple{background:#000;color:#fff;border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px}
+.btn-facebook{background:#1877f2;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px}
+.btn-google+.btn-apple{margin-top:10px}
 .divider{text-align:center;margin:20px 0;color:#888;font-size:13px}
 .toggle-text{text-align:center;margin-top:15px;font-size:13px;color:#aaa}
 .toggle-text a{color:#7c4dff;cursor:pointer}
@@ -30,6 +34,9 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 #screen-ar{background:#000;overflow:hidden}
 #camera-feed{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0}
 #ar-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2}
+#screen-ar.no-camera{background:radial-gradient(ellipse at center,#172442 0%,#0a0a2e 72%)}
+#screen-ar.no-camera #camera-feed,
+#screen-ar.no-camera #ar-canvas{display:none}
 
 /* Crosshair */
 .crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:15;pointer-events:none}
@@ -51,6 +58,7 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .hud-xp-fill{height:100%;background:linear-gradient(90deg,#7c4dff,#448aff);border-radius:3px}
 .hud-compass{font-size:9px;color:#4fc3f7;margin-top:4px}
 .hud-tr{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.btn-display-mode{padding:6px 9px;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.65);color:#fff;border-radius:10px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap}
 .btn-compass{padding:6px 12px;border:2px solid #4fc3f7;background:rgba(76,195,247,.2);color:#4fc3f7;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
 .btn-compass.active{border-color:#4caf50;background:rgba(76,175,80,.2);color:#4caf50}
 .ar-exit{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:14px;cursor:pointer}
@@ -76,6 +84,8 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .sn-btn:active{transform:scale(.85);background:rgba(255,255,255,.15)}
 .sn-search{border-color:rgba(255,193,7,.6);background:rgba(255,193,7,.15)}
 .sn-search.active{border-color:#4caf50;background:rgba(76,175,80,.3);animation:sPulse 1.5s infinite}
+.sn-search.searching span{display:inline-block;animation:snSpin 1.2s linear infinite}
+@keyframes snSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes sPulse{0%,100%{box-shadow:0 0 0 0 rgba(76,175,80,.5)}50%{box-shadow:0 0 0 12px rgba(76,175,80,0)}}
 
 /* ============================================================
@@ -161,6 +171,9 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 /* ==================== TOAST ==================== */
 .toast{position:fixed;top:max(20px,env(safe-area-inset-top,20px));left:50%;transform:translateX(-50%) translateY(-100px);background:rgba(0,0,0,.85);color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;z-index:10000;transition:transform .4s;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
+.toast.on-ar{position:absolute;top:auto;bottom:calc(50% + 110px);width:90%;max-width:360px;text-align:center;box-sizing:border-box;background:none;padding:0;border-radius:0;font-size:14px;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,.8);transform:translateX(-50%);opacity:0;transition:opacity .25s}
+.toast.on-ar.show{transform:translateX(-50%);opacity:1}
+body.toast-on .search-overlay{visibility:hidden}
 
 .btn-back{position:absolute;top:max(15px,env(safe-area-inset-top,15px));left:15px;background:rgba(255,255,255,.1);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;z-index:50}
 
@@ -459,6 +472,30 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   background:rgba(255,255,255,.15);
   color:#888;cursor:not-allowed;
 }
+.ai-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100001;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.ai-box{width:100%;max-width:360px;background:#1b1530;border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:18px;color:#fff;text-align:center}
+.ai-title{font-size:18px;font-weight:700;margin-bottom:10px}
+.ai-art{width:160px;height:160px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;border-radius:24px}
+.ai-art img{width:160px;height:160px;border-radius:24px;object-fit:cover;border:2px solid rgba(255,255,255,.25)}
+.ai-art.loading{animation:aiPulse 1s ease-in-out infinite alternate;filter:drop-shadow(0 0 16px #b388ff)}
+@keyframes aiPulse{from{transform:scale(.95);opacity:.6}to{transform:scale(1.05);opacity:1}}
+.ai-name{font-weight:700;margin-bottom:10px}
+.ai-gu{font-size:13px;margin-bottom:6px;opacity:.9}
+.gu-wrap{width:100%;max-width:320px;margin-bottom:8px;text-align:left}
+.gu-label{display:block;font-size:12px;opacity:.75;margin-bottom:4px;color:#fff}
+.gu-select{width:100%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:#2a2145;color:#fff;font-size:14px}
+.ai-label{font-size:12px;opacity:.7;text-align:left;margin:8px 0 4px}
+.ai-styles{display:flex;flex-wrap:wrap;gap:6px}
+.ai-style{padding:6px 10px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;font-size:12px;cursor:pointer}
+.ai-style.on{background:linear-gradient(135deg,#667eea,#764ba2);border-color:transparent}
+.ai-input{width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-size:14px}
+.ai-quota{font-size:12px;margin:10px 0 4px;opacity:.85}
+.ai-msg{min-height:18px;font-size:13px;color:#8be9a8;margin-bottom:6px}
+.ai-msg.err{color:#ff8a8a}
+.ai-go,.ai-cancel{width:100%;padding:12px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px}
+.ai-go{border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+.ai-go:disabled{opacity:.6;cursor:default}
+.ai-cancel{border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff}
 .coll-detail-close{
   width:100%;max-width:320px;
   padding:10px 20px;
@@ -748,6 +785,44 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   0%{opacity:1;transform:translateY(0) scale(1)}
   100%{opacity:0;transform:translateY(-35px) scale(0.3)}
 }
+
+/* ===== TRAIN RESULT ===== */
+.tr-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;padding:20px;text-align:center;color:#fff}
+.tr-overlay.show{opacity:1}
+.tr-stage{position:relative;width:260px;height:260px;display:flex;align-items:center;justify-content:center}
+.tr-icon{position:absolute;font-size:96px;line-height:1;transition:opacity .5s,transform .5s;filter:drop-shadow(0 0 14px #ffd54f)}
+.tr-icon.charge{animation:trCharge .35s ease-in-out infinite alternate}
+@keyframes trCharge{from{transform:scale(.92) rotate(-4deg)}to{transform:scale(1.12) rotate(4deg)}}
+.tr-shards{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.tr-shard{position:absolute;font-size:96px;line-height:1;opacity:0;filter:drop-shadow(0 0 8px #f44336)}
+.tr-overlay.lose .tr-icon{opacity:0;animation:none}
+.tr-overlay.lose .tr-shard{animation:trShatter .9s ease-out forwards}
+@keyframes trShatter{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.6)}}
+.tr-overlay.lose .tr-stage{animation:trShake .4s}
+@keyframes trShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.tr-rays{position:absolute;width:260px;height:260px;border-radius:50%;opacity:0;
+  background:repeating-conic-gradient(rgba(255,215,0,.55) 0 8deg,transparent 8deg 24deg);
+  -webkit-mask:radial-gradient(circle,#000 25%,transparent 70%);mask:radial-gradient(circle,#000 25%,transparent 70%)}
+.tr-rays2{transform:rotate(12deg);background:repeating-conic-gradient(rgba(255,255,255,.4) 0 5deg,transparent 5deg 30deg)}
+.tr-wave{position:absolute;width:80px;height:80px;border:3px solid rgba(255,215,0,.8);border-radius:50%;opacity:0}
+.tr-overlay.win .tr-rays{animation:trRays 4s linear infinite;opacity:1;transition:opacity .6s}
+.tr-overlay.win .tr-rays2{animation-direction:reverse}
+@keyframes trRays{to{transform:rotate(360deg)}}
+.tr-overlay.win .tr-wave{animation:trWave 1.4s ease-out infinite}
+.tr-overlay.win .tr-wave2{animation-delay:.7s}
+@keyframes trWave{0%{opacity:.9;transform:scale(.5)}100%{opacity:0;transform:scale(3.2)}}
+.tr-overlay.win .tr-icon{animation:trPulse .5s ease-in-out infinite alternate;filter:drop-shadow(0 0 24px #fff) drop-shadow(0 0 40px gold)}
+@keyframes trPulse{from{transform:scale(1)}to{transform:scale(1.3)}}
+.tr-creature{position:absolute;opacity:0;transform:scale(.2);transition:opacity .8s,transform .8s cubic-bezier(.2,1.4,.4,1)}
+.tr-overlay.reveal .tr-icon{opacity:0;animation:none}
+.tr-overlay.reveal .tr-creature{opacity:1;transform:scale(1);filter:drop-shadow(0 0 18px gold)}
+.tr-text{font-size:20px;font-weight:700;margin-top:18px;opacity:0;transform:translateY(10px);transition:all .5s;color:#ffd54f}
+.tr-overlay.lose .tr-text{color:#ff6b6b}
+.tr-sub{font-size:14px;opacity:0;margin-top:6px;transition:opacity .5s .2s}
+.tr-text.on{opacity:1;transform:none}
+.tr-sub.on{opacity:.85}
+.tr-close{margin-top:22px;padding:10px 40px;border-radius:24px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font-size:15px;opacity:0;pointer-events:none;transition:opacity .4s}
+.tr-close.on{opacity:1;pointer-events:auto}
 
 /* ============================================================
    ★★★ MEDITATION ANIMATION ★★★
@@ -1593,24 +1668,6 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 .bp-pickup-btn:active{transform:scale(0.95)}
 
 /* ============================================================
-   ★★★ CROSSHAIR ARROW ★★★
-   ============================================================ */
-.crosshair-arrow{
-  position:absolute;
-  top:50%;left:50%;
-  width:0;height:0;
-  transform-origin:center center;
-  margin:-52px 0 0 -8px;
-  border-left:8px solid transparent;
-  border-right:8px solid transparent;
-  border-bottom:16px solid #ffa726;
-  filter:drop-shadow(0 0 6px rgba(255,167,38,0.8));
-  z-index:310;
-  pointer-events:none;
-  transition:transform 1.5s ease;
-}
-
-/* ============================================================
    ★★★ CROSSHAIR STATES ★★★
    ============================================================ */
 .crosshair-ring.walking{border-color:#ffa726}
@@ -1720,42 +1777,15 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
    ★★★ SEARCH OVERLAY — 🔍 xoay vòng ★★★
    ============================================================ */
 .search-overlay{
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%);
+  position:absolute;top:auto;bottom:calc(50% + 110px);left:50%;
+  transform:translateX(-50%);
+  width:90%;max-width:360px;
   text-align:center;z-index:500;
   pointer-events:none;
 }
-.so-icon{
-  font-size:64px;
-  animation:soSpin 2s linear infinite;
-}
-@keyframes soSpin{
-  from{transform:rotate(0deg)}
-  to{transform:rotate(360deg)}
-}
-.so-text{
-  font-size:18px;font-weight:700;color:#fff;
-  margin-top:12px;text-shadow:0 2px 8px rgba(0,0,0,.8);
-}
 .so-hint{
-  font-size:12px;color:#aaa;margin-top:6px;
+  font-size:14px;color:#fff;
   text-shadow:0 1px 4px rgba(0,0,0,.8);
-}
-
-/* ============================================================
-   ★★★ CROSSHAIR ARROW ★★★
-   ============================================================ */
-.crosshair-arrow{
-  position:absolute;top:50%;left:50%;
-  width:0;height:0;
-  transform-origin:center center;
-  margin:-52px 0 0 -8px;
-  border-left:8px solid transparent;
-  border-right:8px solid transparent;
-  border-bottom:16px solid #ffa726;
-  filter:drop-shadow(0 0 6px rgba(255,167,38,.8));
-  z-index:310;pointer-events:none;
-  transition:transform 1.5s ease;
 }
 
 /* ============================================================
@@ -1771,8 +1801,13 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
   visibility:hidden;opacity:0;
   pointer-events:none;
 }
+#screen-ar.no-camera .ar-item{
+  bottom:50%;
+  transform:translate(-50%,50%);
+}
 .ar-item .ac-adv-item{pointer-events:auto}
 
+.ar-item.ar-ball .bp-art{pointer-events:auto;cursor:pointer}
 .ar-item .ac-info{order:1;margin-bottom:0}
 .ar-item .ac-art{order:2;line-height:0;animation:creatureFloat 2.5s ease-in-out infinite}
 .ar-item .bp-art{order:1;line-height:0;animation:creatureFloat 2s ease-in-out infinite}
@@ -1825,19 +1860,16 @@ body{font-family:'Segoe UI',sans-serif;background:#0a0a2e;color:#fff;overflow:hi
 /* ============================================================
    ★★★ ROTATION GUIDE ★★★
    ============================================================ */
-.rotation-guide{
-  position:absolute;bottom:220px;left:50%;
-  transform:translateX(-50%);
-  text-align:center;z-index:300;
-  padding:10px 24px;border-radius:16px;
-  background:rgba(0,0,0,.65);
-  pointer-events:none;
+.rg-arrow{
+  position:absolute;top:50%;
+  font-size:34px;line-height:1;color:#ffa726;
+  text-shadow:0 0 10px rgba(255,167,38,.9),0 2px 6px rgba(0,0,0,.8);
+  pointer-events:none;z-index:300;
 }
-.rg-icon{font-size:24px;margin-bottom:4px}
-.rg-text{font-size:14px;font-weight:700;color:#fff}
-.rg-success{background:rgba(76,175,80,.75)}
-.rg-close{background:rgba(255,167,38,.75)}
-.rg-far{background:rgba(0,0,0,.65)}
+.rg-left{right:100%;margin-right:14px;transform:translateY(-50%);animation:rgNudgeL .9s ease-in-out infinite}
+.rg-right{left:100%;margin-left:14px;transform:translateY(-50%);animation:rgNudgeR .9s ease-in-out infinite}
+@keyframes rgNudgeL{0%,100%{transform:translate(0,-50%)}50%{transform:translate(-10px,-50%)}}
+@keyframes rgNudgeR{0%,100%{transform:translate(0,-50%)}50%{transform:translate(10px,-50%)}}
 
 /* ============================================================
    ★★★ BALL BUTTON — Thêm advantage text ★★★
