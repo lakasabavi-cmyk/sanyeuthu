@@ -166,15 +166,21 @@ function requestDeviceOrientation() {
 
 /* ★ Listener nền — luôn ghi heading ★ */
 var _globalHeading = 0;
+var _orientationLastSeenAt = 0;
 function setupOrientationListener() {
   window.addEventListener('deviceorientationabsolute', function(e) {
-    if (e.alpha != null) _globalHeading = (360 - e.alpha) % 360;
+    if (e.alpha != null) {
+      _globalHeading = (360 - e.alpha + 360) % 360;
+      _orientationLastSeenAt = Date.now();
+    }
   }, true);
   window.addEventListener('deviceorientation', function(e) {
     if (e.webkitCompassHeading != null && e.webkitCompassHeading !== undefined) {
       _globalHeading = e.webkitCompassHeading;
+      _orientationLastSeenAt = Date.now();
     } else if (e.alpha != null) {
-      _globalHeading = (360 - e.alpha) % 360;
+      _globalHeading = (360 - e.alpha + 360) % 360;
+      _orientationLastSeenAt = Date.now();
     }
   }, true);
 }
@@ -390,7 +396,6 @@ function triggerDetection() {
    ================================================================ */
 function startScanning() {
   _state = 'scanning';
-  _lockedHeading = Math.random() * 360;
 
   var ring = document.getElementById('crosshair-ring');
   if (ring) { ring.style.borderColor = ''; ring.style.boxShadow = ''; }
@@ -417,15 +422,16 @@ function spawnCreatureItem() {
   overlay.className = 'ar-item';
   overlay.id = 'ar-creature';
   overlay.style.left = '50%';
-  overlay.style.top = '42%';
   overlay.innerHTML =
-    '<div class="ac-art">' + renderCreatureArt(creature, 130) + '</div>'
-    + '<div class="ac-info"><div class="ac-name">' + creature.name + '</div>'
+    '<div class="ac-info"><div class="ac-name">' + creature.name + '</div>'
     + '<div class="ac-tags">'
     + '<span class="ac-el" style="background:' + el.bg + '">' + el.icon + ' ' + el.name + '</span>'
-    + '<span class="ac-lvl">Lv.' + creature.level + ' ' + realm.icon + '</span></div></div>';
+    + '<span class="ac-lvl">Lv.' + creature.level + ' ' + realm.icon + '</span></div></div>'
+    + '<div class="ac-art">' + renderCreatureArt(creature, 130) + '</div>'
+    + '<div class="ac-ground" aria-hidden="true"></div>';
 
   document.getElementById('screen-ar').appendChild(overlay);
+  _lockedHeading = getBearing(playerLat, playerLng, creature.lat, creature.lng);
 
   /* ★ Không còn hàng advantage riêng — gộp vào ball buttons ★ */
   updateBallButtonsWithAdvantage(creature.element);
@@ -471,15 +477,17 @@ function spawnBallItem() {
   var overlay = document.createElement('div');
   overlay.className = 'ar-item';
   overlay.id = 'ar-creature';
-  overlay.style.left = '50%'; overlay.style.top = '42%';
+  overlay.style.left = '50%';
   overlay.innerHTML =
     '<div class="bp-art"><svg viewBox="0 0 100 100" width="110" height="110">'
     + '<defs><radialGradient id="bpG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="' + ball.color + '" stop-opacity="0.5"/><stop offset="100%" stop-color="' + ball.color + '" stop-opacity="0"/></radialGradient></defs>'
     + '<circle cx="50" cy="50" r="45" fill="url(#bpG)" class="bp-glow"/>'
     + '<circle cx="50" cy="50" r="28" fill="' + ball.color + '" opacity="0.85" stroke="#fff" stroke-width="2"/>'
     + '<text x="50" y="58" text-anchor="middle" font-size="26">' + ball.icon + '</text></svg></div>'
-    + '<div class="bp-name" style="color:' + ball.color + '">' + ball.icon + ' ' + ball.name + '</div>';
+    + '<div class="bp-name" style="color:' + ball.color + '">' + ball.icon + ' ' + ball.name + '</div>'
+    + '<div class="ac-ground" aria-hidden="true"></div>';
   document.getElementById('screen-ar').appendChild(overlay);
+  _lockedHeading = Math.random() * 360;
 }
 
 /* ================================================================
@@ -489,7 +497,7 @@ function spawnBallItem() {
 function startOrientationTracking() {
   stopOrientationTracking();
 
-  /* ★ Item ẨN mặc định ★ */
+  /* ★ Item starts hidden until its compass bearing enters the camera view ★ */
   var item = document.getElementById('ar-creature');
   if (item) { item.style.opacity = '0'; item.style.visibility = 'hidden'; }
 
@@ -504,8 +512,15 @@ function startOrientationTracking() {
     var itemEl = document.getElementById('ar-creature');
     if (!itemEl) return;
 
-    /* ★ Ẩn/hiện theo hướng quay camera ★ */
-    if (absDiff < 25) {
+    var screen = document.getElementById('screen-ar');
+    var screenWidth = screen ? screen.clientWidth : window.innerWidth;
+    var halfFov = CONFIG.FOV / 2;
+    var visible = absDiff <= halfFov;
+    var itemX = screenWidth / 2 + (diff / CONFIG.FOV) * screenWidth;
+    itemEl.style.left = Math.max(0, Math.min(screenWidth, itemX)) + 'px';
+
+    /* Place the sprite above a fixed ground-contact point in the camera view. */
+    if (visible) {
       itemEl.style.opacity = '1';
       itemEl.style.visibility = 'visible';
     } else {
@@ -518,12 +533,15 @@ function startOrientationTracking() {
 
     /* Enable capture — CHỈ creature */
     if (_findType === 'creature') {
-      creatureOnScreen = absDiff < 25;
-      crosshairLocked = absDiff < 15;
-      currentAccuracy = Math.max(0, 1 - absDiff / 15);
+      var screenOffset = Math.abs(itemX - screenWidth / 2);
+      creatureOnScreen = visible;
+      crosshairLocked = visible && screenOffset <= CONFIG.CROSSHAIR_LOCK_PX;
+      currentAccuracy = crosshairLocked
+        ? Math.max(0.5, 1 - screenOffset / (CONFIG.CROSSHAIR_LOCK_PX * 2))
+        : Math.max(0, 1 - screenOffset / (CONFIG.CROSSHAIR_LOCK_PX * 3));
       var capBtn = document.getElementById('capture-btn');
       if (capBtn) {
-        if (absDiff < 15) capBtn.classList.remove('disabled');
+        if (crosshairLocked) capBtn.classList.remove('disabled');
         else capBtn.classList.add('disabled');
       }
     } else {
@@ -537,7 +555,7 @@ function startOrientationTracking() {
     /* Ball pickup button */
     if (_findType === 'ball') {
       var bpBtn = document.getElementById('bp-pickup-btn');
-      if (absDiff < 15) {
+      if (visible && Math.abs(itemX - screenWidth / 2) <= CONFIG.CROSSHAIR_LOCK_PX) {
         if (!bpBtn) {
           bpBtn = document.createElement('button');
           bpBtn.id = 'bp-pickup-btn';
@@ -552,26 +570,24 @@ function startOrientationTracking() {
     }
   };
 
-  /* ★ Check mỗi 200ms thay vì event listener ★ */
+  /* ★ Check mỗi 200ms; fall back to a centered, ground-anchored item if no sensor responds ★ */
+  var scanStartedAt = Date.now();
   var checkInterval = setInterval(function() {
     if (_state !== 'scanning') { clearInterval(checkInterval); return; }
-    if (_oriPermissionGranted) {
+    if (_orientationLastSeenAt && Date.now() - _orientationLastSeenAt < 3000) {
       _orientFn();
-    }
-  }, 200);
-
-  /* ★ Fallback: nếu sau 5s vẫn không có sensor → hiện item ★ */
-  setTimeout(function() {
-    if (_state !== 'scanning') return;
-    if (!_oriPermissionGranted) {
-      /* Không có sensor → hiện item ngay */
+    } else if (Date.now() - scanStartedAt >= 5000) {
       var itemEl = document.getElementById('ar-creature');
       if (itemEl) {
+        itemEl.style.left = '50%';
         itemEl.style.opacity = '1';
         itemEl.style.visibility = 'visible';
       }
+      updateRotationGuide(0, 0);
       if (_findType === 'creature') {
-        creatureOnScreen = true; crosshairLocked = true; currentAccuracy = 1;
+        creatureOnScreen = true;
+        crosshairLocked = true;
+        currentAccuracy = 1;
         var capBtn = document.getElementById('capture-btn');
         if (capBtn) capBtn.classList.remove('disabled');
       } else {
@@ -586,7 +602,7 @@ function startOrientationTracking() {
         }
       }
     }
-  }, 5000);
+  }, 200);
 }
 
 function stopOrientationTracking() {
