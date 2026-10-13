@@ -8,20 +8,49 @@ function showScreen(id){
   var ss=document.querySelectorAll('.screen');
   for(var i=0;i<ss.length;i++)ss[i].classList.remove('active');
   document.getElementById(id).classList.add('active');
-  if(id==='screen-ar'){startCamera();initGPS();updateHUD();renderBalls();}
+  if(id==='screen-ar'){applyDisplayMode(GS.displayMode||'auto');initGPS();updateHUD();renderBalls();}
   if(id==='screen-profile')updateProfile();
   if(id==='screen-collection')updateCollection();
   if(id==='screen-pills')updatePillBag();
 }
 
-function showToast(m,d){d=d||3000;var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},d);}
+var _toastTimer=null;
+function showToast(m,d){
+  d=d||3000;
+  var t=document.getElementById('toast');
+  t.textContent=m;
+  var ar=document.getElementById('screen-ar');
+  t.classList.toggle('on-ar',!!(ar&&ar.classList.contains('active')));
+  t.classList.add('show');
+  document.body.classList.add('toast-on');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){t.classList.remove('show');document.body.classList.remove('toast-on');},d);
+}
+
+function showCompassPrompt(){
+  if(displayModeActive!=='camera'||_compassOn) return;
+  var prompt=document.getElementById('compass-prompt');
+  if(prompt) prompt.classList.add('active');
+}
+
+function closeCompassPrompt(){
+  var prompt=document.getElementById('compass-prompt');
+  if(prompt) prompt.classList.remove('active');
+}
+
+function enableCompassFromPrompt(){
+  closeCompassPrompt();
+  if(!_compassOn) activateCompass();
+}
 
 /* ===== HUD ===== */
 function updateHUD(){
   var r=getRealm(GS.level);
   /* ★ Name + Level ★ */
   var nameEl=document.getElementById('hud-name');
-  if(nameEl) nameEl.textContent=getAccountName()+' — Level '+GS.level;
+  if(nameEl) nameEl.textContent=getAccountName();
+  var lvEl=document.getElementById('hud-level');
+  if(lvEl) lvEl.textContent=GS.level;
   /* ★ Realm ★ */
   var realmEl=document.getElementById('hud-realm');
   if(realmEl) realmEl.textContent=r.icon+' '+r.name;
@@ -254,13 +283,36 @@ function handleRegister(){
   setTimeout(function(){showCompassPrompt();},500);
 }
 
-function handleGoogleLogin(){
-  GS.user={email:'google@gmail.com',name:'Thợ Săn',accountName:'Thợ Săn'};
+var SOCIAL_PROVIDERS={
+  google:{label:'Google',email:'google@gmail.com'},
+  apple:{label:'Apple',email:'apple@icloud.com'},
+  facebook:{label:'Facebook',email:'facebook@facebook.com'}
+};
+
+/* Đăng nhập mạng xã hội giả lập — chưa xác thực thật */
+function handleSocialLogin(provider){
+  var p=SOCIAL_PROVIDERS[provider];
+  if(!p) return;
+  GS.user={email:p.email,name:'Thợ Săn',accountName:'Thợ Săn',provider:provider};
   saveState();
   showScreen('screen-ar');
   updateHUD();
-  showToast('Chào Thợ Săn!',3000);
+  showToast('Đăng nhập '+p.label+' thành công! Chào Thợ Săn!',3000);
   setTimeout(function(){showCompassPrompt();},500);
+}
+
+function handleGoogleLogin(){handleSocialLogin('google');}
+
+function addTestCreatures(){
+  var n=grantTestCreatures(20);
+  updateProfile();
+  showToast('🧪 Đã thêm '+n+' yêu thú test! Tổng: '+GS.collection.length,3000);
+}
+
+function addTestPills(){
+  for(var i=0;i<20;i++) addPill(1+Math.floor(Math.random()*11),1);
+  if(typeof updatePillBag==='function') updatePillBag();
+  showToast('🧪 Đã thêm 20 đan dược vào túi thuốc!',3000);
 }
 
 /* ===== SEARCH (delegate to gameflow) ===== */
@@ -278,4 +330,4 @@ loadState();
 if(checkDailyReset()){showToast('🌅 Chúc ngày mới! +1 bảo bối mỗi loại!',5000);}
 renderBalls();
 renderAR();
-console.log('🔮 Yêu Thú Săn Bắt v1.40');
+console.log('🔮 PHỤC YÊU AI v1.40');
