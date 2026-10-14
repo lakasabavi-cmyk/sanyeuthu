@@ -762,7 +762,7 @@ function onCaptureSuccess(creature) {
   initArea(); GS.area.caught++;
   cleanupAfterResult();
   saveState(); updateAreaStatus();
-  showToast('✅ Đã bắt được <strong>' + creature.name + '</strong>!', 4000);
+  showToast('✅ Đã bắt được ' + creature.name + '!', 4000);
   setTimeout(function() {
     if (isAreaExhausted() && isBallAreaExhausted()) setTimeout(showAreaExhausted, 1500);
   }, 2000);
