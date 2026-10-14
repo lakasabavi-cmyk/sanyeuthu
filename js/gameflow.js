@@ -184,29 +184,50 @@ function requestDeviceOrientation() {
 var _globalHeading = 0;
 var _globalPitch = 0;
 var _orientationLastSeenAt = 0;
-/* Camera sau hướng ngang khi cầm máy dọc có beta = 90; ngẩng lên thì beta tăng */
-function setPitchFromBeta(beta) {
-  if (beta == null) return;
-  _globalPitch = Math.max(-90, Math.min(90, beta - 90));
+var _orientationAbsoluteLastSeenAt = 0;
+var _orientationListenersReady = false;
+function getScreenOrientationAngle() {
+  var angle = window.screen && window.screen.orientation
+    ? window.screen.orientation.angle
+    : window.orientation;
+  return ((angle || 0) % 360 + 360) % 360;
+}
+function setPitchFromOrientation(beta, gamma) {
+  var angle = getScreenOrientationAngle();
+  if (angle === 90) _globalPitch = gamma == null ? _globalPitch : gamma;
+  else if (angle === 270) _globalPitch = gamma == null ? _globalPitch : -gamma;
+  else if (angle === 180) _globalPitch = beta == null ? _globalPitch : -beta;
+  else _globalPitch = beta == null ? _globalPitch : beta - 90;
+}
+function shortestAngleDelta(angle) {
+  return ((angle + 180) % 360 + 360) % 360 - 180;
+}
+/* Orientation sensors use different axes when the Android screen rotates. */
+function updateOrientationPitch(e) {
+  setPitchFromOrientation(e.beta, e.gamma);
+}
+function updateOrientation(e, absolute) {
+  var hasHeading = e.webkitCompassHeading != null || e.alpha != null;
+  if (!hasHeading) return;
+  if (absolute) _orientationAbsoluteLastSeenAt = Date.now();
+  else if (Date.now() - _orientationAbsoluteLastSeenAt < 2000) return;
+
+  if (e.webkitCompassHeading != null && e.webkitCompassHeading !== undefined) {
+    _globalHeading = e.webkitCompassHeading;
+  } else if (e.alpha != null) {
+    _globalHeading = (360 - e.alpha + 360) % 360;
+  }
+  updateOrientationPitch(e);
+  _orientationLastSeenAt = Date.now();
 }
 function setupOrientationListener() {
+  if (_orientationListenersReady) return;
+  _orientationListenersReady = true;
   window.addEventListener('deviceorientationabsolute', function(e) {
-    if (e.alpha != null) {
-      _globalHeading = (360 - e.alpha + 360) % 360;
-      setPitchFromBeta(e.beta);
-      _orientationLastSeenAt = Date.now();
-    }
+    updateOrientation(e, true);
   }, true);
   window.addEventListener('deviceorientation', function(e) {
-    if (e.webkitCompassHeading != null && e.webkitCompassHeading !== undefined) {
-      _globalHeading = e.webkitCompassHeading;
-      setPitchFromBeta(e.beta);
-      _orientationLastSeenAt = Date.now();
-    } else if (e.alpha != null) {
-      _globalHeading = (360 - e.alpha + 360) % 360;
-      setPitchFromBeta(e.beta);
-      _orientationLastSeenAt = Date.now();
-    }
+    updateOrientation(e, false);
   }, true);
 }
 
@@ -268,6 +289,7 @@ function startSearchPhase() {
   _triggerSec = 30 + Math.random() * 90;
   _accelHistory = [];
 
+  removeRotationGuide();
   showSearchOverlay();
   startMovementDetection();
   startSearchRing();
@@ -511,6 +533,7 @@ function spawnBallItem() {
    ================================================================ */
 function startOrientationTracking() {
   stopOrientationTracking();
+  var pitchOrigin = _globalPitch;
 
   /* ★ Item starts hidden until its compass bearing enters the camera view ★ */
   var item = document.getElementById('ar-creature');
@@ -536,7 +559,7 @@ function startOrientationTracking() {
     var screenWidth = screen ? screen.clientWidth : window.innerWidth;
     var screenHeight = screen ? screen.clientHeight : window.innerHeight;
     var pxPerDeg = screenWidth / CONFIG.FOV;
-    var pitchDiff = _lockedPitch - _globalPitch;
+    var pitchDiff = _lockedPitch - shortestAngleDelta(_globalPitch - pitchOrigin);
     var itemX = screenWidth / 2 + diff * pxPerDeg;
     var itemY = screenHeight / 2 - pitchDiff * pxPerDeg;
     var visible = itemX >= 0 && itemX <= screenWidth && itemY >= 0 && itemY <= screenHeight;
@@ -558,7 +581,15 @@ function startOrientationTracking() {
 
     /* Enable capture — CHỈ creature */
     if (_findType === 'creature') {
-      var screenOffset = Math.sqrt(Math.pow(itemX - screenWidth / 2, 2) + Math.pow(itemY - screenHeight / 2, 2));
+      var art = itemEl.querySelector('.ac-art');
+      var ringEl = document.getElementById('crosshair-ring');
+      var artRect = art ? art.getBoundingClientRect() : null;
+      var ringRect = ringEl ? ringEl.getBoundingClientRect() : null;
+      var targetX = artRect ? artRect.left + artRect.width / 2 : itemX;
+      var targetY = artRect ? artRect.top + artRect.height / 2 : itemY;
+      var centerX = ringRect ? ringRect.left + ringRect.width / 2 : screenWidth / 2;
+      var centerY = ringRect ? ringRect.top + ringRect.height / 2 : screenHeight / 2;
+      var screenOffset = Math.sqrt(Math.pow(targetX - centerX, 2) + Math.pow(targetY - centerY, 2));
       creatureOnScreen = visible;
       crosshairLocked = visible && screenOffset <= CONFIG.CROSSHAIR_LOCK_PX;
       currentAccuracy = crosshairLocked
@@ -597,6 +628,9 @@ function showItemAtScreenCenter() {
   var item = document.getElementById('ar-creature');
   if (item) {
     item.style.left = '50%';
+    item.style.top = '50%';
+    item.style.bottom = 'auto';
+    item.style.transform = 'translate(-50%,' + (_findType === 'creature' ? '-58%' : '-40%') + ')';
     item.style.opacity = '1';
     item.style.visibility = 'visible';
   }
@@ -642,6 +676,7 @@ function updateRotationGuide(dx, dy, visible) {
   var ring = document.getElementById('crosshair-ring');
   if (!wrap) return;
   var el = document.getElementById('rg-arrow');
+  if (_state !== 'scanning') { removeRotationGuide(); return; }
   if (visible) {
     if (el) el.remove();
     if (ring) ring.classList.remove('detected');
