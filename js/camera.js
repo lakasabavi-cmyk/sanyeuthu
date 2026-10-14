@@ -111,7 +111,7 @@ function renderAR(){
     return;
   }
   var target=GS.currentTarget;
-  if(!target){requestAnimationFrame(renderAR);return;}
+  if(!target||(typeof _state!=='undefined'&&_state==='idle')){requestAnimationFrame(renderAR);return;}
 
   var cx=canvas.width/2,cy=canvas.height/2,time=Date.now()/1000;
   var gpsDist=getDist(playerLat,playerLng,target.lat,target.lng);
