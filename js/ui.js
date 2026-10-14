@@ -78,10 +78,19 @@ function updateAccountName(name){
 /* ===== LOGOUT ===== */
 function doLogout(){
   if(!confirm('Đăng xuất khỏi tài khoản?')) return;
-  GS.user=null;
-  saveState();
-  showScreen('screen-login');
-  showToast('Đã đăng xuất',2000);
+  if(!authClient){showToast('Dịch vụ đăng nhập chưa sẵn sàng.');return;}
+  authClient.auth.signOut()
+    .then(function(result){
+      if(result.error){
+        showAuthError('Đăng xuất thất bại',result.error);
+        return;
+      }
+      GS.user=null;
+      saveState();
+      showScreen('screen-login');
+      showToast('Đã đăng xuất',2000);
+    })
+    .catch(function(error){showAuthError('Đăng xuất thất bại',error);});
 }
 
 /* ===== PROFILE ===== */
@@ -262,43 +271,63 @@ function toggleRegister(){
 }
 
 function handleLogin(){
-  var e=document.getElementById('input-email').value,p=document.getElementById('input-password').value;
-  if(!e||!p){showToast('Nhập thông tin');return;}
-  GS.user={email:e,name:e.split('@')[0],accountName:e.split('@')[0]};
-  saveState();
-  showScreen('screen-ar');
-  updateHUD();
-  showToast('Đăng nhập thành công! Chào '+getAccountName()+'!',3000);
-  setTimeout(function(){showCompassPrompt();},500);
+  var e=document.getElementById('input-email').value.trim();
+  var p=document.getElementById('input-password').value;
+  if(!e||!p){showToast('Nhập email và mật khẩu');return;}
+  if(!authClient){showToast('Dịch vụ đăng nhập chưa sẵn sàng. Hãy tải lại trang.');return;}
+  setAuthButtonsDisabled(true);
+  authClient.auth.signInWithPassword({email:e,password:p})
+    .then(function(result){
+      if(result.error) showAuthError('Đăng nhập thất bại',result.error);
+    })
+    .catch(function(error){showAuthError('Đăng nhập thất bại',error);})
+    .then(function(){setAuthButtonsDisabled(false);});
 }
 
 function handleRegister(){
-  var n=document.getElementById('reg-name').value,e=document.getElementById('reg-email').value;
-  if(!n||!e){showToast('Điền đủ');return;}
-  GS.user={email:e,name:n,accountName:n};
-  saveState();
-  showScreen('screen-ar');
-  updateHUD();
-  showToast('Chào mừng '+n+'!',3000);
-  setTimeout(function(){showCompassPrompt();},500);
+  var n=document.getElementById('reg-name').value.trim();
+  var e=document.getElementById('reg-email').value.trim();
+  var p=document.getElementById('reg-password').value;
+  if(!n||!e||!p){showToast('Điền tên, email và mật khẩu');return;}
+  if(!authClient){showToast('Dịch vụ đăng nhập chưa sẵn sàng. Hãy tải lại trang.');return;}
+  setAuthButtonsDisabled(true);
+  authClient.auth.signUp({
+    email:e,
+    password:p,
+    options:{data:{display_name:n},emailRedirectTo:getAuthRedirectUrl()}
+  })
+    .then(function(result){
+      if(result.error){
+        showAuthError('Đăng ký thất bại',result.error);
+      }else if(!result.data.session){
+        showToast('Đăng ký thành công. Hãy mở email để xác nhận tài khoản.',5000);
+      }
+    })
+    .catch(function(error){showAuthError('Đăng ký thất bại',error);})
+    .then(function(){setAuthButtonsDisabled(false);});
 }
 
-var SOCIAL_PROVIDERS={
-  google:{label:'Google',email:'google@gmail.com'},
-  apple:{label:'Apple',email:'apple@icloud.com'},
-  facebook:{label:'Facebook',email:'facebook@facebook.com'}
-};
-
-/* Đăng nhập mạng xã hội giả lập — chưa xác thực thật */
 function handleSocialLogin(provider){
-  var p=SOCIAL_PROVIDERS[provider];
-  if(!p) return;
-  GS.user={email:p.email,name:'Thợ Săn',accountName:'Thợ Săn',provider:provider};
-  saveState();
-  showScreen('screen-ar');
-  updateHUD();
-  showToast('Đăng nhập '+p.label+' thành công! Chào Thợ Săn!',3000);
-  setTimeout(function(){showCompassPrompt();},500);
+  if(provider!=='google'&&provider!=='apple'){
+    showToast('Nhà cung cấp đăng nhập không được hỗ trợ.');
+    return;
+  }
+  if(!authClient){showToast('Dịch vụ đăng nhập chưa sẵn sàng. Hãy tải lại trang.');return;}
+  setAuthButtonsDisabled(true);
+  authClient.auth.signInWithOAuth({
+    provider:provider,
+    options:{redirectTo:getAuthRedirectUrl()}
+  })
+    .then(function(result){
+      if(result.error){
+        showAuthError('Không thể đăng nhập bằng '+(provider==='google'?'Google':'Apple'),result.error);
+        setAuthButtonsDisabled(false);
+      }
+    })
+    .catch(function(error){
+      showAuthError('Không thể đăng nhập bằng '+(provider==='google'?'Google':'Apple'),error);
+      setAuthButtonsDisabled(false);
+    });
 }
 
 function handleGoogleLogin(){handleSocialLogin('google');}
@@ -327,6 +356,7 @@ function closeNotifFound(){document.getElementById('notif-found').classList.remo
    ★★★ INIT ★★★
    ================================================================ */
 loadState();
+initAuth();
 if(checkDailyReset()){showToast('🌅 Chúc ngày mới! +1 bảo bối mỗi loại!',5000);}
 renderBalls();
 renderAR();
