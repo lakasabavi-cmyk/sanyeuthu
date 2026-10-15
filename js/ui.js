@@ -5,6 +5,7 @@
 
 /* ===== SCREEN ===== */
 function showScreen(id){
+  if(typeof SFX!=='undefined') SFX.play('screen');
   var ss=document.querySelectorAll('.screen');
   for(var i=0;i<ss.length;i++)ss[i].classList.remove('active');
   document.getElementById(id).classList.add('active');
@@ -95,6 +96,7 @@ function doLogout(){
 
 /* ===== PROFILE ===== */
 function updateProfile(){
+  if(typeof syncSoundSettings==='function') syncSoundSettings();
   var r=getRealm(GS.level);
   var name=getAccountName();
 
@@ -360,4 +362,4 @@ initAuth();
 if(checkDailyReset()){showToast('🌅 Chúc ngày mới! +1 bảo bối mỗi loại!',5000);}
 renderBalls();
 renderAR();
-console.log('🔮 PHỤC YÊU AI v1.40');
+console.log('🔮 PHỤC YÊU AI v1.47');
