@@ -3,7 +3,7 @@
    ★★★ CSS RULE: KHÔNG tự ý đổi vị trí/kích thước icon, button ★★★
    ============================================================ */
 
-var APP_VERSION = '1.52';
+var APP_VERSION = '1.53';
 
 var VERSION_HISTORY = [
   {ver:'1.00',date:'2025-01-15',note:'Khởi tạo',changed:['index.html','css/style.css','js/*']},
@@ -29,6 +29,7 @@ var VERSION_HISTORY = [
   ,{ver:'1.50',date:'2026-10-16',note:'Gỡ nút test thêm yêu thú và thêm đan dược khỏi Hồ sơ.',changed:['index.html','js/ui.js','js/creatures.js','js/versions.js']}
   ,{ver:'1.51',date:'2026-10-16',note:'Kết nối AI: chọn Gemini, ChatGPT hoặc Claude (bỏ Muse Spark); vẫn giữ backend riêng.',changed:['js/ai.js','js/versions.js','js/ui.js','index.html']}
   ,{ver:'1.52',date:'2026-10-16',note:'Tự động toàn màn hình khi chơi bằng trình duyệt điện thoại (chạm lần đầu).',changed:['js/ui.js','js/versions.js','index.html']}
+  ,{ver:'1.53',date:'2026-10-16',note:'Sửa lỗi không tải được dịch vụ đăng nhập: thêm CDN dự phòng cho Supabase/Three khi thiếu js/vendor.',changed:['index.html','js/ui.js','js/versions.js']}
 ];
 
 console.log('🔮 PHỤC YÊU AI v' + APP_VERSION);
