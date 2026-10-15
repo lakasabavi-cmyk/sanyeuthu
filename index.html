@@ -35,7 +35,7 @@
       <button class="btn btn-primary" onclick="handleRegister()">Tạo tài khoản</button>
       <div class="toggle-text">Đã có tài khoản? <a onclick="toggleRegister()">Đăng nhập</a></div>
     </div>
-    <div class="login-version">v1.40</div>
+    <div class="login-version">v1.47</div>
   </div>
 </div>
 
@@ -141,6 +141,34 @@
     <div class="stat-card"><div class="stat-value" id="stat-rate" style="color:#4fc3f7">0%</div><div class="stat-label">Tỷ lệ</div></div>
     <div class="stat-card"><div class="stat-value" id="stat-total-xp" style="color:#ffd700">0</div><div class="stat-label">Tổng XP</div></div>
   </div>
+  <div class="profile-settings">
+    <div class="setting-row">
+      <span>🔊 Hiệu ứng âm thanh</span>
+      <button class="setting-toggle" id="toggle-sfx" type="button" role="switch" aria-checked="true" onclick="toggleSfxSetting()"></button>
+    </div>
+    <div class="setting-row setting-vol">
+      <span>🔉 Âm lượng hiệu ứng</span>
+      <div class="vol-ctrl">
+        <button type="button" class="vol-btn" onclick="stepVolume('sfx',-0.1)" aria-label="Giảm âm lượng hiệu ứng">−</button>
+        <input type="range" id="vol-sfx" min="0" max="100" step="5" oninput="setVolumeFromSlider('sfx',this.value)" aria-label="Âm lượng hiệu ứng">
+        <button type="button" class="vol-btn" onclick="stepVolume('sfx',0.1)" aria-label="Tăng âm lượng hiệu ứng">+</button>
+        <span class="vol-val" id="vol-sfx-val">100%</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <span>🎵 Nhạc nền</span>
+      <button class="setting-toggle" id="toggle-music" type="button" role="switch" aria-checked="true" onclick="toggleMusicSetting()"></button>
+    </div>
+    <div class="setting-row setting-vol">
+      <span>🎶 Âm lượng nhạc nền</span>
+      <div class="vol-ctrl">
+        <button type="button" class="vol-btn" onclick="stepVolume('music',-0.1)" aria-label="Giảm âm lượng nhạc nền">−</button>
+        <input type="range" id="vol-music" min="0" max="100" step="5" oninput="setVolumeFromSlider('music',this.value)" aria-label="Âm lượng nhạc nền">
+        <button type="button" class="vol-btn" onclick="stepVolume('music',0.1)" aria-label="Tăng âm lượng nhạc nền">+</button>
+        <span class="vol-val" id="vol-music-val">100%</span>
+      </div>
+    </div>
+  </div>
   <button class="btn" style="margin:16px auto;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="addTestCreatures()">🧪 Thêm 20 yêu thú test</button>
   <button class="btn" style="margin:0 auto 16px;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="addTestPills()">🧪 Thêm 20 đan dược test</button>
   <button class="btn" style="margin:0 auto 16px;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="openAiConnect()">🔌 Kết nối AI (test)</button>
@@ -207,6 +235,7 @@
 </div>
 
 <script src="js/versions.js"></script>
+<script src="js/sound.js"></script>
 <script src="js/config.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/arrows.js"></script>
@@ -220,6 +249,8 @@
 <script src="js/alchemy.js"></script>
 <script src="js/gameflow.js"></script>
 <script src="js/creature-art.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script src="js/creature-3d.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/ui.js"></script>
 </body>
