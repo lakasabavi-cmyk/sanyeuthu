@@ -1,5 +1,5 @@
 /* ============================================================
-   creature-art.js — Bộ 15 yêu thú SVG chibi mặc định
+   creature-art.js — Bộ 15 yêu thú 3D, SVG dự phòng
    ★ v1.21 FIX: checkAiConnection safe + Detail modal ★
    ============================================================ */
 
@@ -161,6 +161,9 @@ function getSparkles(s, color) {
    ================================================================ */
 
 function renderCreatureArt(creature, size) {
+  if (creature.id >= 1 && creature.id <= 15 && typeof renderCreature3D === 'function') {
+    return renderCreature3D(creature, size || 200);
+  }
   return chibiSvg(creature, size || 200);
 }
 
