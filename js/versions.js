@@ -3,7 +3,7 @@
    ★★★ CSS RULE: KHÔNG tự ý đổi vị trí/kích thước icon, button ★★★
    ============================================================ */
 
-var APP_VERSION = '1.47';
+var APP_VERSION = '1.48';
 
 var VERSION_HISTORY = [
   {ver:'1.00',date:'2025-01-15',note:'Khởi tạo',changed:['index.html','css/style.css','js/*']},
@@ -24,6 +24,7 @@ var VERSION_HISTORY = [
   ,{ver:'1.45',date:'2026-10-16',note:'Thêm hiệu ứng âm thanh (Web Audio): bấm nút, chuyển màn, yêu thú xuất hiện, ném bùa, bắt thành công/thất bại, lên cấp.',changed:['js/sound.js','js/capture.js','js/gameflow.js','js/ui.js','index.html','js/versions.js']}
   ,{ver:'1.46',date:'2026-10-16',note:'Thêm nhạc nền nhẹ nhàng; Hồ sơ có công tắc bật/tắt riêng hiệu ứng và nhạc nền.',changed:['js/sound.js','js/ui.js','css/style.css','index.html','js/versions.js']}
   ,{ver:'1.47',date:'2026-10-16',note:'Hồ sơ: thêm nút −/+ và thanh trượt chỉnh âm lượng hiệu ứng và nhạc nền riêng.',changed:['js/sound.js','css/style.css','index.html','js/ui.js','js/versions.js']}
+  ,{ver:'1.48',date:'2026-10-16',note:'Mỗi khu vực 5 yêu thú + 5 bùa (từ 2). Bắt trượt: yêu thú trốn sang hướng khác, trượt đủ 3 lần mới biến mất và trừ số lượng.',changed:['js/gameflow.js','js/capture.js','js/ui.js','index.html','js/versions.js']}
 ];
 
 console.log('🔮 PHỤC YÊU AI v' + APP_VERSION);
