@@ -3,7 +3,7 @@
    ★★★ CSS RULE: KHÔNG tự ý đổi vị trí/kích thước icon, button ★★★
    ============================================================ */
 
-var APP_VERSION = '1.48';
+var APP_VERSION = '1.51';
 
 var VERSION_HISTORY = [
   {ver:'1.00',date:'2025-01-15',note:'Khởi tạo',changed:['index.html','css/style.css','js/*']},
@@ -25,6 +25,9 @@ var VERSION_HISTORY = [
   ,{ver:'1.46',date:'2026-10-16',note:'Thêm nhạc nền nhẹ nhàng; Hồ sơ có công tắc bật/tắt riêng hiệu ứng và nhạc nền.',changed:['js/sound.js','js/ui.js','css/style.css','index.html','js/versions.js']}
   ,{ver:'1.47',date:'2026-10-16',note:'Hồ sơ: thêm nút −/+ và thanh trượt chỉnh âm lượng hiệu ứng và nhạc nền riêng.',changed:['js/sound.js','css/style.css','index.html','js/ui.js','js/versions.js']}
   ,{ver:'1.48',date:'2026-10-16',note:'Mỗi khu vực 5 yêu thú + 5 bùa (từ 2). Bắt trượt: yêu thú trốn sang hướng khác, trượt đủ 3 lần mới biến mất và trừ số lượng.',changed:['js/gameflow.js','js/capture.js','js/ui.js','index.html','js/versions.js']}
+  ,{ver:'1.49',date:'2026-10-16',note:'Đóng gói app Android/iOS bằng Capacitor; thư viện three/supabase chạy offline.',changed:['package.json','capacitor.config.json','scripts/*','android/*','ios/*','index.html','js/vendor/*','js/ui.js','js/versions.js']}
+  ,{ver:'1.50',date:'2026-10-16',note:'Gỡ nút test thêm yêu thú và thêm đan dược khỏi Hồ sơ.',changed:['index.html','js/ui.js','js/creatures.js','js/versions.js']}
+  ,{ver:'1.51',date:'2026-10-16',note:'Kết nối AI: chọn Gemini, ChatGPT hoặc Claude (bỏ Muse Spark); vẫn giữ backend riêng.',changed:['js/ai.js','js/versions.js','js/ui.js','index.html']}
 ];
 
 console.log('🔮 PHỤC YÊU AI v' + APP_VERSION);
