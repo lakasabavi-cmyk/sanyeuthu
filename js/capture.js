@@ -16,6 +16,7 @@ function doCapture(){
     return;
   }
   GS.inventory[ball]--;
+  if(typeof SFX!=='undefined') SFX.play('throwBall');
 
   var rate=getRate(ball,creature.element,creature.level,GS.level,currentAccuracy);
 
@@ -81,7 +82,8 @@ function checkLevelUp(){
   if(GS.xp>=need){
     GS.xp-=need;
     GS.level++;
-    showToast('🎊 Level '+GS.level+'!',5000);
+    if(typeof SFX!=='undefined') setTimeout(function(){SFX.play('levelUp');},1100);
+    showToast('🎊 Level '+GS.level+'!',5000);('🎊 Level '+GS.level+'!',5000);
     checkLevelUp();
   }
 }
