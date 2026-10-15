@@ -9,9 +9,10 @@
    ============================================================ */
 
 var FLOW = {
-  AREA_CREATURES: 2,
-  AREA_BALLS: 2,
-  MAX_ESCAPE: 3,
+  AREA_CREATURES: 5,
+  AREA_BALLS: 5,
+  MAX_ESCAPE: 5,
+  MAX_FAILS_PER_CREATURE: 3,
   RESET_MS: 60 * 60 * 1000,
   MOVE_METERS: 50
 };
@@ -20,6 +21,11 @@ var FLOW = {
    ★★★ AREA STATE — GPS cho 50m area reset ★★★
    ================================================================ */
 function initArea() {
+  if (GS.area && GS.area.totalBalls < FLOW.AREA_BALLS) {
+    GS.area.totalBalls = FLOW.AREA_BALLS;
+    GS.area.totalCreatures = FLOW.AREA_CREATURES;
+    saveState();
+  }
   if (!GS.area) {
     GS.area = {caught:0, escaped:0, ballsTaken:0,
       totalBalls:FLOW.AREA_BALLS, totalCreatures:FLOW.AREA_CREATURES,
@@ -273,7 +279,7 @@ function startSearchPhase() {
   if (!_compassOn) { showToast('🧭 Hãy vào bí cảnh trước!', 3000); return; }
 
   initArea();
-  if (isResetDue() || hasMovedEnough()) { resetArea(); showToast('🗺️ Khu vực mới! 2 yêu thú + 2 bùa.', 4000); return; }
+  if (isResetDue() || hasMovedEnough()) { resetArea(); showToast('🗺️ Khu vực mới! ' + FLOW.AREA_CREATURES + ' yêu thú + ' + FLOW.AREA_BALLS + ' bùa.', 4000); return; }
 
   var cr = FLOW.AREA_CREATURES - (GS.area.caught + GS.area.escaped);
   var bl = GS.area.totalBalls - GS.area.ballsTaken;
@@ -441,8 +447,8 @@ function startScanning() {
   }
 }
 
-function spawnCreatureItem() {
-  var creature = generateCreature();
+function spawnCreatureItem(existingCreature) {
+  var creature = existingCreature || generateCreature();
   GS.currentTarget = creature;
   if (typeof SFX !== 'undefined') SFX.play('spawn');
   saveState();
@@ -465,6 +471,7 @@ function spawnCreatureItem() {
 
   document.getElementById('screen-ar').appendChild(overlay);
   _lockedHeading = getBearing(playerLat, playerLng, creature.lat, creature.lng);
+  if (existingCreature) _lockedHeading = (_lockedHeading + 90 + Math.random() * 180) % 360;
   _lockedPitch = randomItemPitch();
 
   /* ★ Không còn hàng advantage riêng — gộp vào ball buttons ★ */
@@ -772,13 +779,38 @@ function onCaptureSuccess(creature) {
 
 function onCaptureFail(creature) {
   setTimeout(function() { if (typeof SFX !== 'undefined') SFX.play('fail'); }, 350);
-  initArea(); GS.area.escaped++;
+  initArea();
+
+  /* Chưa đủ số lần trượt: yêu thú trốn sang chỗ khác, chưa trừ số lượng */
+  if ((creature.fails || 0) < FLOW.MAX_FAILS_PER_CREATURE) {
+    cleanupAfterResult();
+    _fledCreature = creature;
+    saveState(); updateAreaStatus();
+    showToast('💨 Yêu thú trốn sang chỗ khác! Còn ' + (FLOW.MAX_FAILS_PER_CREATURE - creature.fails) + ' lần thử.', 4000);
+    return;
+  }
+
+  GS.area.escaped++;
   cleanupAfterResult();
   saveState(); updateAreaStatus();
   showToast('💔 Yêu thú đã chạy thoát! Bấm 🔍 để tìm tiếp.', 4000);
   setTimeout(function() {
     if (isAreaExhausted() && isBallAreaExhausted()) setTimeout(showAreaExhausted, 1500);
   }, 2000);
+}
+
+var _fledCreature = null;
+
+/* Gọi sau khi đóng bảng kết quả: đặt lại yêu thú đã trốn ở hướng mới */
+function respawnFledCreature() {
+  var creature = _fledCreature;
+  _fledCreature = null;
+  if (!creature || !_compassOn) return;
+  _findType = 'creature';
+  _state = 'scanning';
+  spawnCreatureItem(creature);
+  startOrientationTracking();
+  showToast('👀 Yêu thú xuất hiện ở hướng khác, hãy tìm lại!', 4000);
 }
 
 /* ================================================================
