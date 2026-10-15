@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a2e">
 <title>🔮 PHỤC YÊU AI</title>
 <link rel="stylesheet" href="css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/vendor/supabase.js"></script>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -35,7 +35,7 @@
       <button class="btn btn-primary" onclick="handleRegister()">Tạo tài khoản</button>
       <div class="toggle-text">Đã có tài khoản? <a onclick="toggleRegister()">Đăng nhập</a></div>
     </div>
-    <div class="login-version">v1.48</div>
+    <div class="login-version">v1.51</div>
   </div>
 </div>
 
@@ -169,9 +169,7 @@
       </div>
     </div>
   </div>
-  <button class="btn" style="margin:16px auto;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="addTestCreatures()">🧪 Thêm 20 yêu thú test</button>
-  <button class="btn" style="margin:0 auto 16px;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="addTestPills()">🧪 Thêm 20 đan dược test</button>
-  <button class="btn" style="margin:0 auto 16px;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="openAiConnect()">🔌 Kết nối AI (test)</button>
+  <button class="btn" style="margin:16px auto;display:block;width:90%;max-width:360px;background:rgba(255,255,255,.1);color:#fff;border:1px dashed rgba(255,255,255,.4)" onclick="openAiConnect()">🔌 Kết nối AI (test)</button>
 </div>
 
 <!-- ==================== AVATAR PICKER ==================== -->
@@ -249,7 +247,7 @@
 <script src="js/alchemy.js"></script>
 <script src="js/gameflow.js"></script>
 <script src="js/creature-art.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script src="js/vendor/three.min.js"></script>
 <script src="js/creature-3d.js"></script>
 <script src="js/ai.js"></script>
 <script src="js/ui.js"></script>
