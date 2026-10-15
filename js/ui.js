@@ -350,4 +350,21 @@ initAuth();
 if(checkDailyReset()){showToast('🌅 Chúc ngày mới! +1 bảo bối mỗi loại!',5000);}
 renderBalls();
 renderAR();
-console.log('🔮 PHỤC YÊU AI v1.51');
+
+/* Tự động toàn màn hình trên trình duyệt điện thoại (cần một lần chạm; iPhone Safari không hỗ trợ) */
+(function autoFullscreen() {
+  var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone || (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+  var el = document.documentElement;
+  var req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!mobile || standalone || !req) return;
+  function enter() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+    try {
+      var p = req.call(el, {navigationUI: 'hide'});
+      if (p && p.catch) p.catch(function() {});
+    } catch (e) {}
+  }
+  ['touchend', 'click'].forEach(function(t) { document.addEventListener(t, enter, true); });
+})();
+console.log('🔮 PHỤC YÊU AI v1.52');
