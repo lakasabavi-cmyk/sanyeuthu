@@ -3,7 +3,7 @@
    ★★★ CSS RULE: KHÔNG tự ý đổi vị trí/kích thước icon, button ★★★
    ============================================================ */
 
-var APP_VERSION = '1.20';
+var APP_VERSION = '1.47';
 
 var VERSION_HISTORY = [
   {ver:'1.00',date:'2025-01-15',note:'Khởi tạo',changed:['index.html','css/style.css','js/*']},
@@ -16,7 +16,14 @@ var VERSION_HISTORY = [
   {ver:'1.07',date:'2025-01-17',note:'FIX: Xóa canvas text trùng HTML ar-distance',changed:['js/camera.js','js/versions.js']},
   {ver:'1.08',date:'2025-01-17',note:'Balls hàng ngang center. Capture ngay dưới balls. Chỉ sửa CSS layout.',changed:['css/style.css','js/versions.js']},
   {ver:'1.11',date:'2025-01-17',note:'Bộ 15 yêu thú SVG chibi animated mặc định. Ưu tiên: AI image > SVG art > emoji.',changed:['js/creature-art.js','css/style.css','js/ui.js','index.html','js/versions.js']},
-  {ver:'1.20',date:'2025-01-18',note:'Hệ thống skills: ATK/DEF/HP/SPD/SKI (max 100/stat). Rarity cap: Legendary 450, Rare 400. 5 skill categories ngũ hành. Combat formula + Board formation 1v1/3v3/5v5.',changed:['js/skills.js','js/creatures.js','js/creature-art.js','css/style.css','js/versions.js']}
+  {ver:'1.20',date:'2025-01-18',note:'Hệ thống skills: ATK/DEF/HP/SPD/SKI (max 100/stat). Rarity cap: Legendary 450, Rare 400. 5 skill categories ngũ hành. Combat formula + Board formation 1v1/3v3/5v5.',changed:['js/skills.js','js/creatures.js','js/creature-art.js','css/style.css','js/versions.js']},
+  {ver:'1.41',date:'2026-10-16',note:'Hiệu ứng giả lập 3D cho yêu thú, đan dược và bùa ngũ hành trong túi và AR.',changed:['css/style.css','js/versions.js','index.html','js/ui.js']},
+  {ver:'1.42',date:'2026-10-16',note:'Thử nghiệm mô hình 3D realtime có animation cho Kim Ưng bằng Three.js.',changed:['index.html','js/creature-art.js','js/creature-3d.js','css/style.css','js/versions.js','js/ui.js']},
+  {ver:'1.43',date:'2026-10-16',note:'Thay bộ 15 yêu thú mặc định bằng mô hình 3D realtime có animation theo loài và nguyên tố.',changed:['js/creature-art.js','js/creature-3d.js','css/style.css','js/versions.js','index.html','js/ui.js']}
+  ,{ver:'1.44',date:'2026-10-16',note:'Texture 3D theo hệ: Kim ánh kim, Mộc vân lá, Thủy sóng nước, Hỏa lửa, Thổ đá nứt với màu đúng hệ.',changed:['js/creature-3d.js','js/versions.js','index.html','js/ui.js']}
+  ,{ver:'1.45',date:'2026-10-16',note:'Thêm hiệu ứng âm thanh (Web Audio): bấm nút, chuyển màn, yêu thú xuất hiện, ném bùa, bắt thành công/thất bại, lên cấp.',changed:['js/sound.js','js/capture.js','js/gameflow.js','js/ui.js','index.html','js/versions.js']}
+  ,{ver:'1.46',date:'2026-10-16',note:'Thêm nhạc nền nhẹ nhàng; Hồ sơ có công tắc bật/tắt riêng hiệu ứng và nhạc nền.',changed:['js/sound.js','js/ui.js','css/style.css','index.html','js/versions.js']}
+  ,{ver:'1.47',date:'2026-10-16',note:'Hồ sơ: thêm nút −/+ và thanh trượt chỉnh âm lượng hiệu ứng và nhạc nền riêng.',changed:['js/sound.js','css/style.css','index.html','js/ui.js','js/versions.js']}
 ];
 
 console.log('🔮 PHỤC YÊU AI v' + APP_VERSION);
