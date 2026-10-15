@@ -1,0 +1,17 @@
+{
+  "name": "sanyeuthu",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-06",
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": ".",
+    "run_worker_first": ["/api/*"]
+  },
+  "ai": { "binding": "AI" },
+  "kv_namespaces": [{ "binding": "QUOTA" }],
+  "vars": {
+    "ALLOWED_ORIGIN": "https://sanyeuthu.lakasabavi.workers.dev,https://localhost,capacitor://localhost",
+    "PER_USER_DAILY": "3",
+    "GLOBAL_DAILY": "180"
+  }
+}
