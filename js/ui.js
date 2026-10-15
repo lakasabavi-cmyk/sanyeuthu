@@ -334,18 +334,6 @@ function handleSocialLogin(provider){
 
 function handleGoogleLogin(){handleSocialLogin('google');}
 
-function addTestCreatures(){
-  var n=grantTestCreatures(20);
-  updateProfile();
-  showToast('🧪 Đã thêm '+n+' yêu thú test! Tổng: '+GS.collection.length,3000);
-}
-
-function addTestPills(){
-  for(var i=0;i<20;i++) addPill(1+Math.floor(Math.random()*11),1);
-  if(typeof updatePillBag==='function') updatePillBag();
-  showToast('🧪 Đã thêm 20 đan dược vào túi thuốc!',3000);
-}
-
 /* ===== SEARCH (delegate to gameflow) ===== */
 function startSearch(){
   if(typeof startSearchPhase==='function') startSearchPhase();
@@ -362,4 +350,4 @@ initAuth();
 if(checkDailyReset()){showToast('🌅 Chúc ngày mới! +1 bảo bối mỗi loại!',5000);}
 renderBalls();
 renderAR();
-console.log('🔮 PHỤC YÊU AI v1.48');
+console.log('🔮 PHỤC YÊU AI v1.51');
