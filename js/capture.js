@@ -46,11 +46,17 @@ function doCapture(){
     GS.failed++;
     GS.xp+=CONFIG.XP_FAIL;
     if(GS.xp<0) GS.xp=0;
+    creature.fails=(creature.fails||0)+1;
+    var maxFails=(typeof FLOW!=='undefined'&&FLOW.MAX_FAILS_PER_CREATURE)||3;
+    var fled=creature.fails<maxFails;
 
     showResult(
-      '🏃',
-      creature.emoji+' <strong>'+creature.name+'</strong> đã chạy thoát!',
-      'Hãy tiếp tục tìm kiếm.<br>Tỷ lệ bắt: '+Math.round(rate*100)+'%'+advText,
+      fled?'💨':'🏃',
+      fled
+        ?creature.emoji+' <strong>'+creature.name+'</strong> trốn sang chỗ khác!'
+        :creature.emoji+' <strong>'+creature.name+'</strong> đã chạy thoát!',
+      (fled?'Trượt lần '+creature.fails+'/'+maxFails+'. Hãy tìm và thử lại.':'Đã trượt '+maxFails+' lần, yêu thú biến mất.')
+        +'<br>Tỷ lệ bắt: '+Math.round(rate*100)+'%'+advText,
       'fail'
     );
 
@@ -75,6 +81,7 @@ function closeResult(){
   GS.currentTarget=null;
   document.getElementById('ar-distance').style.display='none';
   if(typeof removeCreatureOnAR==='function') removeCreatureOnAR();
+  if(typeof respawnFledCreature==='function') respawnFledCreature();
 }
 
 function checkLevelUp(){
@@ -83,7 +90,7 @@ function checkLevelUp(){
     GS.xp-=need;
     GS.level++;
     if(typeof SFX!=='undefined') setTimeout(function(){SFX.play('levelUp');},1100);
-    showToast('🎊 Level '+GS.level+'!',5000);('🎊 Level '+GS.level+'!',5000);
+    showToast('🎊 Level '+GS.level+'!',5000);
     checkLevelUp();
   }
 }
