@@ -1,7 +1,7 @@
 /* ============================================================
    ai.js — Biến hình yêu thú bằng AI
-   - Không giữ khóa API ở client: gọi tới AI_CONFIG.endpoint (proxy của bạn).
-   - endpoint trống => chế độ DEMO (không gọi AI thật, chỉ để thử luồng).
+   - Nhà cung cấp: Gemini, ChatGPT (OpenAI), Claude hoặc backend riêng (proxy).
+   - Chưa có API key/endpoint => chế độ DEMO (không gọi AI thật, chỉ để thử luồng).
    - Proxy nhận POST JSON {prompt, negative, element, gu}
      và trả JSON {image: "<url hoặc data:image/...>"}.
    ============================================================ */
@@ -20,7 +20,7 @@ var AI_GU = [
   {id:'football',  name:'Cầu thủ nổi tiếng',  prompt:'cute football star, sporty jersey with number, tiny football boots, golden trophy, captain armband, stadium lights'},
   {id:'dragonball',name:'7 viên ngọc rồng',   prompt:'seven glowing orange wish orbs with red stars floating around, martial artist gi outfit, spiky energy hair, ki aura, adventure quest vibe'},
   {id:'dragon',    name:'Bí kíp luyện rồng',  prompt:'friendly young dragon companion with tiny wings, Viking adventurer outfit, fur boots, wooden shield, misty cliff island, dragon-training vibe'},
-  {id:'avatar',    name:'Avatar film',         prompt:'bioluminescent alien forest creature, glowing blue-teal skin patterns, long braid with sensory tendrils, floating spirit seeds, fantasy jungle moon'},
+  {id:'avatar',    name:'Avatar',         prompt:'bioluminescent alien forest creature, glowing blue-teal skin patterns, long braid with sensory tendrils, floating spirit seeds, fantasy jungle moon'},
   {id:'dc',        name:'Biệt đội DC',        prompt:'caped superhero team costume, bold emblem chest badge, tiny mask, heroic pose, dark city skyline with glowing signal in the sky'},
   {id:'elf',       name:'Yêu quái tai nhọn',  prompt:'pointed elf ears, forest spirit imp, tiny leaf cloak, pixie lantern, mischievous cute smile, moonlit woodland'},
   {id:'avengers',  name:'Anh Hùng Avenger',   prompt:'armored hero squad outfit, glowing energy core in chest, tiny hammer and shield, super hero landing pose, futuristic tower backdrop'}
@@ -233,15 +233,35 @@ function aiGenerate() {
 var AI_CONN_KEY = 'yeuthu_ai_conn';
 var AI_TOKEN_KEY = 'yeuthu_ai_token';
 
+var AI_PROVIDERS = {
+  gemini: {name: 'Google Gemini', hint: 'Khóa API từ aistudio.google.com'},
+  openai: {name: 'ChatGPT (OpenAI)', hint: 'Khóa API từ platform.openai.com'},
+  claude: {name: 'Claude (Anthropic)', hint: 'Khóa API từ console.anthropic.com (Claude vẽ ảnh dạng SVG)'},
+  proxy:  {name: 'Backend riêng của game', hint: 'Token (nếu backend yêu cầu)'}
+};
+
 function aiGetConn() {
-  var c = {endpoint: '', mode: 'proxy', token: ''};
-  try { var s = JSON.parse(localStorage.getItem(AI_CONN_KEY) || '{}'); c.endpoint = s.endpoint || ''; c.mode = s.mode || 'proxy'; } catch (e) {}
+  var c = {endpoint: '', provider: 'gemini', token: ''};
+  try {
+    var s = JSON.parse(localStorage.getItem(AI_CONN_KEY) || '{}');
+    c.endpoint = s.endpoint || '';
+    c.provider = AI_PROVIDERS[s.provider] ? s.provider : (s.mode === 'proxy' && s.endpoint ? 'proxy' : 'gemini');
+  } catch (e) {}
   try { c.token = sessionStorage.getItem(AI_TOKEN_KEY) || ''; } catch (e) {}
-  if (AI_CONFIG.endpoint) c.endpoint = AI_CONFIG.endpoint;
+  if (AI_CONFIG.endpoint) { c.endpoint = AI_CONFIG.endpoint; c.provider = 'proxy'; }
   return c;
 }
 
-function aiIsDemo() { return !aiGetConn().endpoint; }
+function aiIsDemo() {
+  var c = aiGetConn();
+  return c.provider === 'proxy' ? !c.endpoint : !c.token;
+}
+
+function aiProviderChanged() {
+  var p = document.getElementById('aic-provider').value;
+  document.getElementById('aic-endpoint-wrap').style.display = p === 'proxy' ? '' : 'none';
+  document.getElementById('aic-hint').textContent = AI_PROVIDERS[p].hint;
+}
 
 function openAiConnect() {
   var c = aiGetConn();
@@ -250,14 +270,18 @@ function openAiConnect() {
   o.id = 'ai-conn-overlay';
   o.innerHTML = '<div class="ai-box">'
     + '<div class="ai-title">🔌 Kết nối AI (test)</div>'
-    + '<div class="ai-label">Địa chỉ API (https://...)</div>'
-    + '<input class="ai-input" id="aic-endpoint" placeholder="https://..." value="' + String(c.endpoint).replace(/"/g, '&quot;') + '">'
-    + '<div class="ai-label">Kiểu yêu cầu</div>'
-    + '<select class="gu-select" id="aic-mode">'
-    +   '<option value="proxy"' + (c.mode === 'proxy' ? ' selected' : '') + '>Backend của game {prompt, negative, element, gu}</option>'
-    +   '<option value="muse"' + (c.mode === 'muse' ? ' selected' : '') + '>Muse Spark {modality, input_prompt, config} (chưa xác minh)</option>'
+    + '<div class="ai-label">Nhà cung cấp AI</div>'
+    + '<select class="gu-select" id="aic-provider" onchange="aiProviderChanged()">'
+    + Object.keys(AI_PROVIDERS).map(function(k) {
+        return '<option value="' + k + '"' + (c.provider === k ? ' selected' : '') + '>' + AI_PROVIDERS[k].name + '</option>';
+      }).join('')
     + '</select>'
-    + '<div class="ai-label">API key / access token (chỉ lưu trong tab này)</div>'
+    + '<div id="aic-endpoint-wrap" style="display:' + (c.provider === 'proxy' ? '' : 'none') + '">'
+    +   '<div class="ai-label">Địa chỉ API (https://...)</div>'
+    +   '<input class="ai-input" id="aic-endpoint" placeholder="https://..." value="' + String(c.endpoint).replace(/"/g, '&quot;') + '">'
+    + '</div>'
+    + '<div class="ai-label">API key (chỉ lưu trong phiên này)</div>'
+    + '<div class="ai-label" id="aic-hint" style="opacity:.7">' + AI_PROVIDERS[c.provider].hint + '</div>'
     + '<input class="ai-input" id="aic-token" type="password" autocomplete="off" placeholder="Bearer token" value="' + String(c.token).replace(/"/g, '&quot;') + '">'
     + '<div class="ai-msg" id="aic-msg"></div>'
     + '<img id="aic-preview" style="display:none;width:120px;height:120px;border-radius:16px;margin:4px auto;object-fit:cover">'
@@ -269,13 +293,14 @@ function openAiConnect() {
 }
 
 function saveAiConnect(close) {
-  var ep = document.getElementById('aic-endpoint').value.trim();
-  if (ep && !/^https:\/\//i.test(ep) && !/^http:\/\/(localhost|127\.0\.0\.1)/i.test(ep)) {
+  var provider = document.getElementById('aic-provider').value;
+  var ep = provider === 'proxy' ? document.getElementById('aic-endpoint').value.trim() : '';
+  if (ep &&  !/^https:\/\//i.test(ep) && !/^http:\/\/(localhost|127\.0\.0\.1)/i.test(ep)) {
     document.getElementById('aic-msg').textContent = 'Địa chỉ phải bắt đầu bằng https://';
     document.getElementById('aic-msg').className = 'ai-msg err';
     return false;
   }
-  localStorage.setItem(AI_CONN_KEY, JSON.stringify({endpoint: ep, mode: document.getElementById('aic-mode').value}));
+  localStorage.setItem(AI_CONN_KEY, JSON.stringify({endpoint: ep, provider: provider}));
   var tk = document.getElementById('aic-token').value.trim();
   if (tk) sessionStorage.setItem(AI_TOKEN_KEY, tk); else sessionStorage.removeItem(AI_TOKEN_KEY);
   if (close) { var o = document.getElementById('ai-conn-overlay'); if (o) o.remove(); if (typeof showToast === 'function') showToast(aiIsDemo() ? 'AI: chế độ demo' : 'AI: đã lưu kết nối'); }
@@ -298,7 +323,7 @@ function testAiConnect() {
   msg.className = 'ai-msg'; msg.textContent = '';
   aiFetchImage(sample, gu, buildAiPrompt(sample, gu)).then(function(img) {
     pv.src = img; pv.style.display = 'block';
-    msg.textContent = aiIsDemo() ? 'Chưa nhập địa chỉ: đang ở chế độ demo.' : '✅ Kết nối thành công, nhận được ảnh.';
+    msg.textContent = aiIsDemo() ? 'Chưa nhập API key: đang ở chế độ demo.' : '✅ Kết nối thành công, nhận được ảnh.';
   }).catch(function(e) {
     msg.className = 'ai-msg err';
     msg.textContent = '❌ ' + (e && e.message ? e.message : 'Lỗi kết nối') + ' (có thể do CORS nếu gọi trực tiếp từ trình duyệt)';
@@ -321,35 +346,75 @@ function aiExtractImage(d) {
 /* ---------- Provider ---------- */
 function aiFetchImage(creature, gu, prompt) {
   var conn = aiGetConn();
-  if (!conn.endpoint) return aiDemoImage(creature, gu);
+  if (aiIsDemo()) return aiDemoImage(creature, gu);
 
-  var body = conn.mode === 'muse'
-    ? {modality: 'image', input_prompt: prompt, config: {safety_filters: true, negative_prompt: buildAiNegative(creature)}}
-    : {prompt: prompt, negative: buildAiNegative(creature), element: creature.element, gu: gu.id};
-  var headers = {'Content-Type': 'application/json'};
-  if (conn.token) headers['Authorization'] = 'Bearer ' + conn.token;
+  var negative = buildAiNegative(creature);
+  var url, body, headers = {'Content-Type': 'application/json'};
+  var p = conn.provider;
+  if (p === 'gemini') {
+    url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
+    headers['x-goog-api-key'] = conn.token;
+    body = {contents: [{parts: [{text: prompt + '. Avoid: ' + negative}]}], generationConfig: {responseModalities: ['IMAGE']}};
+  } else if (p === 'openai') {
+    url = 'https://api.openai.com/v1/images/generations';
+    headers['Authorization'] = 'Bearer ' + conn.token;
+    body = {model: 'gpt-image-1', prompt: prompt + '. Avoid: ' + negative, size: '1024x1024', n: 1};
+  } else if (p === 'claude') {
+    url = 'https://api.anthropic.com/v1/messages';
+    headers['x-api-key'] = conn.token;
+    headers['anthropic-version'] = '2023-06-01';
+    headers['anthropic-dangerous-direct-browser-access'] = 'true';
+    body = {
+      model: 'claude-sonnet-4-5', max_tokens: 4000,
+      messages: [{role: 'user', content: 'Draw a cute collectible creature as a single self-contained SVG (viewBox="0 0 200 200", no scripts, no external links, no text). Subject: ' + prompt + '. Avoid: ' + negative + '. Reply with only the <svg>...</svg> code.'}]
+    };
+  } else {
+    url = conn.endpoint;
+    if (conn.token) headers['Authorization'] = 'Bearer ' + conn.token;
+    body = {prompt: prompt, negative: negative, element: creature.element, gu: gu.id};
+  }
 
   var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
   var timer = ctrl ? setTimeout(function() { ctrl.abort(); }, AI_CONFIG.timeoutMs) : null;
-  return fetch(conn.endpoint, {
+  return fetch(url, {
     method: 'POST',
     headers: headers,
     body: JSON.stringify(body),
     signal: ctrl ? ctrl.signal : undefined
   }).then(function(r) {
     if (timer) clearTimeout(timer);
-    if (r.status === 401 || r.status === 403) throw new Error('Token không hợp lệ hoặc chưa có quyền (' + r.status + ')');
+    if (r.status === 401 || r.status === 403) throw new Error('API key không hợp lệ hoặc chưa có quyền (' + r.status + ')');
     if (!r.ok) {
       return r.json().catch(function() { return {}; }).then(function(d) {
-        throw new Error((d && d.error) || ('Máy chủ trả về ' + r.status));
+        var e = d && d.error;
+        throw new Error((e && (e.message || e)) || ('Máy chủ trả về ' + r.status));
       });
     }
     return r.json();
   }).then(function(d) {
-    var img = aiExtractImage(d);
+    var img = p === 'gemini' ? aiExtractGemini(d) : p === 'claude' ? aiExtractClaudeSvg(d) : aiExtractImage(d);
     if (!img) throw new Error('Phản hồi không có ảnh hợp lệ');
     return img;
   });
+}
+
+function aiExtractGemini(d) {
+  var parts = d && d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts || [];
+  for (var i = 0; i < parts.length; i++) {
+    var inl = parts[i].inlineData || parts[i].inline_data;
+    if (inl && inl.data) return 'data:' + (inl.mimeType || inl.mime_type || 'image/png') + ';base64,' + inl.data;
+  }
+  return '';
+}
+
+function aiExtractClaudeSvg(d) {
+  var txt = '';
+  ((d && d.content) || []).forEach(function(b) { if (b.type === 'text') txt += b.text; });
+  var m = txt.match(/<svg[\s\S]*<\/svg>/i);
+  if (!m) return '';
+  var svg = m[0].replace(/<script[\s\S]*?<\/script>/gi, '').replace(/\son\w+\s*=\s*("[^"]*"|'[^']*')/gi, '');
+  if (!/xmlns=/.test(svg)) svg = svg.replace(/<svg/i, '<svg xmlns="http://www.w3.org/2000/svg"');
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 }
 
 /* DEMO: chỉ dựng lại hình SVG hiện có trên nền lấp lánh */
