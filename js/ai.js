@@ -339,7 +339,11 @@ function aiFetchImage(creature, gu, prompt) {
   }).then(function(r) {
     if (timer) clearTimeout(timer);
     if (r.status === 401 || r.status === 403) throw new Error('Token không hợp lệ hoặc chưa có quyền (' + r.status + ')');
-    if (!r.ok) throw new Error('Máy chủ trả về ' + r.status);
+    if (!r.ok) {
+      return r.json().catch(function() { return {}; }).then(function(d) {
+        throw new Error((d && d.error) || ('Máy chủ trả về ' + r.status));
+      });
+    }
     return r.json();
   }).then(function(d) {
     var img = aiExtractImage(d);
