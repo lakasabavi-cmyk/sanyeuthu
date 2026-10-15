@@ -30,26 +30,6 @@ function placeCreature(c) {
   c.lng = playerLng + (dist * Math.sin(angle * Math.PI / 180)) / (111320 * Math.cos(playerLat * Math.PI / 180));
 }
 
-/* Công cụ test: thêm yêu thú ngẫu nhiên vào túi thợ săn */
-function grantTestCreatures(n) {
-  n = n || 20;
-  if (!GS.collection) GS.collection = [];
-  for (var i = 0; i < n; i++) {
-    var base = CREATURE_DB[Math.floor(Math.random() * CREATURE_DB.length)];
-    var lvl = base.minLvl + Math.floor(Math.random() * (base.maxLvl - base.minLvl + 1));
-    var c = Object.assign({}, base, {
-      level: lvl, lat: 0, lng: 0,
-      escapeChances: 0, escapeAttemptsUsed: 0,
-      caughtAt: Date.now(), caughtWith: 'TEST'
-    });
-    c.stats = generateCreatureStats(c);
-    GS.collection.push(c);
-  }
-  GS.caught = (GS.caught || 0) + n;
-  saveState();
-  return n;
-}
-
 function generateCreature() {
   var pL = GS.level;
   var cands = CREATURE_DB.filter(function(c) { return c.minLvl <= pL + 5 && c.maxLvl >= pL - 2; });
