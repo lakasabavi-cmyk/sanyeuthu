@@ -367,4 +367,4 @@ renderAR();
   }
   ['touchend', 'click'].forEach(function(t) { document.addEventListener(t, enter, true); });
 })();
-console.log('🔮 PHỤC YÊU AI v1.53');
+console.log('🔮 PHỤC YÊU AI v1.55');
