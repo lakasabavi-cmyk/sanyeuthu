@@ -444,6 +444,7 @@ function startScanning() {
 function spawnCreatureItem() {
   var creature = generateCreature();
   GS.currentTarget = creature;
+  if (typeof SFX !== 'undefined') SFX.play('spawn');
   saveState();
   removeItemFromAR();
 
@@ -759,6 +760,7 @@ function removeCreatureOnAR() { removeItemFromAR(); }
    ★★★ KẾT QUẢ BẮT ★★★
    ================================================================ */
 function onCaptureSuccess(creature) {
+  setTimeout(function() { if (typeof SFX !== 'undefined') SFX.play('success'); }, 350);
   initArea(); GS.area.caught++;
   cleanupAfterResult();
   saveState(); updateAreaStatus();
@@ -769,6 +771,7 @@ function onCaptureSuccess(creature) {
 }
 
 function onCaptureFail(creature) {
+  setTimeout(function() { if (typeof SFX !== 'undefined') SFX.play('fail'); }, 350);
   initArea(); GS.area.escaped++;
   cleanupAfterResult();
   saveState(); updateAreaStatus();
